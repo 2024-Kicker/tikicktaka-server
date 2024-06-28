@@ -13,5 +13,5 @@ assignees: ''
 <!-- refactor/issue-47-->
 
 ### ✅ refactoring TODO
-<!-- 리팩토링 튜두  -->
+<!-- 리팩토링 투두  -->
 - [ ]
