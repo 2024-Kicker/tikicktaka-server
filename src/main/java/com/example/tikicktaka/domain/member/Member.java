@@ -81,4 +81,6 @@ public class Member extends BaseDateTimeEntity {
     public void setProfileImg(ProfileImg profileImg) {
         this.profileImg = profileImg;
     }
+
+    public void setMemberStatus(MemberStatus memberStatus) { this.memberStatus = memberStatus; }
 }

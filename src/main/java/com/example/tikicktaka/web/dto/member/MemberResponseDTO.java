@@ -20,4 +20,20 @@ public class MemberResponseDTO {
         String loginId;
         LocalDateTime createdAt;
     }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class LoginIdDuplicateConfirmResultDTO{
+        Boolean checkLoginId;
+    }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class NicknameDuplicateConfirmResultDTO{
+        Boolean checkNickname;
+    }
 }

@@ -44,4 +44,18 @@ public class MemberRequestDTO {
 
         private List<Boolean> memberTerm;
     }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class NicknameDuplicateConfirmDTO{
+        private String nickname;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class LoginIdDuplicateConfirmDTO{
+        private String loginId;
+    }
 }
