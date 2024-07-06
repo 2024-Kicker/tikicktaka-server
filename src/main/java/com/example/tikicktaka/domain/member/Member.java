@@ -48,6 +48,8 @@ public class Member extends BaseDateTimeEntity {
     @Temporal(TemporalType.DATE)
     private Date birthday;
 
+    private Long point;
+
     @Column(columnDefinition = "VARCHAR(13)")
     private String phone;
 

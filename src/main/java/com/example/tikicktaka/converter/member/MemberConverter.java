@@ -6,6 +6,7 @@ import com.example.tikicktaka.domain.member.Member;
 import com.example.tikicktaka.domain.member.Term;
 import com.example.tikicktaka.web.dto.member.MemberRequestDTO;
 import com.example.tikicktaka.web.dto.member.MemberResponseDTO;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,17 +24,23 @@ public class MemberConverter {
                 .build();
     }
 
-    public static Member toMember(MemberRequestDTO.JoinDTO request){
+    public static Member toMember(MemberRequestDTO.JoinDTO request, BCryptPasswordEncoder encoder){
         return Member.builder()
                 .nickname(request.getNickname())
                 .name(request.getName())
-                .password(request.getPassword())
+                .password(encoder.encode(request.getPassword()))
                 .email(request.getEmail())
                 .birthday(request.getBirthday())
                 .gender(request.getGender())
                 .phone(request.getPhone())
                 .memberRole(MemberRole.MEMBER)
                 .memberTermList(new ArrayList<>())
+                .build();
+    }
+
+    public static MemberResponseDTO.LoginResultDTO toLoginResultDTO(String jwt){
+        return MemberResponseDTO.LoginResultDTO.builder()
+                .jwt(jwt)
                 .build();
     }
 

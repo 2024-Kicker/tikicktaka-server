@@ -36,6 +36,17 @@ public class MemberController {
         return ApiResponse.onSuccess(MemberConverter.toJoinResultDTO(member));
     }
 
+    @PostMapping("/login")
+    @Operation(summary = "로그인 API", description = "request 파라미터 : 이메일, 비밀번호, response : jwt token")
+    public ApiResponse<MemberResponseDTO.LoginResultDTO> login(@RequestBody MemberRequestDTO.MemberLoginDTO request){
+        String email = request.getEmail();
+        String password = request.getPassword();
+
+        String jwt = memberCommandService.login(email,password);
+
+        return ApiResponse.onSuccess(MemberConverter.toLoginResultDTO(jwt));
+    }
+
     @PostMapping("/email/duplicate")
     @Operation(summary = "이메일 중복 체크 API", description = "request : 이메일, response : 중복이면 false, 중복이 아니면 true")
     public ApiResponse<MemberResponseDTO.LoginIdDuplicateConfirmResultDTO> emailDuplicate(@RequestBody MemberRequestDTO.EmailDuplicateConfirmDTO request) {

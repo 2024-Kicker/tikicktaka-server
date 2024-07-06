@@ -45,6 +45,14 @@ public class MemberRequestDTO {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
+    public static class MemberLoginDTO{
+        private String email;
+        private String password;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class NicknameDuplicateConfirmDTO{
         private String nickname;
     }

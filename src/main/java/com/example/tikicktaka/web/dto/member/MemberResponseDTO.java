@@ -25,6 +25,14 @@ public class MemberResponseDTO {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
+    public static class LoginResultDTO{
+        String jwt;
+    }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class LoginIdDuplicateConfirmResultDTO{
         Boolean checkLoginId;
     }
