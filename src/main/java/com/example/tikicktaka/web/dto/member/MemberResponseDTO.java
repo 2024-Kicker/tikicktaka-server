@@ -17,7 +17,7 @@ public class MemberResponseDTO {
 
         Long memberId;
         String nickname;
-        String loginId;
+        String email;
         LocalDateTime createdAt;
     }
 

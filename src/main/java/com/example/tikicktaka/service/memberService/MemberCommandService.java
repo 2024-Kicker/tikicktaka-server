@@ -7,7 +7,7 @@ public interface MemberCommandService {
 
     Member join(MemberRequestDTO.JoinDTO request);
 
-    Boolean confirmLoginIdDuplicate(MemberRequestDTO.LoginIdDuplicateConfirmDTO request);
+    Boolean confirmEmailDuplicate(MemberRequestDTO.EmailDuplicateConfirmDTO request);
 
     Boolean confirmNicknameDuplicate(MemberRequestDTO.NicknameDuplicateConfirmDTO request);
 }

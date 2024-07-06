@@ -43,12 +43,12 @@ public class MemberCommandServiceImpl implements MemberCommandService{
             }
         }
 
-        Optional<Member> existingLoginId = memberRepository.findByLoginId((request.getLoginId()));
-        if (existingLoginId.isPresent()) {
-                if (!existingLoginId.get().getMemberStatus().equals(MemberStatus.INACTIVE)) {
+        Optional<Member> existingEmail = memberRepository.findByEmail((request.getEmail()));
+        if (existingEmail.isPresent()) {
+                if (!existingEmail.get().getMemberStatus().equals(MemberStatus.INACTIVE)) {
                     throw new MemberHandler(ErrorStatus.MEMBER_ID_DUPLICATED);
                 } else {
-                    existingMember = existingLoginId.get();
+                    existingMember = existingEmail.get();
                 }
             }
 
@@ -57,7 +57,7 @@ public class MemberCommandServiceImpl implements MemberCommandService{
             //탈퇴한 회원이 다시 회원가입하는 경우
             existingMember.setMemberStatus(MemberStatus.ACTIVE);
             memberRepository.reregister(existingMember.getId(), request.getNickname(),
-                    request.getName(), request.getPassword(), request.getLoginId(), request.getEmail(),
+                    request.getName(), request.getPassword(), request.getEmail(),
                     request.getBirthday(), request.getGender(), request.getPhone());
             return existingMember;
         } else {
@@ -80,19 +80,19 @@ public class MemberCommandServiceImpl implements MemberCommandService{
     }
 
     @Override
-    public Boolean confirmLoginIdDuplicate(MemberRequestDTO.LoginIdDuplicateConfirmDTO request) {
-        Optional<Member> member = memberRepository.findByLoginId(request.getLoginId());
-        Boolean checkLoginId = false;
+    public Boolean confirmEmailDuplicate(MemberRequestDTO.EmailDuplicateConfirmDTO request) {
+        Optional<Member> member = memberRepository.findByEmail(request.getEmail());
+        Boolean checkEmail = false;
 
         if (!member.isPresent()) {
 
-            checkLoginId = true;
+            checkEmail = true;
         }else{
             if(member.get().getMemberStatus().equals(MemberStatus.INACTIVE)){
-                checkLoginId =true;
+                checkEmail =true;
             }
         }
-        return checkLoginId;
+        return checkEmail;
     }
 
     @Override

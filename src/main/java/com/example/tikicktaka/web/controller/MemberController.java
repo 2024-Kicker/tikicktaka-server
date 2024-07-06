@@ -38,8 +38,8 @@ public class MemberController {
 
     @PostMapping("/email/duplicate")
     @Operation(summary = "이메일 중복 체크 API", description = "request : 이메일, response : 중복이면 false, 중복이 아니면 true")
-    public ApiResponse<MemberResponseDTO.LoginIdDuplicateConfirmResultDTO> emailDuplicate(@RequestBody MemberRequestDTO.LoginIdDuplicateConfirmDTO request) {
-        Boolean checkLoginId = memberCommandService.confirmLoginIdDuplicate(request);
+    public ApiResponse<MemberResponseDTO.LoginIdDuplicateConfirmResultDTO> emailDuplicate(@RequestBody MemberRequestDTO.EmailDuplicateConfirmDTO request) {
+        Boolean checkLoginId = memberCommandService.confirmEmailDuplicate(request);
 
         return ApiResponse.onSuccess(MemberConverter.toLoginIdDuplicateConfirmResultDTO(checkLoginId));
     }

@@ -40,9 +40,6 @@ public class Member extends BaseDateTimeEntity {
     private String name;
 
     @Column(nullable = false, columnDefinition = "VARCHAR(50)")
-    private String loginId;
-
-    @Column(columnDefinition = "VARCHAR(50)")
     private String email;
 
     @Column(columnDefinition = "TEXT")
@@ -83,4 +80,6 @@ public class Member extends BaseDateTimeEntity {
     }
 
     public void setMemberStatus(MemberStatus memberStatus) { this.memberStatus = memberStatus; }
+
+    public void setSocialType(SocialType socialType) { this.socialType = socialType; }
 }
