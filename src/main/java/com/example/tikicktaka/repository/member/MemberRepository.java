@@ -14,13 +14,13 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     Optional<Member> findByNickname(String nickname);
 
-    Optional<Member> findByLoginId(String loginId);
+    Optional<Member> findByEmail(String email);
 
     Optional<Member> findByPhone(String phone);
 
     @Transactional
     @Modifying(clearAutomatically = true)
-    @Query("UPDATE Member m SET m.name = :name, m.loginId = :loginId, m.email = :email, m.phone = :phone, m.birthday = :birthday, m.gender = :gender, m.password = :password, m.nickname = :nickname WHERE m.id = :memberId")
-    void reregister(Long memberId, String nickname, String name, String password, String loginId, String email, Date birthday
+    @Query("UPDATE Member m SET m.name = :name, m.email = :email, m.phone = :phone, m.birthday = :birthday, m.gender = :gender, m.password = :password, m.nickname = :nickname WHERE m.id = :memberId")
+    void reregister(Long memberId, String nickname, String name, String password, String email, Date birthday
             , Gender gender, String phone);
 }
