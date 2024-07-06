@@ -12,21 +12,32 @@ import com.example.tikicktaka.repository.member.TermRepository;
 import com.example.tikicktaka.web.dto.member.MemberRequestDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
+import static com.example.tikicktaka.config.springSecurity.utils.JwtUtil.createJwt;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 public class MemberCommandServiceImpl implements MemberCommandService{
 
     private final MemberRepository memberRepository;
     private final TermRepository termRepository;
+    private final BCryptPasswordEncoder encoder;
+
+    @Value("${JWT_TOKEN_SECRET}")
+    private String key;
+
+    private int expiredMs = 1000 * 60 * 60 * 24 * 5;
 
     @Transactional
     @Override
@@ -61,7 +72,7 @@ public class MemberCommandServiceImpl implements MemberCommandService{
                     request.getBirthday(), request.getGender(), request.getPhone());
             return existingMember;
         } else {
-            member = MemberConverter.toMember(request);
+            member = MemberConverter.toMember(request, encoder);
         }
 
         // 약관 동의 저장 로직
@@ -77,6 +88,20 @@ public class MemberCommandServiceImpl implements MemberCommandService{
 
         memberRepository.save(member);
         return member;
+    }
+
+    @Override
+    public String login(String email, String password) {
+        Member member = memberRepository.findByEmail(email).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_EMAIL_NOT_FOUND));
+
+        if(!encoder.matches(password, member.getPassword())){
+            throw new MemberHandler(ErrorStatus.MEMBER_PASSWORD_NOT_EQUAL);
+        }
+
+        List<String> roles = new ArrayList<>();
+        roles.add("ROLE_USER");
+
+        return createJwt(member.getId(), member.getName(), expiredMs, key, roles);
     }
 
     @Override
