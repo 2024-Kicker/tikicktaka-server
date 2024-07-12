@@ -1,3 +1,5 @@
+server:
+  port: 8087
 spring:
   datasource:
     url: ${DB_URL}
@@ -17,3 +19,12 @@ spring:
         hbm2ddl:
           auto: create
         default_batch_fetch_size: 1000
+jwt:
+  secret-key :${JWT_TOKEN_SECRET}
+
+oauth:
+  kakao:
+    client-id: ${CLIENT_ID}
+    url:
+      auth: https://kauth.kakao.com
+      api: https://kapi.kakao.com
