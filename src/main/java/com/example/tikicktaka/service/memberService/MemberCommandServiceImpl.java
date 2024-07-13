@@ -2,11 +2,14 @@ package com.example.tikicktaka.service.memberService;
 
 import com.example.tikicktaka.apiPayload.code.status.ErrorStatus;
 import com.example.tikicktaka.apiPayload.exception.handler.MemberHandler;
+import com.example.tikicktaka.config.MailConfig;
 import com.example.tikicktaka.converter.member.MemberConverter;
 import com.example.tikicktaka.domain.enums.MemberStatus;
 import com.example.tikicktaka.domain.mapping.member.MemberTerm;
+import com.example.tikicktaka.domain.member.Auth;
 import com.example.tikicktaka.domain.member.Member;
 import com.example.tikicktaka.domain.member.Term;
+import com.example.tikicktaka.repository.member.AuthRepository;
 import com.example.tikicktaka.repository.member.MemberRepository;
 import com.example.tikicktaka.repository.member.TermRepository;
 import com.example.tikicktaka.web.dto.member.MemberRequestDTO;
@@ -17,6 +20,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,6 +37,8 @@ public class MemberCommandServiceImpl implements MemberCommandService{
     private final MemberRepository memberRepository;
     private final TermRepository termRepository;
     private final BCryptPasswordEncoder encoder;
+    private final AuthRepository authRepository;
+    private final MailConfig mailConfig;
 
     @Value("${JWT_TOKEN_SECRET}")
     private String key;
@@ -134,5 +140,44 @@ public class MemberCommandServiceImpl implements MemberCommandService{
             }
         }
         return checkNickname;
+    }
+
+    @Override
+    @Transactional
+    public Auth sendEmailAuth(String email) {
+
+        String code = Integer.toString((int) (Math.random() * 899999) + 100000);
+        Boolean expired = false;
+        mailConfig.sendMail(email,code);
+
+        Auth auth = MemberConverter.toEmailAuth(email,code,expired);
+
+        Optional<Auth> delete = authRepository.findByEmail(email);
+        if(delete.isPresent()){
+            Auth deleteAuth = delete.get();
+            authRepository.delete(deleteAuth);
+        }
+
+        authRepository.save(auth);
+        return auth;
+    }
+
+    @Override
+    @Transactional
+    public Boolean confirmEmailAuth(MemberRequestDTO.EmailAuthConfirmDTO request) {
+        Boolean checkEmail = false;
+        Auth auth = authRepository.findByEmail(request.getEmail()).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_EMAIL_AUTH_ERROR));
+        LocalDateTime current = LocalDateTime.now();
+
+        if(auth.getCode().equals(request.getCode()) && !auth.getExpired() && auth.getExpireDate().isAfter(current)){
+            checkEmail = true;
+
+            auth.useToken();
+            authRepository.save(auth);
+        } else {
+            throw new MemberHandler(ErrorStatus.MEMBER_EMAIL_AUTH_ERROR);
+        }
+
+        return checkEmail;
     }
 }

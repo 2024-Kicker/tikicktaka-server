@@ -3,6 +3,7 @@ package com.example.tikicktaka.web.controller;
 
 import com.example.tikicktaka.apiPayload.ApiResponse;
 import com.example.tikicktaka.converter.member.MemberConverter;
+import com.example.tikicktaka.domain.member.Auth;
 import com.example.tikicktaka.domain.member.Member;
 import com.example.tikicktaka.service.memberService.MemberCommandService;
 import com.example.tikicktaka.web.dto.member.MemberRequestDTO;
@@ -61,5 +62,19 @@ public class MemberController {
         Boolean checkNickname = memberCommandService.confirmNicknameDuplicate(request);
 
         return ApiResponse.onSuccess(MemberConverter.toNicknameDuplicateConfirmResultDTO(checkNickname));
+    }
+
+    @PostMapping("/email/auth")
+    @Operation(summary = "email 인증 요청 api")
+    public ApiResponse<MemberResponseDTO.EmailAuthSendResultDTO> emailAuthSend(@RequestBody MemberRequestDTO.EmailAuthDTO request){
+        Auth auth = memberCommandService.sendEmailAuth(request.getEmail());
+        return ApiResponse.onSuccess(MemberConverter.toEmailAuthSendResultDTO(auth));
+    }
+
+    @PostMapping("/email/auth/verify")
+    @Operation(summary = "email 인증 검증 api")
+    public ApiResponse<MemberResponseDTO.EmailAuthConfirmResultDTO> emailAuth(@RequestBody MemberRequestDTO.EmailAuthConfirmDTO request){
+        Boolean checkEmail = memberCommandService.confirmEmailAuth(request);
+        return ApiResponse.onSuccess(MemberConverter.toEmailAuthConfirmResultDTO(checkEmail));
     }
 }
