@@ -63,4 +63,19 @@ public class MemberRequestDTO {
     public static class EmailDuplicateConfirmDTO{
         private String email;
     }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class EmailAuthDTO{
+        private String email;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class EmailAuthConfirmDTO{
+        private String email;
+        private String code;
+    }
 }

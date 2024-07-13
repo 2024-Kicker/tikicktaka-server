@@ -2,12 +2,14 @@ package com.example.tikicktaka.converter.member;
 
 import com.example.tikicktaka.domain.enums.MemberRole;
 import com.example.tikicktaka.domain.mapping.member.MemberTerm;
+import com.example.tikicktaka.domain.member.Auth;
 import com.example.tikicktaka.domain.member.Member;
 import com.example.tikicktaka.domain.member.Term;
 import com.example.tikicktaka.web.dto.member.MemberRequestDTO;
 import com.example.tikicktaka.web.dto.member.MemberResponseDTO;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -64,5 +66,27 @@ public class MemberConverter {
                         .memberAgree(entry.getValue())
                         .build())
                 .collect(Collectors.toList());
+    }
+
+    public static MemberResponseDTO.EmailAuthSendResultDTO toEmailAuthSendResultDTO(Auth auth){
+        return MemberResponseDTO.EmailAuthSendResultDTO.builder()
+                .email(auth.getEmail())
+                .authCode(auth.getCode())
+                .build();
+    }
+
+    public static Auth toEmailAuth(String email, String code, Boolean expired){
+        return Auth.builder()
+                .email(email)
+                .code(code)
+                .expireDate(LocalDateTime.now().plusMinutes(5))
+                .expired(expired)
+                .build();
+    }
+
+    public static MemberResponseDTO.EmailAuthConfirmResultDTO toEmailAuthConfirmResultDTO(Boolean checkEmail){
+        return MemberResponseDTO.EmailAuthConfirmResultDTO.builder()
+                .checkEmail(checkEmail)
+                .build();
     }
 }
