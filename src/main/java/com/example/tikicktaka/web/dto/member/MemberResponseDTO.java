@@ -61,4 +61,12 @@ public class MemberResponseDTO {
     public static class EmailAuthConfirmResultDTO{
         Boolean checkEmail;
     }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ProfileModifyResultDTO {
+        String nickname;
+    }
 }
