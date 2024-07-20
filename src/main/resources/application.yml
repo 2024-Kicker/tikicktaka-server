@@ -32,9 +32,16 @@ spring:
         format_sql: true
         use_sql_comments: true
         hbm2ddl:
-          auto: update
+          auto: create
         default_batch_fetch_size: 1000
 
 jwt:
   token:
     secret: ${JWT_TOKEN_SECRET}
+
+oauth:
+  kakao:
+    client-id: ${CLIENT_ID}
+    url:
+      auth: https://kauth.kakao.com
+      api: https://kapi.kakao.com
