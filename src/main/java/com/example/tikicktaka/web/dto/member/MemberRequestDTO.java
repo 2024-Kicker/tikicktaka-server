@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.Date;
 import java.util.List;
@@ -78,4 +79,24 @@ public class MemberRequestDTO {
         private String email;
         private String code;
     }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class CompleteSignupDTO{
+
+        @NotBlank(message = "이름을 입력해주세요.")
+        private String name;
+
+        private Date birthday;
+
+        @NotBlank(message = "휴대폰 번호를 입력해주세요")
+        private String phone;
+
+        private Gender gender;
+
+        private List<Boolean> memberTerm;
+    }
+
 }

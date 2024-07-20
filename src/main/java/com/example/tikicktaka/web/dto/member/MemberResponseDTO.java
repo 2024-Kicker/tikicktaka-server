@@ -61,4 +61,23 @@ public class MemberResponseDTO {
     public static class EmailAuthConfirmResultDTO{
         Boolean checkEmail;
     }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class CompleteSignupResultDTO {
+        private Long id;
+        private String name;
+        private String email;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class MemberLoginResponseDTO {
+        private Long memberId;
+        private String nickname;
+        private String email;
+        private String jwt;
+    }
 }

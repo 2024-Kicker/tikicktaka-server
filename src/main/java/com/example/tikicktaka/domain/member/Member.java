@@ -31,6 +31,7 @@ public class Member extends BaseDateTimeEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, columnDefinition = "VARCHAR(10)")
+    @ColumnDefault("'member'")
     private MemberRole memberRole;
 
     @Column(columnDefinition = "VARCHAR(50)")
@@ -84,4 +85,24 @@ public class Member extends BaseDateTimeEntity {
     public void setMemberStatus(MemberStatus memberStatus) { this.memberStatus = memberStatus; }
 
     public void setSocialType(SocialType socialType) { this.socialType = socialType; }
+
+
+    public Member(String email, String nickname, String name, Date birthday, Gender gender, String phone, List<MemberTerm> memberTermList) {
+
+    }
+    public Member(String email, String nickname, List<MemberTerm> memberTermList) {
+
+    }
+
+    // Method to update additional information after social login
+    public void updateAdditionalInfo(String name, Date birthday, Gender gender, String phone, List<MemberTerm> memberTermList) {
+        this.name = name;
+        this.birthday = birthday;
+        this.gender = gender;
+        this.phone = phone;
+        this.memberTermList = memberTermList;
+        this.memberStatus = MemberStatus.ACTIVE;
+    }
+
+
 }

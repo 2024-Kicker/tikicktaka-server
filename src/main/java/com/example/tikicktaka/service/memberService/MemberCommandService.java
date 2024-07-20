@@ -3,6 +3,7 @@ package com.example.tikicktaka.service.memberService;
 import com.example.tikicktaka.domain.member.Auth;
 import com.example.tikicktaka.domain.member.Member;
 import com.example.tikicktaka.web.dto.member.MemberRequestDTO;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface MemberCommandService {
 
@@ -17,4 +18,7 @@ public interface MemberCommandService {
     Auth sendEmailAuth(String email);
 
     Boolean confirmEmailAuth(MemberRequestDTO.EmailAuthConfirmDTO request);
+
+    @Transactional
+    Member completeSignup(Long memberId, MemberRequestDTO.CompleteSignupDTO request);
 }

@@ -19,10 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @Slf4j
@@ -94,4 +91,11 @@ public class MemberController {
         return ResponseEntity.ok().body(member.getEmail());
     }
 
+    //소셜 로그인 후 회원가입
+    @PostMapping("/complete-signup/{memberId}")
+    @Operation(summary = "추가 정보 입력 API", description = "소셜 로그인 후 추가 정보 입력을 처리합니다.")
+    public ApiResponse<MemberResponseDTO.CompleteSignupResultDTO> completeSignup(@PathVariable Long memberId, @RequestBody @Valid MemberRequestDTO.CompleteSignupDTO request) {
+        Member member = memberCommandService.completeSignup(memberId, request);
+        return ApiResponse.onSuccess(MemberConverter.toCompleteSignupResultDTO(member));
+    }
 }

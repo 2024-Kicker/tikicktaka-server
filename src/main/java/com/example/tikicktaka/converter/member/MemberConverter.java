@@ -89,4 +89,12 @@ public class MemberConverter {
                 .checkEmail(checkEmail)
                 .build();
     }
+
+    public static MemberResponseDTO.CompleteSignupResultDTO toCompleteSignupResultDTO(Member member) {
+        return new MemberResponseDTO.CompleteSignupResultDTO(
+                member.getId(),
+                member.getName(),
+                member.getEmail()
+        );
+    }
 }
