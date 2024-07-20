@@ -1,6 +1,6 @@
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '3.3.1'
+    id 'org.springframework.boot' version '2.6.4'
     id 'io.spring.dependency-management' version '1.1.5'
 }
 
@@ -24,17 +24,34 @@ repositories {
 }
 
 dependencies {
+    // Spring Boot starters
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2'
-    implementation 'io.springfox:springfox-swagger2:2.9.2'
-    implementation 'io.springfox:springfox-swagger-ui:2.9.2'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client' // OAuth2 Starter
+
+    // OpenAPI and Swagger for API documentation
+    implementation 'org.springdoc:springdoc-openapi-ui:1.6.5'
+    implementation 'io.springfox:springfox-swagger2:3.0.0'
+    implementation 'io.springfox:springfox-swagger-ui:3.0.0'
+
+    // Lombok for reducing boilerplate code
     compileOnly 'org.projectlombok:lombok'
-    runtimeOnly 'com.mysql:mysql-connector-j'
     annotationProcessor 'org.projectlombok:lombok'
+
+    // Spring Security OAuth2
+    implementation 'org.springframework.security:spring-security-oauth2-client:5.6.4'
+    implementation 'org.springframework.security:spring-security-oauth2-jose:5.6.4'
+
+    // MySQL JDBC driver
+    implementation 'mysql:mysql-connector-java:8.0.28'
+
+    // JSON Web Token library
+    implementation 'io.jsonwebtoken:jjwt:0.9.1'
+
+    // Test dependencies
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 tasks.named('test') {

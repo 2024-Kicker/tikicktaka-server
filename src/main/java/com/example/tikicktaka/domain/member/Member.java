@@ -1,7 +1,7 @@
 package com.example.tikicktaka.domain.member;
 
 import com.example.tikicktaka.domain.common.BaseDateTimeEntity;
-import jakarta.persistence.*;
+import javax.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
 
