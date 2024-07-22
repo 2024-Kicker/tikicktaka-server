@@ -91,6 +91,14 @@ public class MemberConverter {
                 .build();
     }
 
+
+    public static MemberResponseDTO.CompleteSignupResultDTO toCompleteSignupResultDTO(Member member) {
+        return new MemberResponseDTO.CompleteSignupResultDTO(
+                member.getId(),
+                member.getName(),
+                member.getEmail()
+        );
+
     public static ProfileImg toProfileImg(String url, Member member) {
         return ProfileImg.builder()
                 .url(url)
@@ -125,5 +133,6 @@ public class MemberConverter {
         return MemberResponseDTO.ProfileModifyResultDTO.builder()
                 .nickname(member.getNickname())
                 .build();
+
     }
 }

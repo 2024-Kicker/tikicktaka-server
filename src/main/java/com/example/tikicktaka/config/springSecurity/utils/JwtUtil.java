@@ -2,13 +2,14 @@ package com.example.tikicktaka.config.springSecurity.utils;
 
 import com.example.tikicktaka.config.springSecurity.constants.SecurityConstants;
 import io.jsonwebtoken.Jwts;
+import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.List;
-
+@Component
 public class JwtUtil {
 
     private static SecretKey secretKey;

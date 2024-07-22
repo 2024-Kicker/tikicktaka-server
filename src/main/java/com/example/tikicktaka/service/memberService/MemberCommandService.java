@@ -3,7 +3,10 @@ package com.example.tikicktaka.service.memberService;
 import com.example.tikicktaka.domain.member.Auth;
 import com.example.tikicktaka.domain.member.Member;
 import com.example.tikicktaka.web.dto.member.MemberRequestDTO;
+
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
 
 public interface MemberCommandService {
 
@@ -19,5 +22,10 @@ public interface MemberCommandService {
 
     Boolean confirmEmailAuth(MemberRequestDTO.EmailAuthConfirmDTO request);
 
+
+    @Transactional
+    Member completeSignup(Long memberId, MemberRequestDTO.CompleteSignupDTO request);
+
     Member profileModify(MultipartFile profile, String nickname, Member member);
+
 }
