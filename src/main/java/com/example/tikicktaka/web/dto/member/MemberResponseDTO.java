@@ -80,4 +80,12 @@ public class MemberResponseDTO {
         private String email;
         private String jwt;
     }
+  
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ProfileModifyResultDTO {
+        String nickname;
+    }
 }

@@ -5,13 +5,16 @@ import com.example.tikicktaka.apiPayload.exception.handler.MemberHandler;
 import com.example.tikicktaka.config.MailConfig;
 import com.example.tikicktaka.converter.member.MemberConverter;
 import com.example.tikicktaka.domain.enums.MemberStatus;
+import com.example.tikicktaka.domain.images.ProfileImg;
 import com.example.tikicktaka.domain.mapping.member.MemberTerm;
 import com.example.tikicktaka.domain.member.Auth;
 import com.example.tikicktaka.domain.member.Member;
 import com.example.tikicktaka.domain.member.Term;
 import com.example.tikicktaka.repository.member.AuthRepository;
 import com.example.tikicktaka.repository.member.MemberRepository;
+import com.example.tikicktaka.repository.member.ProfileImgRepository;
 import com.example.tikicktaka.repository.member.TermRepository;
+import com.example.tikicktaka.service.UtilService;
 import com.example.tikicktaka.web.dto.member.MemberRequestDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +22,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -31,14 +35,16 @@ import static com.example.tikicktaka.config.springSecurity.utils.JwtUtil.createJ
 @Service
 @Slf4j
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+@Transactional
 public class MemberCommandServiceImpl implements MemberCommandService{
 
     private final MemberRepository memberRepository;
     private final TermRepository termRepository;
+    private final ProfileImgRepository profileImgRepository;
     private final BCryptPasswordEncoder encoder;
     private final AuthRepository authRepository;
     private final MailConfig mailConfig;
+    private final UtilService utilService;
 
     @Value("${JWT_TOKEN_SECRET}")
     private String key;
@@ -181,7 +187,6 @@ public class MemberCommandServiceImpl implements MemberCommandService{
         return checkEmail;
     }
 
-
     @Transactional
     @Override
     public Member completeSignup(Long memberId, MemberRequestDTO.CompleteSignupDTO request) {
@@ -209,4 +214,27 @@ public class MemberCommandServiceImpl implements MemberCommandService{
 
         return memberRepository.save(member);
     }
+
+    @Override
+    @Transactional
+    public Member profileModify(MultipartFile profile, String nickname, Member member) {
+
+        Optional<ProfileImg> older = profileImgRepository.findByMember_Id(member.getId());
+        if (older.isPresent()) {
+            ProfileImg old = older.get();
+            profileImgRepository.delete(old);
+            profileImgRepository.flush();
+        }
+
+        String profileUrl = utilService.uploadS3Img("member", profile);
+
+        ProfileImg profileImg = MemberConverter.toProfileImg(profileUrl, member);
+        profileImgRepository.save(profileImg);
+
+        Member update = MemberConverter.toUpdateProfile(member, profileImg, nickname);
+        memberRepository.save(update);
+
+        return member;
+    }
+
 }

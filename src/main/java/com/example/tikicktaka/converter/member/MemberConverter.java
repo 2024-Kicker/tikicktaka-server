@@ -1,6 +1,7 @@
 package com.example.tikicktaka.converter.member;
 
 import com.example.tikicktaka.domain.enums.MemberRole;
+import com.example.tikicktaka.domain.images.ProfileImg;
 import com.example.tikicktaka.domain.mapping.member.MemberTerm;
 import com.example.tikicktaka.domain.member.Auth;
 import com.example.tikicktaka.domain.member.Member;
@@ -90,11 +91,48 @@ public class MemberConverter {
                 .build();
     }
 
+
     public static MemberResponseDTO.CompleteSignupResultDTO toCompleteSignupResultDTO(Member member) {
         return new MemberResponseDTO.CompleteSignupResultDTO(
                 member.getId(),
                 member.getName(),
                 member.getEmail()
         );
+
+    public static ProfileImg toProfileImg(String url, Member member) {
+        return ProfileImg.builder()
+                .url(url)
+                .member(member)
+                .build();
+    }
+
+    public static Member toUpdateProfile(Member member, ProfileImg profileImg, String nickname) {
+        List<MemberTerm> memberTermList = member.getMemberTermList();
+
+        if (memberTermList == null) {
+            memberTermList = new ArrayList<>();
+        }
+
+        return Member.builder()
+                .id(member.getId())
+                .name(member.getName())
+                .nickname(nickname)
+                .password(member.getPassword())
+                .email(member.getEmail())
+                .birthday(member.getBirthday())
+                .gender(member.getGender())
+                .phone(member.getPhone())
+                .memberRole(MemberRole.MEMBER)
+                .memberTermList(memberTermList)
+                .profileImg(profileImg)
+                .build();
+    }
+
+    public static MemberResponseDTO.ProfileModifyResultDTO toProfileModify(Member member) {
+
+        return MemberResponseDTO.ProfileModifyResultDTO.builder()
+                .nickname(member.getNickname())
+                .build();
+
     }
 }
