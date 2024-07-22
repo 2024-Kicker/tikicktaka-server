@@ -98,6 +98,7 @@ public class MemberConverter {
                 member.getName(),
                 member.getEmail()
         );
+    }
 
     public static ProfileImg toProfileImg(String url, Member member) {
         return ProfileImg.builder()

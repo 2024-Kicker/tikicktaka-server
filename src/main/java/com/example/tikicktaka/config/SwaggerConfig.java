@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Configuration;
 public class SwaggerConfig {
 
     @Bean
-    public OpenAPI MaackAPI() {
+    public OpenAPI TikickTakaAPI() {
         Info info = new Info()
                 .title("TikickTaka Server API")
                 .description("TikickTaka Server API 명세서")
