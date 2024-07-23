@@ -193,22 +193,19 @@ public class MemberCommandServiceImpl implements MemberCommandService{
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
 
-        // Convert request terms to MemberTerm entities
-        HashMap<Term, Boolean> termMap = new HashMap<>();
-        for (int i = 0; i < request.getMemberTerm().size(); i++) {
-            termMap.put(termRepository.findById(i + 1L)
-                    .orElseThrow(() -> new MemberHandler(ErrorStatus.TERM_NOT_FOUND)), request.getMemberTerm().get(i));
-        }
-
-        List<MemberTerm> memberTermList = MemberConverter.toMemberTermList(termMap);
+////        // Convert request terms to MemberTerm entities
+////        HashMap<Term, Boolean> termMap = new HashMap<>();
+////        for (int i = 0; i < request.getMemberTerm().size(); i++) {
+////            termMap.put(termRepository.findById(i + 1L)
+////                    .orElseThrow(() -> new MemberHandler(ErrorStatus.TERM_NOT_FOUND)), request.getMemberTerm().get(i));
+////        }
+//
+//        List<MemberTerm> memberTermList = MemberConverter.toMemberTermList(termMap);
 
         // Update member with additional info
         member.updateAdditionalInfo(
-                request.getName(),
                 request.getBirthday(),
-                request.getGender(),
-                request.getPhone(),
-                memberTermList
+                request.getPhone()
         );
 
 

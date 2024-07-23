@@ -85,18 +85,15 @@ public class MemberRequestDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class CompleteSignupDTO{
-
-        @NotBlank(message = "이름을 입력해주세요.")
-        private String name;
-
+        @NotBlank(message = "생년월일을 입력해주세요")
         private Date birthday;
 
         @NotBlank(message = "휴대폰 번호를 입력해주세요")
         private String phone;
 
-        private Gender gender;
+        //private Gender gender;
 
-        private List<Boolean> memberTerm;
+        //private List<Boolean> memberTerm;
     }
 
 }
