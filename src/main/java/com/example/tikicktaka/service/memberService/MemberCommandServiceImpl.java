@@ -2,18 +2,19 @@ package com.example.tikicktaka.service.memberService;
 
 import com.example.tikicktaka.apiPayload.code.status.ErrorStatus;
 import com.example.tikicktaka.apiPayload.exception.handler.MemberHandler;
+import com.example.tikicktaka.apiPayload.exception.handler.TeamHandler;
 import com.example.tikicktaka.config.MailConfig;
 import com.example.tikicktaka.converter.member.MemberConverter;
 import com.example.tikicktaka.domain.enums.MemberStatus;
 import com.example.tikicktaka.domain.images.ProfileImg;
+import com.example.tikicktaka.domain.mapping.member.MemberTeam;
 import com.example.tikicktaka.domain.mapping.member.MemberTerm;
 import com.example.tikicktaka.domain.member.Auth;
 import com.example.tikicktaka.domain.member.Member;
 import com.example.tikicktaka.domain.member.Term;
-import com.example.tikicktaka.repository.member.AuthRepository;
-import com.example.tikicktaka.repository.member.MemberRepository;
-import com.example.tikicktaka.repository.member.ProfileImgRepository;
-import com.example.tikicktaka.repository.member.TermRepository;
+import com.example.tikicktaka.domain.teams.Team;
+import com.example.tikicktaka.repository.member.*;
+import com.example.tikicktaka.repository.team.TeamRepository;
 import com.example.tikicktaka.service.UtilService;
 import com.example.tikicktaka.web.dto.member.MemberRequestDTO;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +41,8 @@ public class MemberCommandServiceImpl implements MemberCommandService{
 
     private final MemberRepository memberRepository;
     private final TermRepository termRepository;
+    private final TeamRepository teamRepository;
+    private final MemberTeamRepository memberTeamRepository;
     private final ProfileImgRepository profileImgRepository;
     private final BCryptPasswordEncoder encoder;
     private final AuthRepository authRepository;
@@ -185,6 +188,24 @@ public class MemberCommandServiceImpl implements MemberCommandService{
         }
 
         return checkEmail;
+    }
+
+    @Override
+    @Transactional
+    public MemberTeam setPreferTeam(Member member, Long teamId) {
+
+        Optional<MemberTeam> beforeMemberTeam = memberTeamRepository.findByMember(member);
+        if(beforeMemberTeam.isPresent()){
+            MemberTeam deleteMemberTeam = beforeMemberTeam.orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_TEAM_NOT_FOUND));
+            memberTeamRepository.delete(deleteMemberTeam);
+            memberTeamRepository.flush();
+        }
+
+        Team team = teamRepository.findById(teamId).orElseThrow(() -> new TeamHandler(ErrorStatus.TEAM_NOT_FOUND));//error 처리 추가하기
+
+        MemberTeam memberTeam = MemberConverter.toPreferTeam(member,team);
+
+        return memberTeamRepository.save(memberTeam);//Member Team repository 생성
     }
 
     @Transactional
