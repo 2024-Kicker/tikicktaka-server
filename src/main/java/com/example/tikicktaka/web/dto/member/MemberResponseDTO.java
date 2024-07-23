@@ -94,4 +94,13 @@ public class MemberResponseDTO {
     public static class ProfileModifyResultDTO {
         String nickname;
     }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class MemberPreferTeamDTO{
+        Long memberTeamId;
+        LocalDateTime createdAt;
+    }
 }

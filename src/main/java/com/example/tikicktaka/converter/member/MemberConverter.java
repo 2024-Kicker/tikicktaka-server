@@ -2,10 +2,12 @@ package com.example.tikicktaka.converter.member;
 
 import com.example.tikicktaka.domain.enums.MemberRole;
 import com.example.tikicktaka.domain.images.ProfileImg;
+import com.example.tikicktaka.domain.mapping.member.MemberTeam;
 import com.example.tikicktaka.domain.mapping.member.MemberTerm;
 import com.example.tikicktaka.domain.member.Auth;
 import com.example.tikicktaka.domain.member.Member;
 import com.example.tikicktaka.domain.member.Term;
+import com.example.tikicktaka.domain.teams.Team;
 import com.example.tikicktaka.web.dto.member.MemberRequestDTO;
 import com.example.tikicktaka.web.dto.member.MemberResponseDTO;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -136,5 +138,19 @@ public class MemberConverter {
                 .nickname(member.getNickname())
                 .build();
 
+    }
+
+    public static MemberResponseDTO.MemberPreferTeamDTO toMemberPreferTeamDTO(MemberTeam memberTeam){
+        return MemberResponseDTO.MemberPreferTeamDTO.builder()
+                .memberTeamId(memberTeam.getId())
+                .createdAt(memberTeam.getCreatedAt())
+                .build();
+    }
+
+    public static MemberTeam toPreferTeam(Member member, Team team){
+        return MemberTeam.builder()
+                .member(member)
+                .team(team)
+                .build();
     }
 }

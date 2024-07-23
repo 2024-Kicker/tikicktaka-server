@@ -6,6 +6,7 @@ import com.example.tikicktaka.domain.enums.MemberRole;
 import com.example.tikicktaka.domain.enums.MemberStatus;
 import com.example.tikicktaka.domain.enums.SocialType;
 import com.example.tikicktaka.domain.images.ProfileImg;
+import com.example.tikicktaka.domain.mapping.member.MemberTeam;
 import com.example.tikicktaka.domain.mapping.member.MemberTerm;
 import jakarta.persistence.*;
 import lombok.*;
@@ -77,6 +78,9 @@ public class Member extends BaseDateTimeEntity {
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<MemberTerm> memberTermList = new ArrayList<>();
+
+    @OneToOne(mappedBy = "member")
+    private MemberTeam memberTeam;
 
     public void setProfileImg(ProfileImg profileImg) {
         this.profileImg = profileImg;

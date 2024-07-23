@@ -4,6 +4,7 @@ import com.example.tikicktaka.apiPayload.ApiResponse;
 import com.example.tikicktaka.apiPayload.code.status.ErrorStatus;
 import com.example.tikicktaka.apiPayload.exception.handler.MemberHandler;
 import com.example.tikicktaka.converter.member.MemberConverter;
+import com.example.tikicktaka.domain.mapping.member.MemberTeam;
 import com.example.tikicktaka.domain.member.Member;
 import com.example.tikicktaka.service.memberService.MemberCommandService;
 import com.example.tikicktaka.service.memberService.MemberQueryService;
@@ -13,10 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
@@ -42,4 +40,14 @@ public class MyPageController {
 
         return ApiResponse.onSuccess(MemberConverter.toProfileModify(modifyMember));
     }
+
+    @PostMapping(value = "/teams/{teamId}")
+    @Operation(summary = "선호 구단 등록 API", description = "request : 팀 id.")
+    public ApiResponse<MemberResponseDTO.MemberPreferTeamDTO> preferTeam(@RequestParam("teamId") Long teamId,
+                                                                         Authentication authentication){
+        Member member = memberQueryService.findMemberByName((authentication.getName().toString())).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        MemberTeam memberTeam = memberCommandService.setPreferTeam(member, teamId);
+        return ApiResponse.onSuccess(MemberConverter.toMemberPreferTeamDTO(memberTeam));
+    }
+
 }
