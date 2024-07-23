@@ -93,16 +93,19 @@ public class Member extends BaseDateTimeEntity {
     public Member(String email, String nickname, List<MemberTerm> memberTermList) {
 
     }
-
     // Method to update additional information after social login
-    public void updateAdditionalInfo(String name, Date birthday, Gender gender, String phone, List<MemberTerm> memberTermList) {
-        this.name = name;
+    public void updateAdditionalInfo(Date birthday, String phone) {
         this.birthday = birthday;
-        this.gender = gender;
         this.phone = phone;
-        this.memberTermList = memberTermList;
         this.memberStatus = MemberStatus.ACTIVE;
     }
 
-
+//    // Method to update additional information after social login
+//    public void updateAdditionalInfo(String name, Date birthday, Gender gender, String phone, List<MemberTerm> memberTermList) {
+//        this.birthday = birthday;
+//        this.gender = gender;
+//        this.phone = phone;
+//        this.memberTermList = memberTermList;
+//        this.memberStatus = MemberStatus.ACTIVE;
+//    }
 }

@@ -68,6 +68,7 @@ public class MemberResponseDTO {
     public static class CompleteSignupResultDTO {
         private Long id;
         private String name;
+        private String nickname;
         private String email;
     }
 
@@ -76,9 +77,14 @@ public class MemberResponseDTO {
     @AllArgsConstructor
     public static class MemberLoginResponseDTO {
         private Long memberId;
-        private String nickname;
+        private String name;
+        private String nickName;
         private String email;
         private String jwt;
+        private String message;
+
+//        public MemberLoginResponseDTO(Long memberId, String name, String nickName, String email, String jwt, String message) {
+//        }
     }
   
     @Builder

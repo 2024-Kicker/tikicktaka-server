@@ -20,6 +20,8 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     Optional<Member> findByPhone(String phone);
 
+    boolean existsByNickname(String nickname); // 닉네임 중복 체크 메소드 추가
+
     @Transactional
     @Modifying(clearAutomatically = true)
     @Query("UPDATE Member m SET m.name = :name, m.email = :email, m.phone = :phone, m.birthday = :birthday, m.gender = :gender, m.password = :password, m.nickname = :nickname WHERE m.id = :memberId")

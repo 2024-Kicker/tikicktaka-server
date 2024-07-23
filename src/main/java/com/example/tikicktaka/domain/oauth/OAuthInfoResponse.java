@@ -4,6 +4,6 @@ import com.example.tikicktaka.domain.enums.SocialType;
 
 public interface OAuthInfoResponse {
     String getEmail();
-    String getNickname();
+    String getName();
     SocialType getSocialType();
 }

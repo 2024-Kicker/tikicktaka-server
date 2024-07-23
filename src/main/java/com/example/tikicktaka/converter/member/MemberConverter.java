@@ -96,6 +96,7 @@ public class MemberConverter {
         return new MemberResponseDTO.CompleteSignupResultDTO(
                 member.getId(),
                 member.getName(),
+                member.getNickname(),
                 member.getEmail()
         );
     }
