@@ -28,15 +28,14 @@ public class MyPageController {
     private final MemberCommandService memberCommandService;
     private final MemberQueryService memberQueryService;
 
-    @PutMapping(value = "/profile/modify", consumes = "multipart/form-data")
+    @PutMapping(value = "/profile-image/upload", consumes = "multipart/form-data")
     @Operation(summary = "마이페이지 프로필 사진 등록 api", description = "request : 프로필 이미지, 닉네임")
     public ApiResponse<MemberResponseDTO.ProfileModifyResultDTO> profileModify(@RequestParam("profile") MultipartFile profile,
-                                                                               @RequestParam("nickname") String nickname,
                                                                                Authentication authentication) {
         Member member = memberQueryService.findMemberByName((authentication.getName().toString())).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
 
 
-        Member modifyMember = memberCommandService.profileModify(profile, nickname, member);
+        Member modifyMember = memberCommandService.profileModify(profile, member);
 
         return ApiResponse.onSuccess(MemberConverter.toProfileModify(modifyMember));
     }

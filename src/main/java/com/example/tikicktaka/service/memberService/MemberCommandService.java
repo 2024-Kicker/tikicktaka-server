@@ -28,6 +28,6 @@ public interface MemberCommandService {
     @Transactional
     Member completeSignup(Long memberId, MemberRequestDTO.CompleteSignupDTO request);
 
-    Member profileModify(MultipartFile profile, String nickname, Member member);
+    Member profileModify(MultipartFile profile, Member member);
 
 }

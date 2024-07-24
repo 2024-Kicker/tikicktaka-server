@@ -235,7 +235,7 @@ public class MemberCommandServiceImpl implements MemberCommandService{
 
     @Override
     @Transactional
-    public Member profileModify(MultipartFile profile, String nickname, Member member) {
+    public Member profileModify(MultipartFile profile, Member member) {
 
         Optional<ProfileImg> older = profileImgRepository.findByMember_Id(member.getId());
         if (older.isPresent()) {
