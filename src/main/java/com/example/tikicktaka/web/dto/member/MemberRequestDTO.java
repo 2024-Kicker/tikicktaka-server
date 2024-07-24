@@ -46,6 +46,22 @@ public class MemberRequestDTO {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
+    public static class UpdateMemberDTO{
+        @NotBlank(message = "닉네임을 입력해주세요.")
+        private String nickname;
+
+        @NotBlank(message = "이름을 입력해주세요")
+        private String name;
+
+        @NotBlank(message = "휴대폰 번호를 입력해주세요")
+        private String phone;
+
+        private Date birthday;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class MemberLoginDTO{
         private String email;
         private String password;
