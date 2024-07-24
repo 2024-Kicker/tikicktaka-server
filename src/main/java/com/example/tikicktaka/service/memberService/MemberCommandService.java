@@ -28,6 +28,7 @@ public interface MemberCommandService {
     @Transactional
     Member completeSignup(Long memberId, MemberRequestDTO.CompleteSignupDTO request);
 
-    Member profileModify(MultipartFile profile, Member member);
+    Member profileImageUpload(MultipartFile profile, Member member);
 
+    Member modifyProfile(MemberRequestDTO.UpdateMemberDTO request, Member member);
 }

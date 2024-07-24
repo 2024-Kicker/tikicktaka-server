@@ -111,7 +111,7 @@ public class MemberConverter {
                 .build();
     }
 
-    public static Member toUpdateProfile(Member member, ProfileImg profileImg, String nickname) {
+    public static Member toUpdateProfile(Member member, MemberRequestDTO.UpdateMemberDTO request) {
         List<MemberTerm> memberTermList = member.getMemberTermList();
 
         if (memberTermList == null) {
@@ -120,16 +120,16 @@ public class MemberConverter {
 
         return Member.builder()
                 .id(member.getId())
-                .name(member.getName())
-                .nickname(nickname)
+                .name(request.getName())
+                .nickname(request.getNickname())
                 .password(member.getPassword())
                 .email(member.getEmail())
-                .birthday(member.getBirthday())
+                .birthday(request.getBirthday())
                 .gender(member.getGender())
-                .phone(member.getPhone())
+                .phone(request.getPhone())
                 .memberRole(MemberRole.MEMBER)
                 .memberTermList(memberTermList)
-                .profileImg(profileImg)
+                .profileImg(member.getProfileImg())
                 .build();
     }
 
@@ -137,6 +137,17 @@ public class MemberConverter {
 
         return MemberResponseDTO.ProfileModifyResultDTO.builder()
                 .nickname(member.getNickname())
+                .build();
+
+    }
+
+    public static MemberResponseDTO.UpdateProfileResultDTO toProfileUpdate(Member member) {
+
+        return MemberResponseDTO.UpdateProfileResultDTO.builder()
+                .memberId(member.getId())
+                .nickname(member.getNickname())
+                .email(member.getEmail())
+                .updatedAt(member.getUpdatedAt())
                 .build();
 
     }

@@ -8,6 +8,7 @@ import com.example.tikicktaka.domain.mapping.member.MemberTeam;
 import com.example.tikicktaka.domain.member.Member;
 import com.example.tikicktaka.service.memberService.MemberCommandService;
 import com.example.tikicktaka.service.memberService.MemberQueryService;
+import com.example.tikicktaka.web.dto.member.MemberRequestDTO;
 import com.example.tikicktaka.web.dto.member.MemberResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
@@ -35,9 +36,20 @@ public class MyPageController {
         Member member = memberQueryService.findMemberByName((authentication.getName().toString())).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
 
 
-        Member modifyMember = memberCommandService.profileModify(profile, member);
+        Member modifyMember = memberCommandService.profileImageUpload(profile, member);
 
         return ApiResponse.onSuccess(MemberConverter.toProfileModify(modifyMember));
+    }
+
+    @PutMapping(value = "/profile/modify")
+    @Operation(summary = "프로필 수정 api", description = "request : 닉네임, 이름, 전화번호, 생년월일")
+    public ApiResponse<MemberResponseDTO.UpdateProfileResultDTO> updateProfile(@RequestBody MemberRequestDTO.UpdateMemberDTO request,
+                                                                               Authentication authentication){
+
+        Member member = memberQueryService.findMemberByName((authentication.getName().toString())).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        Member updateMember = memberCommandService.modifyProfile(request, member);
+
+        return ApiResponse.onSuccess(MemberConverter.toProfileUpdate(updateMember));
     }
 
     @PostMapping(value = "/teams/{teamId}")

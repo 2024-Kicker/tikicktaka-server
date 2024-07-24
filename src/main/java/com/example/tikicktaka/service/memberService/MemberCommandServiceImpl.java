@@ -235,7 +235,7 @@ public class MemberCommandServiceImpl implements MemberCommandService{
 
     @Override
     @Transactional
-    public Member profileModify(MultipartFile profile, Member member) {
+    public Member profileImageUpload(MultipartFile profile, Member member) {
 
         Optional<ProfileImg> older = profileImgRepository.findByMember_Id(member.getId());
         if (older.isPresent()) {
@@ -250,10 +250,17 @@ public class MemberCommandServiceImpl implements MemberCommandService{
         member.setProfileImg(profileImg);
         profileImgRepository.save(profileImg);
 
-//        Member update = MemberConverter.toUpdateProfile(member, profileImg, nickname);
-//        memberRepository.save(update);
-
         return member;
+    }
+
+    @Override
+    @Transactional
+    public Member modifyProfile(MemberRequestDTO.UpdateMemberDTO request, Member member) {
+
+        Member update = MemberConverter.toUpdateProfile(member, request);
+        memberRepository.save(update);
+
+        return null;
     }
 
 }
