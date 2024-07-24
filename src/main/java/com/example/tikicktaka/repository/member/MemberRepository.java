@@ -25,6 +25,5 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     @Transactional
     @Modifying(clearAutomatically = true)
     @Query("UPDATE Member m SET m.name = :name, m.email = :email, m.phone = :phone, m.birthday = :birthday, m.gender = :gender, m.password = :password, m.nickname = :nickname WHERE m.id = :memberId")
-    void reregister(Long memberId, String nickname, String name, String password, String email, Date birthday
-            , Gender gender, String phone);
+    void reregister(Long memberId, String nickname, String name, String password, String email, Date birthday, Gender gender, String phone);
 }

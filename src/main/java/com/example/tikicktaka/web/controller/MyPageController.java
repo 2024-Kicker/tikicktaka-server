@@ -23,7 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 @Validated
 @io.swagger.v3.oas.annotations.tags.Tag(name = "MyPage", description = "MyPage 관련 API")
-@RequestMapping("/api/members/mypage")
+@RequestMapping("/api/mypage")
 public class MyPageController {
 
     private final MemberCommandService memberCommandService;
