@@ -247,10 +247,11 @@ public class MemberCommandServiceImpl implements MemberCommandService{
         String profileUrl = utilService.uploadS3Img("member", profile);
 
         ProfileImg profileImg = MemberConverter.toProfileImg(profileUrl, member);
+        member.setProfileImg(profileImg);
         profileImgRepository.save(profileImg);
 
-        Member update = MemberConverter.toUpdateProfile(member, profileImg, nickname);
-        memberRepository.save(update);
+//        Member update = MemberConverter.toUpdateProfile(member, profileImg, nickname);
+//        memberRepository.save(update);
 
         return member;
     }

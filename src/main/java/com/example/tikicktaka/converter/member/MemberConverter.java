@@ -87,9 +87,10 @@ public class MemberConverter {
                 .build();
     }
 
-    public static MemberResponseDTO.EmailAuthConfirmResultDTO toEmailAuthConfirmResultDTO(Boolean checkEmail){
+    public static MemberResponseDTO.EmailAuthConfirmResultDTO toEmailAuthConfirmResultDTO(String email, Boolean checkEmail){
         return MemberResponseDTO.EmailAuthConfirmResultDTO.builder()
                 .checkEmail(checkEmail)
+                .email(email)
                 .build();
     }
 

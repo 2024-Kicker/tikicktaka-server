@@ -60,6 +60,7 @@ public class MemberResponseDTO {
     @AllArgsConstructor
     public static class EmailAuthConfirmResultDTO{
         Boolean checkEmail;
+        String email;
     }
 
     @Getter

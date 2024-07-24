@@ -29,7 +29,7 @@ public class MyPageController {
     private final MemberQueryService memberQueryService;
 
     @PutMapping(value = "/profile/modify", consumes = "multipart/form-data")
-    @Operation(summary = "마이페이지 프로필 수정(닉네임, 프로필 사진) api", description = "request : 프로필 이미지, 닉네임")
+    @Operation(summary = "마이페이지 프로필 사진 등록 api", description = "request : 프로필 이미지, 닉네임")
     public ApiResponse<MemberResponseDTO.ProfileModifyResultDTO> profileModify(@RequestParam("profile") MultipartFile profile,
                                                                                @RequestParam("nickname") String nickname,
                                                                                Authentication authentication) {

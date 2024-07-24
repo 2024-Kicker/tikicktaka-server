@@ -77,8 +77,9 @@ public class MemberController {
     @PostMapping("/email/auth/verify")
     @Operation(summary = "email 인증 검증 api")
     public ApiResponse<MemberResponseDTO.EmailAuthConfirmResultDTO> emailAuth(@RequestBody MemberRequestDTO.EmailAuthConfirmDTO request){
+        String email = request.getEmail();
         Boolean checkEmail = memberCommandService.confirmEmailAuth(request);
-        return ApiResponse.onSuccess(MemberConverter.toEmailAuthConfirmResultDTO(checkEmail));
+        return ApiResponse.onSuccess(MemberConverter.toEmailAuthConfirmResultDTO(email, checkEmail));
     }
 
     @PostMapping("/jwt/test")
