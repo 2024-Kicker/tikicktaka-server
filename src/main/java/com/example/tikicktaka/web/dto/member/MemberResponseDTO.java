@@ -25,6 +25,18 @@ public class MemberResponseDTO {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
+    public static class UpdateProfileResultDTO{
+
+        Long memberId;
+        String nickname;
+        String email;
+        LocalDateTime updatedAt;
+    }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class LoginResultDTO{
         String jwt;
     }
