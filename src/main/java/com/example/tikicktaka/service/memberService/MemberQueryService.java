@@ -9,4 +9,6 @@ public interface MemberQueryService {
     Optional<Member> findMemberById(Long id);
 
     Optional<Member> findMemberByName(String name);
+
+    Member getMemberProfile(Long memberId);
 }

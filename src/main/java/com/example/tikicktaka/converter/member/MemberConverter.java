@@ -133,6 +133,21 @@ public class MemberConverter {
                 .build();
     }
 
+    public static MemberResponseDTO.memberProfileDTO memberProfileDTO(Member member){
+        return MemberResponseDTO.memberProfileDTO.builder()
+                .memberId(member.getId())
+                .email(member.getEmail())
+                .nickname(member.getNickname())
+                .name(member.getName())
+                .profileImgUrl(member.getProfileImg().getUrl())
+                .phoneNumber(member.getPhone())
+                .gender(member.getGender().name())
+                .phoneNumber(member.getPhone())
+                .point(member.getPoint())
+                .memberTerm(member.getMemberTermList().stream().map(memberTeam -> memberTeam.getMemberAgree()).toList())
+                .build();
+    }
+
     public static MemberResponseDTO.ProfileModifyResultDTO toProfileModify(Member member) {
 
         return MemberResponseDTO.ProfileModifyResultDTO.builder()

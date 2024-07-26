@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class MemberResponseDTO {
 
@@ -19,6 +20,22 @@ public class MemberResponseDTO {
         String nickname;
         String email;
         LocalDateTime createdAt;
+    }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class memberProfileDTO{
+        Long memberId;
+        String email;
+        String nickname;
+        String name;
+        Long point;
+        String phoneNumber;
+        String gender;
+        String profileImgUrl;
+        List<Boolean> memberTerm;
     }
 
     @Builder
