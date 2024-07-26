@@ -165,4 +165,11 @@ public class MemberConverter {
                 .team(team)
                 .build();
     }
+
+    public static MemberResponseDTO.SearchIdDTO toSearchIdResultDTO(Member member) {
+        return MemberResponseDTO.SearchIdDTO.builder()
+                .id(member.getId())
+                .email(member.getEmail())
+                .build();
+    }
 }
