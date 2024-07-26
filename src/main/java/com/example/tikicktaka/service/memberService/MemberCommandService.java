@@ -33,4 +33,6 @@ public interface MemberCommandService {
     Member modifyProfile(MemberRequestDTO.UpdateMemberDTO request, Member member);
 
     Member findByPhone(String phone);
+
+    void deleteMember(Long memberId);
 }

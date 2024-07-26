@@ -270,4 +270,13 @@ public class MemberCommandServiceImpl implements MemberCommandService{
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
+    @Override
+    @Transactional
+    public void deleteMember(Long memberId) {
+
+        Member member = memberRepository.findById(memberId).orElseThrow(()-> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        member.setMemberStatus(MemberStatus.INACTIVE);
+        memberRepository.save(member);
+    }
+
 }

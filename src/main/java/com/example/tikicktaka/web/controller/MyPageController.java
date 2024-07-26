@@ -2,6 +2,7 @@ package com.example.tikicktaka.web.controller;
 
 import com.example.tikicktaka.apiPayload.ApiResponse;
 import com.example.tikicktaka.apiPayload.code.status.ErrorStatus;
+import com.example.tikicktaka.apiPayload.code.status.SuccessStatus;
 import com.example.tikicktaka.apiPayload.exception.handler.MemberHandler;
 import com.example.tikicktaka.converter.member.MemberConverter;
 import com.example.tikicktaka.domain.mapping.member.MemberTeam;
@@ -59,6 +60,15 @@ public class MyPageController {
         Member member = memberQueryService.findMemberByName((authentication.getName().toString())).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
         MemberTeam memberTeam = memberCommandService.setPreferTeam(member, teamId);
         return ApiResponse.onSuccess(MemberConverter.toMemberPreferTeamDTO(memberTeam));
+    }
+
+    @DeleteMapping(value = "/delete")
+    @Operation(summary = "회원 탈퇴 api", description = "request: 회원 탈퇴 사유 번호로 주시면 됩니다")
+    public ApiResponse<?> deleteMember(Authentication authentication){
+
+        Member member = memberQueryService.findMemberByName((authentication.getName().toString())).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        memberCommandService.deleteMember(member.getId());
+        return ApiResponse.of(SuccessStatus.MEMBER_DELETE_SUCCESS, null);
     }
 
 }
