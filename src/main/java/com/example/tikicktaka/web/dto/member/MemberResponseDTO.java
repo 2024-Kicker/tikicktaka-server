@@ -95,9 +95,6 @@ public class MemberResponseDTO {
         private String email;
         private String jwt;
         private String message;
-
-//        public MemberLoginResponseDTO(Long memberId, String name, String nickName, String email, String jwt, String message) {
-//        }
     }
   
     @Builder
@@ -115,5 +112,14 @@ public class MemberResponseDTO {
     public static class MemberPreferTeamDTO{
         Long memberTeamId;
         LocalDateTime createdAt;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class SearchIdDTO{
+        private Long id;
+        private String email;
     }
 }

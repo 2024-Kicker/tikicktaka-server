@@ -31,4 +31,6 @@ public interface MemberCommandService {
     Member profileImageUpload(MultipartFile profile, Member member);
 
     Member modifyProfile(MemberRequestDTO.UpdateMemberDTO request, Member member);
+
+    Member findByPhone(String phone);
 }

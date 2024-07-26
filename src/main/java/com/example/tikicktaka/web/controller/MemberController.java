@@ -7,6 +7,7 @@ import com.example.tikicktaka.apiPayload.exception.handler.MemberHandler;
 import com.example.tikicktaka.converter.member.MemberConverter;
 import com.example.tikicktaka.domain.member.Auth;
 import com.example.tikicktaka.domain.member.Member;
+import com.example.tikicktaka.repository.member.MemberRepository;
 import com.example.tikicktaka.service.memberService.MemberCommandService;
 import com.example.tikicktaka.service.memberService.MemberQueryService;
 import com.example.tikicktaka.web.dto.member.MemberRequestDTO;
@@ -21,6 +22,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
+
 @RestController
 @Slf4j
 @RequiredArgsConstructor
@@ -31,6 +34,7 @@ public class MemberController {
 
     private final MemberCommandService memberCommandService;
     private final MemberQueryService memberQueryService;
+    private final MemberRepository memberRepository;
 
     @PostMapping("/join")
     @Operation(summary = "회원가입 API", description = "request 파라미터 : 닉네임, 이름, 로그인 아이디(String), 비밀번호(String), 이메일, 생일(yyyymmdd), 성별(MALE, FEMALE, NO_SELECET), 폰번호(010xxxxxxxx),이용약관(Boolean 배열)")
@@ -98,5 +102,19 @@ public class MemberController {
     public ApiResponse<MemberResponseDTO.CompleteSignupResultDTO> completeSignup(@PathVariable Long memberId, @RequestBody @Valid MemberRequestDTO.CompleteSignupDTO request) {
         Member member = memberCommandService.completeSignup(memberId, request);
         return ApiResponse.onSuccess(MemberConverter.toCompleteSignupResultDTO(member));
+    }
+
+    // 아이디 찾기
+    @PostMapping("/find/id")
+    @Operation(summary = "전화번호로 사용자 찾기", description = "request 파라미터: 전화번호, response: 사용자 정보")
+    public ApiResponse<MemberResponseDTO.SearchIdDTO> findUserByPhone(@RequestBody @Valid MemberRequestDTO.SearchIdDTO request) {
+        String phone = request.getPhone();
+        Optional<Member> member = memberRepository.findByPhone(phone);
+        if (member.isPresent()) {
+            Member foundmember = member.get();
+            return ApiResponse.onSuccess(MemberConverter.toSearchIdResultDTO(foundmember));
+        } else {
+            return ApiResponse.onFailure("404", "User not found", null);
+        }
     }
 }
