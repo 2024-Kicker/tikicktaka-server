@@ -1,5 +1,7 @@
 package com.example.tikicktaka.service.memberService;
 
+import com.example.tikicktaka.apiPayload.code.status.ErrorStatus;
+import com.example.tikicktaka.apiPayload.exception.handler.MemberHandler;
 import com.example.tikicktaka.domain.member.Member;
 import com.example.tikicktaka.repository.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +27,11 @@ public class MemberQueryServiceImpl implements MemberQueryService{
     @Override
     public Optional<Member> findMemberByName(String name) {
         return memberRepository.findByName(name);
+    }
+
+    @Override
+    public Member getMemberProfile(Long memberId) {
+        return memberRepository.findById(memberId).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
     }
 
 

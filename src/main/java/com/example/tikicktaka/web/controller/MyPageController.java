@@ -12,6 +12,9 @@ import com.example.tikicktaka.service.memberService.MemberQueryService;
 import com.example.tikicktaka.web.dto.member.MemberRequestDTO;
 import com.example.tikicktaka.web.dto.member.MemberResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -29,6 +32,17 @@ public class MyPageController {
 
     private final MemberCommandService memberCommandService;
     private final MemberQueryService memberQueryService;
+
+    @GetMapping("/my/profile")
+    @Operation(summary = "나의 프로필 조회 API", description = "나의 프로필 정보 조회를 위한 API이다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
+    })
+    public ApiResponse<MemberResponseDTO.memberProfileDTO> memberProfile(Authentication authentication){
+
+        Member member = memberQueryService.findMemberByName((authentication.getName().toString())).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        return ApiResponse.onSuccess(MemberConverter.memberProfileDTO(member));
+    }
 
     @PutMapping(value = "/profile-image/upload", consumes = "multipart/form-data")
     @Operation(summary = "마이페이지 프로필 사진 등록 api", description = "request : 프로필 이미지")
@@ -70,5 +84,4 @@ public class MyPageController {
         memberCommandService.deleteMember(member.getId());
         return ApiResponse.of(SuccessStatus.MEMBER_DELETE_SUCCESS, null);
     }
-
 }
