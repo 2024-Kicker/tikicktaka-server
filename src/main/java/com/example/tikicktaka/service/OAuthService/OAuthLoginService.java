@@ -24,7 +24,7 @@ public class OAuthLoginService {
     private final MemberRepository memberRepository;
     private final RequestOAuthInfoService requestOAuthInfoService;
     private final JwtUtil jwtUtil; // JWT 유틸리티 추가
-    @Value("${JWT_TOKEN_SECRET}")
+    @Value("${jwt.token.secret}")
     private String key;
 
     private int expiredMs = 1000 * 60 * 60 * 24 * 5;
