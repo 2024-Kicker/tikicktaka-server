@@ -1,6 +1,8 @@
 package com.example.tikicktaka.domain.teams;
 
 import com.example.tikicktaka.domain.common.BaseDateTimeEntity;
+import com.example.tikicktaka.domain.images.ProfileImg;
+import com.example.tikicktaka.domain.images.TeamImg;
 import com.example.tikicktaka.domain.mapping.member.MemberTeam;
 import jakarta.persistence.*;
 import lombok.*;
@@ -29,4 +31,11 @@ public class Team extends BaseDateTimeEntity {
 
     @OneToOne(mappedBy = "team")
     private MemberTeam memberTeam;
+
+    @OneToOne(mappedBy = "team")
+    private TeamImg teamImg;
+
+    public void setTeamImg(TeamImg teamImage) {
+        this.teamImg = teamImage;
+    }
 }

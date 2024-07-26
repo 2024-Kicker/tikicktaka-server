@@ -33,6 +33,12 @@ public class AmazonConfig {
     @Value("${cloud.aws.s3.path.member}")
     private String memberPath;
 
+    @Value("${cloud.aws.s3.path.logo}")
+    private String logoPath;
+
+    @Value("${cloud.aws.s3.path.stadium}")
+    private String stadiumPath;
+
     @PostConstruct
     public void init() { this.awsCredentials = new BasicAWSCredentials(accessKey, secretKey); }
 

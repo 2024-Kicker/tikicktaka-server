@@ -20,7 +20,7 @@ public class SpringSecurityConfig {
 
     private final MemberCommandService memberCommandService;
 
-    @Value("${JWT_TOKEN_SECRET}")
+    @Value("${jwt.token.secret}")
     private String secretKey;
 
     @Bean

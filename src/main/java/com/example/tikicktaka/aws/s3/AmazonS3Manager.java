@@ -32,7 +32,12 @@ public class AmazonS3Manager {
             case "member":
                 keyName = generateMemberKeyName(uuid);
                 break;
-
+            case "logo":
+                keyName = generateLogoKeyName(uuid);
+                break;
+            case "stadium":
+                keyName = generateStadiumKeyName(uuid);
+                break;
             default:
                 keyName = "./" + uuid.getUuid();
         }
@@ -48,4 +53,13 @@ public class AmazonS3Manager {
     public String generateMemberKeyName(Uuid uuid) {
         return amazonConfig.getMemberPath() + '/' + uuid.getUuid();
     }
+
+    public String generateLogoKeyName(Uuid uuid) {
+        return amazonConfig.getLogoPath() + '/' + uuid.getUuid();
+    }
+
+    public String generateStadiumKeyName(Uuid uuid) {
+        return amazonConfig.getStadiumPath() + '/' + uuid.getUuid();
+    }
+
 }

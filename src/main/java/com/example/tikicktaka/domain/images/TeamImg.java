@@ -2,6 +2,7 @@ package com.example.tikicktaka.domain.images;
 
 import com.example.tikicktaka.domain.common.BaseDateTimeEntity;
 import com.example.tikicktaka.domain.member.Member;
+import com.example.tikicktaka.domain.teams.Team;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -10,22 +11,25 @@ import lombok.*;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class ProfileImg extends BaseDateTimeEntity {
+public class TeamImg extends BaseDateTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "profile_img_id")
+    @Column(name = "team_img_id")
     private Long id;
 
     @Column(columnDefinition = "TEXT", nullable = false)
-    private String url;
+    private String logoUrl;
+
+    @Column(columnDefinition = "TEXT", nullable = false)
+    private String stadiumUrl;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
-    private Member member;
+    @JoinColumn(name = "team_id")
+    private Team team;
 
-    public void setMember(Member member) {
-        this.member = member;
-        member.setProfileImg(this);
+    public void setTeam(Team team) {
+        this.team = team;
+        team.setTeamImg(this);
     }
 }

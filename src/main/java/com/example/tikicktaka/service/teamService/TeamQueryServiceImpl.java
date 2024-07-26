@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -21,4 +22,10 @@ public class TeamQueryServiceImpl implements TeamQueryService{
     public Optional<Team> findTeamById(Long teamId) {
         return teamRepository.findById(teamId);
     }
+
+    @Override
+    public List<Team> getTeamList() {
+        return teamRepository.findAll();
+    }
+
 }

@@ -34,11 +34,15 @@ spring:
         hbm2ddl:
           auto: update
         default_batch_fetch_size: 1000
+  servlet:
+    multipart:
+      enabled: true
+      maxFileSize: 1000MB
+      maxRequestSize: 1000MB
 
 jwt:
   token:
     secret: ${JWT_TOKEN_SECRET}
-
 
 oauth:
   kakao:
@@ -53,6 +57,8 @@ cloud:
       bucket: tikicktaka-bucket
       path:
         member : member
+        logo : logo
+        stadium : stadium
     region:
       static: ap-northeast-2
     stack:

@@ -49,7 +49,7 @@ public class MemberCommandServiceImpl implements MemberCommandService{
     private final MailConfig mailConfig;
     private final UtilService utilService;
 
-    @Value("${JWT_TOKEN_SECRET}")
+    @Value("${jwt.token.secret}")
     private String key;
 
     private int expiredMs = 1000 * 60 * 60 * 24 * 5;
