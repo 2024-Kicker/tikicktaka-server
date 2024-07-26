@@ -263,4 +263,11 @@ public class MemberCommandServiceImpl implements MemberCommandService{
         return null;
     }
 
+    @Override
+    @Transactional
+    public Member findByPhone(String phone) {
+        return memberRepository.findByPhone(phone)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
 }

@@ -111,5 +111,9 @@ public class MemberRequestDTO {
 
         //private List<Boolean> memberTerm;
     }
-
+    @Getter
+    @NoArgsConstructor
+    public static class SearchIdDTO {
+        private String phone;
+    }
 }
