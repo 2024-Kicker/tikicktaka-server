@@ -204,4 +204,12 @@ public class MemberConverter {
                 .createdAt(registerSeller.getCreatedAt())
                 .build();
     }
+
+    public static MemberResponseDTO.ModifySellerResultDTO toModifySellerResultDTO(Member member){
+        return MemberResponseDTO.ModifySellerResultDTO.builder()
+                .nickname(member.getNickname())
+                .memberRole(member.getMemberRole().name())
+                .email(member.getEmail())
+                .build();
+    }
 }

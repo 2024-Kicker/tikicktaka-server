@@ -93,6 +93,7 @@ public class Member extends BaseDateTimeEntity {
 
     public void setSocialType(SocialType socialType) { this.socialType = socialType; }
 
+    public void setMemberRole(MemberRole memberRole) { this.memberRole = memberRole; }
 
     public Member(String email, String nickname, String name, Date birthday, Gender gender, String phone, List<MemberTerm> memberTermList) {
 

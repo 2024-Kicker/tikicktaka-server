@@ -149,4 +149,14 @@ public class MemberResponseDTO {
         private String nickname;
         private LocalDateTime createdAt;
     }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class ModifySellerResultDTO{
+        private String nickname;
+        private String email;
+        private String memberRole;
+    }
 }
