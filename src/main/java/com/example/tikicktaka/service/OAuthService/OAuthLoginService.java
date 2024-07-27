@@ -38,18 +38,19 @@ public class OAuthLoginService {
         Member member = memberRepository.findByEmail(oAuthInfoResponse.getEmail()).orElseThrow(()-> new IllegalArgumentException("Member not found"));
 
         //추가 회원 정보 기입 여부 받아옴
-        boolean hasAdditionalInfo = member.getNickname() != null &&
+        boolean hasAdditionalInfo = member.getName() != null &&
                 member.getBirthday() != null && member.getPhone() != null;
 
         if(!hasAdditionalInfo){
             //추가 정보가 없는 경우
-            return new MemberResponseDTO.MemberLoginResponseDTO(memberId, member.getName(), member.getNickname(), member.getEmail(), null,"추가 정보를 먼저 기입하시길 바랍니다");
+            //return new MemberResponseDTO.MemberLoginResponseDTO(memberId, member.getName(), member.getNickname(), member.getEmail(), null,"추가 정보를 먼저 기입하시길 바랍니다");
+            return new MemberResponseDTO.MemberLoginResponseDTO(memberId, member.getName(), member.getEmail(), null,"추가 정보를 먼저 기입하시길 바랍니다");
         }
 
         //추가 정보 기입까지 완료된 경우
         String jwt = jwtUtil.createJwt(memberId, member.getName(), expiredMs, key, List.of("MEMBER"));
-        return new MemberResponseDTO.MemberLoginResponseDTO(memberId, member.getName(), member.getNickname(), member.getEmail(), jwt, "카카오 소셜로그인 완료되었습니다");
-
+        //return new MemberResponseDTO.MemberLoginResponseDTO(memberId, member.getName(), member.getNickname(), member.getEmail(), jwt, "카카오 소셜로그인 완료되었습니다");
+        return new MemberResponseDTO.MemberLoginResponseDTO(memberId, member.getName(), member.getEmail(), jwt, "카카오 소셜로그인 완료되었습니다");
         //return new MemberResponseDTO.MemberLoginResponseDTO(memberId, member.getNickname(), member.getEmail(),jwt, "");
     }
 
@@ -63,8 +64,8 @@ public class OAuthLoginService {
         String randomNickname = generateRandomNickname();
         Member member = Member.builder()
                 .email(oAuthInfoResponse.getEmail())
-                .name(oAuthInfoResponse.getName())
-                .nickname(randomNickname)
+                //.name(oAuthInfoResponse.getName())
+                .name(randomNickname)
                 .socialType(oAuthInfoResponse.getSocialType())
                 .gender(Gender.NO_SELECT) //성별 기본 설정
                 .memberRole(MemberRole.MEMBER) // 기본 롤 설정
@@ -79,7 +80,7 @@ public class OAuthLoginService {
         do {
             int randomNumber = random.nextInt(10000); // 0에서 9999 사이의 랜덤 숫자 생성
             nickname = "키커" + String.format("%04d", randomNumber);
-        } while (memberRepository.existsByNickname(nickname));
+        } while (memberRepository.existsByName(nickname));
         return nickname;
     }
 }
