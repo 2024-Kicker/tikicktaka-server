@@ -1,6 +1,7 @@
 package com.example.tikicktaka.converter.member;
 
 import com.example.tikicktaka.domain.enums.MemberRole;
+import com.example.tikicktaka.domain.enums.MemberStatus;
 import com.example.tikicktaka.domain.images.ProfileImg;
 import com.example.tikicktaka.domain.mapping.member.MemberTeam;
 import com.example.tikicktaka.domain.mapping.member.MemberTerm;
@@ -24,7 +25,7 @@ public class MemberConverter {
     public static MemberResponseDTO.JoinResultDTO toJoinResultDTO(Member member){
         return MemberResponseDTO.JoinResultDTO.builder()
                 .memberId(member.getId())
-                .nickname(member.getNickname())
+                .nickname(member.getName())
                 .email(member.getEmail())
                 .createdAt(member.getCreatedAt())
                 .build();
@@ -32,8 +33,8 @@ public class MemberConverter {
 
     public static Member toMember(MemberRequestDTO.JoinDTO request, BCryptPasswordEncoder encoder){
         return Member.builder()
-                .nickname(request.getNickname())
-                .name(request.getName())
+                //.nickname(request.getNickname())
+                .name(request.getNickname())
                 .password(encoder.encode(request.getPassword()))
                 .email(request.getEmail())
                 .birthday(request.getBirthday())
@@ -100,7 +101,7 @@ public class MemberConverter {
         return new MemberResponseDTO.CompleteSignupResultDTO(
                 member.getId(),
                 member.getName(),
-                member.getNickname(),
+                //member.getNickname(),
                 member.getEmail()
         );
     }
@@ -121,39 +122,60 @@ public class MemberConverter {
 
         return Member.builder()
                 .id(member.getId())
-                .name(request.getName())
-                .nickname(request.getNickname())
+                .name(request.getNickname())
+                //.nickname(request.getNickname())
                 .password(member.getPassword())
                 .email(member.getEmail())
                 .birthday(request.getBirthday())
                 .gender(member.getGender())
                 .phone(request.getPhone())
-                .memberRole(MemberRole.MEMBER)
+                .memberRole(member.getMemberRole())
+                .memberStatus(member.getMemberStatus())
                 .memberTermList(memberTermList)
                 .profileImg(member.getProfileImg())
                 .build();
     }
 
     public static MemberResponseDTO.memberProfileDTO memberProfileDTO(Member member){
+        List<MemberTerm> memberTermList = member.getMemberTermList();
+
+        if (memberTermList == null) {
+            memberTermList = new ArrayList<>();
+        }
+
+        ProfileImg profileImg = member.getProfileImg();
+        MemberTeam preferTeam = member.getMemberTeam();
+
+        String profileImgUrl = null;
+        String preferTeamName = null;
+
+        if(profileImg != null){
+            profileImgUrl = profileImg.getUrl();
+        }
+
+        if(preferTeam != null){
+            preferTeamName = preferTeam.getTeam().getTeamName();
+        }
+
         return MemberResponseDTO.memberProfileDTO.builder()
                 .memberId(member.getId())
                 .email(member.getEmail())
-                .nickname(member.getNickname())
-                .name(member.getName())
-                .profileImgUrl(member.getProfileImg().getUrl())
-                .teamName(member.getMemberTeam().getTeam().getTeamName())
+                .nickname(member.getName())
+                //.name(member.getName())
+                .profileImgUrl(profileImgUrl)
+                .teamName(preferTeamName)
                 .phoneNumber(member.getPhone())
                 .gender(member.getGender().name())
                 .phoneNumber(member.getPhone())
                 .point(member.getPoint())
-                .memberTerm(member.getMemberTermList().stream().map(memberTeam -> memberTeam.getMemberAgree()).toList())
+                .memberTerm(memberTermList.stream().map(memberTeam -> memberTeam.getMemberAgree()).toList())
                 .build();
     }
 
     public static MemberResponseDTO.ProfileModifyResultDTO toProfileModify(Member member) {
 
         return MemberResponseDTO.ProfileModifyResultDTO.builder()
-                .nickname(member.getNickname())
+                .nickname(member.getName())
                 .build();
 
     }
@@ -162,7 +184,7 @@ public class MemberConverter {
 
         return MemberResponseDTO.UpdateProfileResultDTO.builder()
                 .memberId(member.getId())
-                .nickname(member.getNickname())
+                .nickname(member.getName())
                 .email(member.getEmail())
                 .updatedAt(member.getUpdatedAt())
                 .build();
@@ -200,14 +222,14 @@ public class MemberConverter {
 
     public static MemberResponseDTO.RegisterSellerResultDTO toRegisterSellerResultDTO(RegisterSeller registerSeller){
         return MemberResponseDTO.RegisterSellerResultDTO.builder()
-                .nickname(registerSeller.getMember().getNickname())
+                .nickname(registerSeller.getMember().getName())
                 .createdAt(registerSeller.getCreatedAt())
                 .build();
     }
 
     public static MemberResponseDTO.ModifySellerResultDTO toModifySellerResultDTO(Member member){
         return MemberResponseDTO.ModifySellerResultDTO.builder()
-                .nickname(member.getNickname())
+                .nickname(member.getName())
                 .memberRole(member.getMemberRole().name())
                 .email(member.getEmail())
                 .build();

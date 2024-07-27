@@ -63,7 +63,7 @@ public class MemberCommandServiceImpl implements MemberCommandService{
 
         Member existingMember = null;
 
-        Optional<Member> existingNickname = memberRepository.findByNickname(request.getNickname());
+        Optional<Member> existingNickname = memberRepository.findByName(request.getNickname());
         if (existingNickname.isPresent()) {
             if (!existingNickname.get().getMemberStatus().equals(MemberStatus.INACTIVE)) {
                 throw new MemberHandler(ErrorStatus.MEMBER_NICKNAME_DUPLICATED);
@@ -86,7 +86,7 @@ public class MemberCommandServiceImpl implements MemberCommandService{
             //탈퇴한 회원이 다시 회원가입하는 경우
             existingMember.setMemberStatus(MemberStatus.ACTIVE);
             memberRepository.reregister(existingMember.getId(), request.getNickname(),
-                    request.getName(), request.getPassword(), request.getEmail(),
+                    request.getPassword(), request.getEmail(),
                     request.getBirthday(), request.getGender(), request.getPhone());
             return existingMember;
         } else {
@@ -149,7 +149,7 @@ public class MemberCommandServiceImpl implements MemberCommandService{
 
     @Override
     public Boolean confirmNicknameDuplicate(MemberRequestDTO.NicknameDuplicateConfirmDTO request) {
-        Optional<Member> member = memberRepository.findByNickname(request.getNickname());
+        Optional<Member> member = memberRepository.findByName(request.getNickname());
         Boolean checkNickname = false;
 
         if (!member.isPresent()) {
@@ -272,7 +272,7 @@ public class MemberCommandServiceImpl implements MemberCommandService{
         Member update = MemberConverter.toUpdateProfile(member, request);
         memberRepository.save(update);
 
-        return null;
+        return update;
     }
 
     @Override

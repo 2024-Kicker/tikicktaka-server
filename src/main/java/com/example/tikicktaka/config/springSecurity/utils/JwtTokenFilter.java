@@ -55,11 +55,12 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         //jwt 토큰에서 username 꺼내기
         String memberName = JwtUtil.getMembername(token);
 
+        Long memberId = JwtUtil.getMemberId(token);
 
         //권한 부여
         //권한이 USER면 통과 가능
         UsernamePasswordAuthenticationToken authenticationToken =
-                new UsernamePasswordAuthenticationToken(memberName, null, List.of(new SimpleGrantedAuthority("ROLE_USER")));
+                new UsernamePasswordAuthenticationToken(memberId, null, List.of(new SimpleGrantedAuthority("ROLE_USER")));
 
         // Detail을 넘겨준다.
         authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

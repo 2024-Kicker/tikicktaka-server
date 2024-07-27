@@ -30,7 +30,6 @@ public class MemberResponseDTO {
         Long memberId;
         String email;
         String nickname;
-        String name;
         String teamName;
         Long point;
         String phoneNumber;
@@ -98,7 +97,6 @@ public class MemberResponseDTO {
     @AllArgsConstructor
     public static class CompleteSignupResultDTO {
         private Long id;
-        private String name;
         private String nickname;
         private String email;
     }
@@ -108,7 +106,6 @@ public class MemberResponseDTO {
     @AllArgsConstructor
     public static class MemberLoginResponseDTO {
         private Long memberId;
-        private String name;
         private String nickName;
         private String email;
         private String jwt;

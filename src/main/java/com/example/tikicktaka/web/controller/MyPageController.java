@@ -41,7 +41,7 @@ public class MyPageController {
     })
     public ApiResponse<MemberResponseDTO.memberProfileDTO> memberProfile(Authentication authentication){
 
-        Member member = memberQueryService.findMemberByName((authentication.getName().toString())).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        Member member = memberQueryService.findMemberById(Long.valueOf(authentication.getName().toString())).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
         return ApiResponse.onSuccess(MemberConverter.memberProfileDTO(member));
     }
 
@@ -49,8 +49,7 @@ public class MyPageController {
     @Operation(summary = "마이페이지 프로필 사진 등록 api", description = "request : 프로필 이미지")
     public ApiResponse<MemberResponseDTO.ProfileModifyResultDTO> profileModify(@RequestParam("profile") MultipartFile profile,
                                                                                Authentication authentication) {
-        Member member = memberQueryService.findMemberByName((authentication.getName().toString())).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
-
+        Member member = memberQueryService.findMemberById(Long.valueOf(authentication.getName().toString())).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
 
         Member modifyMember = memberCommandService.profileImageUpload(profile, member);
 
@@ -58,11 +57,11 @@ public class MyPageController {
     }
 
     @PutMapping(value = "/profile/modify")
-    @Operation(summary = "프로필 수정 api", description = "request : 닉네임, 이름, 전화번호, 생년월일")
+    @Operation(summary = "프로필 수정 api", description = "request : 닉네임, 전화번호, 생년월일")
     public ApiResponse<MemberResponseDTO.UpdateProfileResultDTO> updateProfile(@RequestBody MemberRequestDTO.UpdateMemberDTO request,
                                                                                Authentication authentication){
 
-        Member member = memberQueryService.findMemberByName((authentication.getName().toString())).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        Member member = memberQueryService.findMemberById(Long.valueOf(authentication.getName().toString())).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
         Member updateMember = memberCommandService.modifyProfile(request, member);
 
         return ApiResponse.onSuccess(MemberConverter.toProfileUpdate(updateMember));
@@ -72,7 +71,7 @@ public class MyPageController {
     @Operation(summary = "선호 구단 등록 API", description = "request : 팀 id.")
     public ApiResponse<MemberResponseDTO.MemberPreferTeamDTO> preferTeam(@RequestParam("teamId") Long teamId,
                                                                          Authentication authentication){
-        Member member = memberQueryService.findMemberByName((authentication.getName().toString())).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        Member member = memberQueryService.findMemberById(Long.valueOf(authentication.getName().toString())).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
         MemberTeam memberTeam = memberCommandService.setPreferTeam(member, teamId);
         return ApiResponse.onSuccess(MemberConverter.toMemberPreferTeamDTO(memberTeam));
     }
@@ -81,7 +80,7 @@ public class MyPageController {
     @Operation(summary = "회원 탈퇴 api")
     public ApiResponse<?> deleteMember(Authentication authentication){
 
-        Member member = memberQueryService.findMemberByName((authentication.getName().toString())).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        Member member = memberQueryService.findMemberById(Long.valueOf(authentication.getName().toString())).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
         memberCommandService.deleteMember(member.getId());
         return ApiResponse.of(SuccessStatus.MEMBER_DELETE_SUCCESS, null);
     }
@@ -98,7 +97,7 @@ public class MyPageController {
     @Operation(summary = "판매자 신청 api", description = "request: 등록 정보를 입력해주시면 됩니다.")
     public ApiResponse<MemberResponseDTO.RegisterSellerResultDTO> registerSeller(@RequestBody MemberRequestDTO.RegisterSellerDTO request,
                                                                                  Authentication authentication){
-        Member member = memberQueryService.findMemberByName((authentication.getName().toString())).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        Member member = memberQueryService.findMemberById(Long.valueOf(authentication.getName().toString())).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
         RegisterSeller registerSeller = memberCommandService.registerSeller(request,member);
         return ApiResponse.onSuccess(MemberConverter.toRegisterSellerResultDTO(registerSeller));
     }
