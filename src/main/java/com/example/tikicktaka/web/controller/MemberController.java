@@ -6,7 +6,6 @@ import com.example.tikicktaka.apiPayload.code.status.ErrorStatus;
 import com.example.tikicktaka.apiPayload.exception.handler.MemberHandler;
 import com.example.tikicktaka.converter.member.MemberConverter;
 import com.example.tikicktaka.domain.member.Auth;
-import com.example.tikicktaka.domain.member.CustomUserDetails;
 import com.example.tikicktaka.domain.member.Member;
 import com.example.tikicktaka.repository.member.MemberRepository;
 import com.example.tikicktaka.service.memberService.MemberCommandService;
@@ -20,7 +19,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
