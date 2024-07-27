@@ -5,6 +5,7 @@ import com.example.tikicktaka.apiPayload.exception.handler.MemberHandler;
 import com.example.tikicktaka.apiPayload.exception.handler.TeamHandler;
 import com.example.tikicktaka.config.MailConfig;
 import com.example.tikicktaka.converter.member.MemberConverter;
+import com.example.tikicktaka.domain.enums.MemberRole;
 import com.example.tikicktaka.domain.enums.MemberStatus;
 import com.example.tikicktaka.domain.images.ProfileImg;
 import com.example.tikicktaka.domain.mapping.member.MemberTeam;
@@ -288,6 +289,15 @@ public class MemberCommandServiceImpl implements MemberCommandService{
         Member member = memberRepository.findById(memberId).orElseThrow(()-> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
         member.setMemberStatus(MemberStatus.INACTIVE);
         memberRepository.save(member);
+    }
+
+    @Override
+    @Transactional
+    public Member modifySeller(Long memberId) {
+        Member member = memberRepository.findById(memberId).orElseThrow(()-> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        member.setMemberRole(MemberRole.SELLER);
+        memberRepository.save(member);
+        return member;
     }
 
 }

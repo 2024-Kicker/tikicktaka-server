@@ -38,4 +38,6 @@ public interface MemberCommandService {
     Member findByPhone(String phone);
 
     void deleteMember(Long memberId);
+
+    Member modifySeller(Long memberId);
 }

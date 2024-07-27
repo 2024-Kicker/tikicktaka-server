@@ -86,6 +86,14 @@ public class MyPageController {
         return ApiResponse.of(SuccessStatus.MEMBER_DELETE_SUCCESS, null);
     }
 
+    @PutMapping(value = "/modify/role/seller/{memberId}")
+    @Operation(summary = "판매자 변경 api", description = "request: 판매자로 변경할 멤버의 id를 입력하면 됩니다.")
+    public ApiResponse<MemberResponseDTO.ModifySellerResultDTO> modifySeller(@PathVariable Long memberId){
+        Member member = memberQueryService.findMemberById(memberId).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        Member modifySellerMember = memberCommandService.modifySeller(member.getId());
+        return ApiResponse.onSuccess(MemberConverter.toModifySellerResultDTO(modifySellerMember));
+    }
+
     @PostMapping(value = "/register/seller")
     @Operation(summary = "판매자 신청 api", description = "request: 등록 정보를 입력해주시면 됩니다.")
     public ApiResponse<MemberResponseDTO.RegisterSellerResultDTO> registerSeller(@RequestBody MemberRequestDTO.RegisterSellerDTO request,
