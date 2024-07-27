@@ -31,6 +31,7 @@ public class MemberResponseDTO {
         String email;
         String nickname;
         String name;
+        String teamName;
         Long point;
         String phoneNumber;
         String gender;
@@ -138,5 +139,14 @@ public class MemberResponseDTO {
     public static class SearchIdDTO{
         private Long id;
         private String email;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class RegisterSellerResultDTO{
+        private String nickname;
+        private LocalDateTime createdAt;
     }
 }

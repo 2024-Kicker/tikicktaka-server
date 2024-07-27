@@ -6,6 +6,7 @@ import com.example.tikicktaka.domain.mapping.member.MemberTeam;
 import com.example.tikicktaka.domain.mapping.member.MemberTerm;
 import com.example.tikicktaka.domain.member.Auth;
 import com.example.tikicktaka.domain.member.Member;
+import com.example.tikicktaka.domain.member.RegisterSeller;
 import com.example.tikicktaka.domain.member.Term;
 import com.example.tikicktaka.domain.teams.Team;
 import com.example.tikicktaka.web.dto.member.MemberRequestDTO;
@@ -140,6 +141,7 @@ public class MemberConverter {
                 .nickname(member.getNickname())
                 .name(member.getName())
                 .profileImgUrl(member.getProfileImg().getUrl())
+                .teamName(member.getMemberTeam().getTeam().getTeamName())
                 .phoneNumber(member.getPhone())
                 .gender(member.getGender().name())
                 .phoneNumber(member.getPhone())
@@ -185,6 +187,21 @@ public class MemberConverter {
         return MemberResponseDTO.SearchIdDTO.builder()
                 .id(member.getId())
                 .email(member.getEmail())
+                .build();
+    }
+
+    public static RegisterSeller toRegisterSeller(MemberRequestDTO.RegisterSellerDTO request, Member member){
+        return RegisterSeller.builder()
+                .title(request.getTitle())
+                .contents(request.getContents())
+                .member(member)
+                .build();
+    }
+
+    public static MemberResponseDTO.RegisterSellerResultDTO toRegisterSellerResultDTO(RegisterSeller registerSeller){
+        return MemberResponseDTO.RegisterSellerResultDTO.builder()
+                .nickname(registerSeller.getMember().getNickname())
+                .createdAt(registerSeller.getCreatedAt())
                 .build();
     }
 }

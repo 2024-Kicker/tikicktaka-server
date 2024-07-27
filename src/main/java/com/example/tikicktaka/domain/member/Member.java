@@ -79,6 +79,9 @@ public class Member extends BaseDateTimeEntity {
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<MemberTerm> memberTermList = new ArrayList<>();
 
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+    private List<RegisterSeller> registerSellerList = new ArrayList<>();
+
     @OneToOne(mappedBy = "member")
     private MemberTeam memberTeam;
 
