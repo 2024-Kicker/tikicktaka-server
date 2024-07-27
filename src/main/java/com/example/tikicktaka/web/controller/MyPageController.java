@@ -7,6 +7,7 @@ import com.example.tikicktaka.apiPayload.exception.handler.MemberHandler;
 import com.example.tikicktaka.converter.member.MemberConverter;
 import com.example.tikicktaka.domain.mapping.member.MemberTeam;
 import com.example.tikicktaka.domain.member.Member;
+import com.example.tikicktaka.domain.member.RegisterSeller;
 import com.example.tikicktaka.service.memberService.MemberCommandService;
 import com.example.tikicktaka.service.memberService.MemberQueryService;
 import com.example.tikicktaka.web.dto.member.MemberRequestDTO;
@@ -77,11 +78,20 @@ public class MyPageController {
     }
 
     @DeleteMapping(value = "/delete")
-    @Operation(summary = "회원 탈퇴 api", description = "request: 회원 탈퇴 사유 번호로 주시면 됩니다")
+    @Operation(summary = "회원 탈퇴 api")
     public ApiResponse<?> deleteMember(Authentication authentication){
 
         Member member = memberQueryService.findMemberByName((authentication.getName().toString())).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
         memberCommandService.deleteMember(member.getId());
         return ApiResponse.of(SuccessStatus.MEMBER_DELETE_SUCCESS, null);
+    }
+
+    @PostMapping(value = "/register/seller")
+    @Operation(summary = "판매자 신청 api", description = "request: 등록 정보를 입력해주시면 됩니다.")
+    public ApiResponse<MemberResponseDTO.RegisterSellerResultDTO> registerSeller(@RequestBody MemberRequestDTO.RegisterSellerDTO request,
+                                                                                 Authentication authentication){
+        Member member = memberQueryService.findMemberByName((authentication.getName().toString())).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        RegisterSeller registerSeller = memberCommandService.registerSeller(request,member);
+        return ApiResponse.onSuccess(MemberConverter.toRegisterSellerResultDTO(registerSeller));
     }
 }

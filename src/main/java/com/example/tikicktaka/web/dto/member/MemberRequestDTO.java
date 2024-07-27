@@ -62,6 +62,14 @@ public class MemberRequestDTO {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
+    public static class RegisterSellerDTO{
+        private String title;
+        private String contents;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class MemberLoginDTO{
         private String email;
         private String password;

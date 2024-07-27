@@ -11,6 +11,7 @@ import com.example.tikicktaka.domain.mapping.member.MemberTeam;
 import com.example.tikicktaka.domain.mapping.member.MemberTerm;
 import com.example.tikicktaka.domain.member.Auth;
 import com.example.tikicktaka.domain.member.Member;
+import com.example.tikicktaka.domain.member.RegisterSeller;
 import com.example.tikicktaka.domain.member.Term;
 import com.example.tikicktaka.domain.teams.Team;
 import com.example.tikicktaka.repository.member.*;
@@ -44,6 +45,7 @@ public class MemberCommandServiceImpl implements MemberCommandService{
     private final TeamRepository teamRepository;
     private final MemberTeamRepository memberTeamRepository;
     private final ProfileImgRepository profileImgRepository;
+    private final RegisterSellerRepository registerSellerRepository;
     private final BCryptPasswordEncoder encoder;
     private final AuthRepository authRepository;
     private final MailConfig mailConfig;
@@ -103,6 +105,15 @@ public class MemberCommandServiceImpl implements MemberCommandService{
 
         memberRepository.save(member);
         return member;
+    }
+
+    @Override
+    @Transactional
+    public RegisterSeller registerSeller(MemberRequestDTO.RegisterSellerDTO request, Member member) {
+
+        RegisterSeller registerSeller = MemberConverter.toRegisterSeller(request,member);
+        registerSellerRepository.save(registerSeller);
+        return registerSeller;
     }
 
     @Override
