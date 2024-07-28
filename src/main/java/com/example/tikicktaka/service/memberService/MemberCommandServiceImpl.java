@@ -8,6 +8,7 @@ import com.example.tikicktaka.converter.member.MemberConverter;
 import com.example.tikicktaka.domain.enums.MemberRole;
 import com.example.tikicktaka.domain.enums.MemberStatus;
 import com.example.tikicktaka.domain.images.ProfileImg;
+import com.example.tikicktaka.domain.mapping.member.ChargeCoin;
 import com.example.tikicktaka.domain.mapping.member.MemberTeam;
 import com.example.tikicktaka.domain.mapping.member.MemberTerm;
 import com.example.tikicktaka.domain.member.Auth;
@@ -47,6 +48,7 @@ public class MemberCommandServiceImpl implements MemberCommandService{
     private final MemberTeamRepository memberTeamRepository;
     private final ProfileImgRepository profileImgRepository;
     private final RegisterSellerRepository registerSellerRepository;
+    private final ChargeCoinRepository chargeCoinRepository;
     private final BCryptPasswordEncoder encoder;
     private final AuthRepository authRepository;
     private final MailConfig mailConfig;
@@ -297,6 +299,15 @@ public class MemberCommandServiceImpl implements MemberCommandService{
         Member member = memberRepository.findById(memberId).orElseThrow(()-> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
         member.setMemberRole(MemberRole.SELLER);
         memberRepository.save(member);
+        return member;
+    }
+
+    @Override
+    @Transactional
+    public Member chargeCoin(Member member, Long amount) {
+        member.updatePoints(amount);
+        ChargeCoin chargeCoin = MemberConverter.toChargeCoin(member,amount);
+        chargeCoinRepository.save(chargeCoin);
         return member;
     }
 

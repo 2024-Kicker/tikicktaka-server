@@ -3,6 +3,7 @@ package com.example.tikicktaka.converter.member;
 import com.example.tikicktaka.domain.enums.MemberRole;
 import com.example.tikicktaka.domain.enums.MemberStatus;
 import com.example.tikicktaka.domain.images.ProfileImg;
+import com.example.tikicktaka.domain.mapping.member.ChargeCoin;
 import com.example.tikicktaka.domain.mapping.member.MemberTeam;
 import com.example.tikicktaka.domain.mapping.member.MemberTerm;
 import com.example.tikicktaka.domain.member.Auth;
@@ -40,6 +41,7 @@ public class MemberConverter {
                 .birthday(request.getBirthday())
                 .gender(request.getGender())
                 .phone(request.getPhone())
+                .point(0L)
                 .memberRole(MemberRole.MEMBER)
                 .memberTermList(new ArrayList<>())
                 .build();
@@ -110,6 +112,20 @@ public class MemberConverter {
         return ProfileImg.builder()
                 .url(url)
                 .member(member)
+                .build();
+    }
+
+    public static ChargeCoin toChargeCoin(Member member, Long amount){
+        return ChargeCoin.builder()
+                .amount(amount)
+                .member(member)
+                .build();
+    }
+
+    public static MemberResponseDTO.ChargeCoinResultDTO toChargeCoinResultDTO(Member member){
+        return MemberResponseDTO.ChargeCoinResultDTO.builder()
+                .nickname(member.getName())
+                .point(member.getPoint())
                 .build();
     }
 

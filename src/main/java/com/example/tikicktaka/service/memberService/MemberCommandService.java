@@ -40,4 +40,6 @@ public interface MemberCommandService {
     void deleteMember(Long memberId);
 
     Member modifySeller(Long memberId);
+
+    Member chargeCoin(Member member, Long amount);
 }

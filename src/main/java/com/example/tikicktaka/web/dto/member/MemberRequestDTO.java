@@ -118,4 +118,11 @@ public class MemberRequestDTO {
     public static class SearchIdDTO {
         private String phone;
     }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ChargeCoinRequestDTO{
+        private Long amount;
+    }
 }

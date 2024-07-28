@@ -101,4 +101,13 @@ public class MyPageController {
         RegisterSeller registerSeller = memberCommandService.registerSeller(request,member);
         return ApiResponse.onSuccess(MemberConverter.toRegisterSellerResultDTO(registerSeller));
     }
+
+    @PostMapping(value = "/charge/coin")
+    @Operation(summary = "코인 충전 api", description = "request: 충전 정보를 입력해주시면 됩니다.")
+    public ApiResponse<MemberResponseDTO.ChargeCoinResultDTO> chargeCoin(@RequestBody MemberRequestDTO.ChargeCoinRequestDTO request,
+                                                                         Authentication authentication){
+        Member member = memberQueryService.findMemberById(Long.valueOf(authentication.getName().toString())).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        Member chargeCoinMember = memberCommandService.chargeCoin(member, request.getAmount());
+        return ApiResponse.onSuccess(MemberConverter.toChargeCoinResultDTO(chargeCoinMember));
+    }
 }
