@@ -6,6 +6,7 @@ import com.example.tikicktaka.domain.enums.MemberRole;
 import com.example.tikicktaka.domain.enums.MemberStatus;
 import com.example.tikicktaka.domain.enums.SocialType;
 import com.example.tikicktaka.domain.images.ProfileImg;
+import com.example.tikicktaka.domain.mapping.member.ChargeCoin;
 import com.example.tikicktaka.domain.mapping.member.MemberTeam;
 import com.example.tikicktaka.domain.mapping.member.MemberTerm;
 import jakarta.persistence.*;
@@ -79,6 +80,9 @@ public class Member extends BaseDateTimeEntity {
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<RegisterSeller> registerSellerList = new ArrayList<>();
 
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+    private List<ChargeCoin> chargeCoinList = new ArrayList<>();
+
     @OneToOne(mappedBy = "member")
     private MemberTeam memberTeam;
 
@@ -103,6 +107,11 @@ public class Member extends BaseDateTimeEntity {
         this.birthday = birthday;
         this.phone = phone;
         this.memberStatus = MemberStatus.ACTIVE;
+    }
+
+    public Member updatePoints(Long point){
+        this.point += point;
+        return this;
     }
 
 //    // Method to update additional information after social login

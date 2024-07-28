@@ -156,4 +156,13 @@ public class MemberResponseDTO {
         private String email;
         private String memberRole;
     }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class ChargeCoinResultDTO{
+        private String nickname;
+        private Long point;
+    }
 }
