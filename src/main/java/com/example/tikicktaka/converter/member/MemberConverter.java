@@ -1,8 +1,10 @@
 package com.example.tikicktaka.converter.member;
 
+import com.example.tikicktaka.converter.lanTour.LanTourConverter;
 import com.example.tikicktaka.domain.enums.MemberRole;
 import com.example.tikicktaka.domain.enums.MemberStatus;
 import com.example.tikicktaka.domain.images.ProfileImg;
+import com.example.tikicktaka.domain.mapping.lanTour.LanTourPurchase;
 import com.example.tikicktaka.domain.mapping.member.ChargeCoin;
 import com.example.tikicktaka.domain.mapping.member.MemberTeam;
 import com.example.tikicktaka.domain.mapping.member.MemberTerm;
@@ -11,6 +13,7 @@ import com.example.tikicktaka.domain.member.Member;
 import com.example.tikicktaka.domain.member.RegisterSeller;
 import com.example.tikicktaka.domain.member.Term;
 import com.example.tikicktaka.domain.teams.Team;
+import com.example.tikicktaka.web.dto.lanTour.LanTourResponseDTO;
 import com.example.tikicktaka.web.dto.member.MemberRequestDTO;
 import com.example.tikicktaka.web.dto.member.MemberResponseDTO;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -248,6 +251,22 @@ public class MemberConverter {
                 .nickname(member.getName())
                 .memberRole(member.getMemberRole().name())
                 .email(member.getEmail())
+                .build();
+    }
+
+    public static MemberResponseDTO.PurchaseLanTourDetailDTO toPurchaseLanTourDetailDTO(LanTourPurchase lanTourPurchase){
+        List<LanTourResponseDTO.LanTourImageResponseDTO> lanTourImageResponseDTOList = lanTourPurchase.getLanTour().getLanTourImgList().stream()
+                .map(LanTourConverter::toLanTourImgDTO)
+                .filter(LanTourResponseDTO.LanTourImageResponseDTO::getIsThumbNail).collect(Collectors.toList());
+
+        return MemberResponseDTO.PurchaseLanTourDetailDTO.builder()
+                .memberName(lanTourPurchase.getMember().getName())
+                .lanTourTitle(lanTourPurchase.getLanTour().getTitle())
+                .price(lanTourPurchase.getLanTour().getPrice())
+                .salesCount(lanTourPurchase.getLanTour().getSalesCount())
+                .lanTourCategory(lanTourPurchase.getLanTour().getLanTourCategory().name())
+                .createdAt(lanTourPurchase.getCreatedAt())
+                .lanTourImgList(lanTourImageResponseDTOList)
                 .build();
     }
 }

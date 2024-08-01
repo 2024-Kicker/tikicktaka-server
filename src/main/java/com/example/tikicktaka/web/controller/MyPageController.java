@@ -5,6 +5,7 @@ import com.example.tikicktaka.apiPayload.code.status.ErrorStatus;
 import com.example.tikicktaka.apiPayload.code.status.SuccessStatus;
 import com.example.tikicktaka.apiPayload.exception.handler.MemberHandler;
 import com.example.tikicktaka.converter.member.MemberConverter;
+import com.example.tikicktaka.domain.mapping.lanTour.LanTourPurchase;
 import com.example.tikicktaka.domain.mapping.member.MemberTeam;
 import com.example.tikicktaka.domain.member.Member;
 import com.example.tikicktaka.domain.member.RegisterSeller;
@@ -16,6 +17,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -109,5 +111,12 @@ public class MyPageController {
         Member member = memberQueryService.findMemberById(Long.valueOf(authentication.getName().toString())).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
         Member chargeCoinMember = memberCommandService.chargeCoin(member, request.getAmount());
         return ApiResponse.onSuccess(MemberConverter.toChargeCoinResultDTO(chargeCoinMember));
+    }
+
+    @GetMapping(value = "/purchase/lan-tour/{purchaseLanId}")
+    @Operation(summary = "랜선투어 구매내역 상세조회 api", description = "request: 조회하고자 하는 랜선 투어 구매내역 아이디를 입력해주시면 됩니다.")
+    public ApiResponse<MemberResponseDTO.PurchaseLanTourDetailDTO> getPurchaseLanTourDetail(@PathVariable Long purchaseLanId){
+        LanTourPurchase lanTourPurchase = memberCommandService.getPurchaseLanTourDetail(purchaseLanId);
+        return ApiResponse.onSuccess(MemberConverter.toPurchaseLanTourDetailDTO(lanTourPurchase));
     }
 }

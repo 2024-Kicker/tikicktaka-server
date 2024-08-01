@@ -1,5 +1,8 @@
 package com.example.tikicktaka.web.dto.member;
 
+import com.example.tikicktaka.domain.enums.LanTourCategory;
+import com.example.tikicktaka.domain.images.LanTourImg;
+import com.example.tikicktaka.web.dto.lanTour.LanTourResponseDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -164,5 +167,19 @@ public class MemberResponseDTO {
     public static class ChargeCoinResultDTO{
         private String nickname;
         private Long point;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class PurchaseLanTourDetailDTO{
+        private String memberName;
+        private String lanTourTitle;
+        private Long price;
+        private Long salesCount;
+        private String lanTourCategory;
+        private List<LanTourResponseDTO.LanTourImageResponseDTO> lanTourImgList;
+        private LocalDateTime createdAt;
     }
 }
