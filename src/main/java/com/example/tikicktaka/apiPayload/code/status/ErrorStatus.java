@@ -30,7 +30,10 @@ public enum ErrorStatus implements BaseErrorCode {
     TERM_NOT_FOUND(HttpStatus.NOT_FOUND, "TERM4001", "해당 약관이 존재하지 않습니다."),
 
     //Team
-    TEAM_NOT_FOUND(HttpStatus.NOT_FOUND, "TEAM4001", "존재하지 않는 팀입니다.");
+    TEAM_NOT_FOUND(HttpStatus.NOT_FOUND, "TEAM4001", "존재하지 않는 팀입니다."),
+
+    //LanTour
+    LAN_TOUR_PURCHASE_NOT_FOUND(HttpStatus.NOT_FOUND,"LANTOUR4001","존재하지 않는 구매내역 입니다.");
 
 
     private final HttpStatus httpStatus;

@@ -1,6 +1,7 @@
 package com.example.tikicktaka.service.memberService;
 
 import com.example.tikicktaka.apiPayload.code.status.ErrorStatus;
+import com.example.tikicktaka.apiPayload.exception.handler.LanTourHandler;
 import com.example.tikicktaka.apiPayload.exception.handler.MemberHandler;
 import com.example.tikicktaka.apiPayload.exception.handler.TeamHandler;
 import com.example.tikicktaka.config.MailConfig;
@@ -8,6 +9,7 @@ import com.example.tikicktaka.converter.member.MemberConverter;
 import com.example.tikicktaka.domain.enums.MemberRole;
 import com.example.tikicktaka.domain.enums.MemberStatus;
 import com.example.tikicktaka.domain.images.ProfileImg;
+import com.example.tikicktaka.domain.mapping.lanTour.LanTourPurchase;
 import com.example.tikicktaka.domain.mapping.member.ChargeCoin;
 import com.example.tikicktaka.domain.mapping.member.MemberTeam;
 import com.example.tikicktaka.domain.mapping.member.MemberTerm;
@@ -49,6 +51,7 @@ public class MemberCommandServiceImpl implements MemberCommandService{
     private final ProfileImgRepository profileImgRepository;
     private final RegisterSellerRepository registerSellerRepository;
     private final ChargeCoinRepository chargeCoinRepository;
+    private final LanTourPurchaseRepository lanTourPurchaseRepository;
     private final BCryptPasswordEncoder encoder;
     private final AuthRepository authRepository;
     private final MailConfig mailConfig;
@@ -309,6 +312,12 @@ public class MemberCommandServiceImpl implements MemberCommandService{
         ChargeCoin chargeCoin = MemberConverter.toChargeCoin(member,amount);
         chargeCoinRepository.save(chargeCoin);
         return member;
+    }
+
+    @Override
+    public LanTourPurchase getPurchaseLanTourDetail(Long lanTourPurchaseId) {
+
+        return lanTourPurchaseRepository.findById(lanTourPurchaseId).orElseThrow(() -> new LanTourHandler(ErrorStatus.LAN_TOUR_PURCHASE_NOT_FOUND));
     }
 
 }
