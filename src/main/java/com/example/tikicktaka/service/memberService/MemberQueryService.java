@@ -1,5 +1,6 @@
 package com.example.tikicktaka.service.memberService;
 
+import com.example.tikicktaka.domain.enums.LanTourCategory;
 import com.example.tikicktaka.domain.mapping.lanTour.LanTourPurchase;
 import com.example.tikicktaka.domain.member.Member;
 import org.springframework.data.domain.Page;
@@ -15,4 +16,6 @@ public interface MemberQueryService {
     Member getMemberProfile(Long memberId);
 
     Page<LanTourPurchase> getMyLanTourPurchaseList(Member member, Integer page);
+
+    Page<LanTourPurchase> getMyCategoryLanTourPurchaseList(Member member, LanTourCategory lanTourCategory, Integer page);
 }

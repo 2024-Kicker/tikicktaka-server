@@ -5,6 +5,7 @@ import com.example.tikicktaka.apiPayload.code.status.ErrorStatus;
 import com.example.tikicktaka.apiPayload.code.status.SuccessStatus;
 import com.example.tikicktaka.apiPayload.exception.handler.MemberHandler;
 import com.example.tikicktaka.converter.member.MemberConverter;
+import com.example.tikicktaka.domain.enums.LanTourCategory;
 import com.example.tikicktaka.domain.mapping.lanTour.LanTourPurchase;
 import com.example.tikicktaka.domain.mapping.member.MemberTeam;
 import com.example.tikicktaka.domain.member.Member;
@@ -137,4 +138,35 @@ public class MyPageController {
         return ApiResponse.onSuccess(MemberConverter.purchaseLanTourPreviewListDTO(lanTourPurchasePage));
     }
 
+    @GetMapping(value = "/purchase/lan-tour/soccer")
+    @Operation(summary = "랜선투어 구매내역 축구 카테고리 전체조회 api", description = "판매중인 상품 조회를 위한 API이며, request parameter로 입력 값을 받습니다." +
+            "page : 상품 조회 페이지 번호")
+    @Parameters(value = {
+            @Parameter(name = "page", description = "페이지 번호, 1 이상의 숫자를 입력해주세요.")
+    })
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
+    })
+    public ApiResponse<MemberResponseDTO.PurchaseLanTourPreviewListDTO> getPurchaseSoccerLanTourList(@RequestParam(name = "page") Integer page,
+                                                                                               Authentication authentication){
+        Member member = memberQueryService.findMemberById(Long.valueOf(authentication.getName().toString())).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        Page<LanTourPurchase> lanTourPurchasePage = memberQueryService.getMyCategoryLanTourPurchaseList(member, LanTourCategory.SOCCER, page - 1);
+        return ApiResponse.onSuccess(MemberConverter.purchaseLanTourPreviewListDTO(lanTourPurchasePage));
+    }
+
+    @GetMapping(value = "/purchase/lan-tour/audio")
+    @Operation(summary = "랜선투어 구매내역 오디오 카테고리 전체조회 api", description = "판매중인 상품 조회를 위한 API이며, request parameter로 입력 값을 받습니다." +
+            "page : 상품 조회 페이지 번호")
+    @Parameters(value = {
+            @Parameter(name = "page", description = "페이지 번호, 1 이상의 숫자를 입력해주세요.")
+    })
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
+    })
+    public ApiResponse<MemberResponseDTO.PurchaseLanTourPreviewListDTO> getPurchaseAudioLanTourList(@RequestParam(name = "page") Integer page,
+                                                                                                     Authentication authentication){
+        Member member = memberQueryService.findMemberById(Long.valueOf(authentication.getName().toString())).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        Page<LanTourPurchase> lanTourPurchasePage = memberQueryService.getMyCategoryLanTourPurchaseList(member, LanTourCategory.AUDIO, page - 1);
+        return ApiResponse.onSuccess(MemberConverter.purchaseLanTourPreviewListDTO(lanTourPurchasePage));
+    }
 }
