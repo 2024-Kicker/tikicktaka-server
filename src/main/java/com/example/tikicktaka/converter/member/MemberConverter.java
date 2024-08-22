@@ -16,6 +16,7 @@ import com.example.tikicktaka.domain.teams.Team;
 import com.example.tikicktaka.web.dto.lanTour.LanTourResponseDTO;
 import com.example.tikicktaka.web.dto.member.MemberRequestDTO;
 import com.example.tikicktaka.web.dto.member.MemberResponseDTO;
+import org.springframework.data.domain.Page;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.time.LocalDateTime;
@@ -264,9 +265,41 @@ public class MemberConverter {
                 .lanTourTitle(lanTourPurchase.getLanTour().getTitle())
                 .price(lanTourPurchase.getLanTour().getPrice())
                 .salesCount(lanTourPurchase.getLanTour().getSalesCount())
+                .location(lanTourPurchase.getLanTour().getLocation())
                 .lanTourCategory(lanTourPurchase.getLanTour().getLanTourCategory().name())
                 .createdAt(lanTourPurchase.getCreatedAt())
                 .lanTourImgList(lanTourImageResponseDTOList)
                 .build();
     }
+
+    public static MemberResponseDTO.PurchaseLanTourPreviewDTO purchaseLanTourPreviewDTO(LanTourPurchase lanTourPurchase){
+        List<LanTourResponseDTO.LanTourImageResponseDTO> lanTourImageResponseDTOList = lanTourPurchase.getLanTour().getLanTourImgList().stream()
+                .map(LanTourConverter::toLanTourImgDTO)
+                .filter(LanTourResponseDTO.LanTourImageResponseDTO::getIsThumbNail).collect(Collectors.toList());
+
+        return MemberResponseDTO.PurchaseLanTourPreviewDTO.builder()
+                .purchaseLanTourId(lanTourPurchase.getId())
+                .lanTourTitle(lanTourPurchase.getLanTour().getTitle())
+                .price(lanTourPurchase.getLanTour().getPrice())
+                .lanTourImgList(lanTourImageResponseDTOList)
+                .lanTourCategory(lanTourPurchase.getLanTour().getLanTourCategory().name())
+                .createdAt(lanTourPurchase.getCreatedAt())
+                .build();
+    }
+
+    public static MemberResponseDTO.PurchaseLanTourPreviewListDTO purchaseLanTourPreviewListDTO(Page<LanTourPurchase> purchaseLanTourList){
+
+        List<MemberResponseDTO.PurchaseLanTourPreviewDTO> purchaseLanTourPreviewDTOList = purchaseLanTourList.stream()
+                .map(MemberConverter::purchaseLanTourPreviewDTO).collect(Collectors.toList());
+
+        return MemberResponseDTO.PurchaseLanTourPreviewListDTO.builder()
+                .purchaseLanTourPreviewDTOList(purchaseLanTourPreviewDTOList)
+                .isFirst(purchaseLanTourList.isFirst())
+                .isLast(purchaseLanTourList.isLast())
+                .listSize(purchaseLanTourList.getSize())
+                .totalElements(purchaseLanTourList.getTotalElements())
+                .totalPage(purchaseLanTourList.getTotalPages())
+                .build();
+    }
+
 }

@@ -178,8 +178,35 @@ public class MemberResponseDTO {
         private String lanTourTitle;
         private Long price;
         private Long salesCount;
+        private String location;
         private String lanTourCategory;
         private List<LanTourResponseDTO.LanTourImageResponseDTO> lanTourImgList;
         private LocalDateTime createdAt;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class PurchaseLanTourPreviewDTO{
+        private Long purchaseLanTourId;
+        private String lanTourTitle;
+        private Long price;
+        private String lanTourCategory;
+        private List<LanTourResponseDTO.LanTourImageResponseDTO> lanTourImgList;
+        private LocalDateTime createdAt;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class PurchaseLanTourPreviewListDTO{
+        List<PurchaseLanTourPreviewDTO> purchaseLanTourPreviewDTOList;
+        Integer listSize;
+        Integer totalPage;
+        Long totalElements;
+        Boolean isFirst;
+        Boolean isLast;
     }
 }
