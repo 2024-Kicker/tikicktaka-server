@@ -301,5 +301,4 @@ public class MemberConverter {
                 .totalPage(purchaseLanTourList.getTotalPages())
                 .build();
     }
-
 }
