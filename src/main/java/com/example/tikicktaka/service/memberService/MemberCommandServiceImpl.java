@@ -5,12 +5,15 @@ import com.example.tikicktaka.apiPayload.exception.handler.LanTourHandler;
 import com.example.tikicktaka.apiPayload.exception.handler.MemberHandler;
 import com.example.tikicktaka.apiPayload.exception.handler.TeamHandler;
 import com.example.tikicktaka.config.MailConfig;
+import com.example.tikicktaka.converter.lanTour.LanTourConverter;
 import com.example.tikicktaka.converter.member.MemberConverter;
 import com.example.tikicktaka.domain.enums.MemberRole;
 import com.example.tikicktaka.domain.enums.MemberStatus;
 import com.example.tikicktaka.domain.images.ProfileImg;
+import com.example.tikicktaka.domain.lanTour.LanTour;
 import com.example.tikicktaka.domain.mapping.lanTour.LanTourPurchase;
 import com.example.tikicktaka.domain.mapping.member.ChargeCoin;
+import com.example.tikicktaka.domain.mapping.member.Dibs;
 import com.example.tikicktaka.domain.mapping.member.MemberTeam;
 import com.example.tikicktaka.domain.mapping.member.MemberTerm;
 import com.example.tikicktaka.domain.member.Auth;
@@ -18,6 +21,7 @@ import com.example.tikicktaka.domain.member.Member;
 import com.example.tikicktaka.domain.member.RegisterSeller;
 import com.example.tikicktaka.domain.member.Term;
 import com.example.tikicktaka.domain.teams.Team;
+import com.example.tikicktaka.repository.lanTour.LanTourRepository;
 import com.example.tikicktaka.repository.member.*;
 import com.example.tikicktaka.repository.team.TeamRepository;
 import com.example.tikicktaka.service.UtilService;
@@ -52,6 +56,8 @@ public class MemberCommandServiceImpl implements MemberCommandService{
     private final RegisterSellerRepository registerSellerRepository;
     private final ChargeCoinRepository chargeCoinRepository;
     private final LanTourPurchaseRepository lanTourPurchaseRepository;
+    private final LanTourRepository lanTourRepository;
+    private final DibsRepository dibsRepository;
     private final BCryptPasswordEncoder encoder;
     private final AuthRepository authRepository;
     private final MailConfig mailConfig;
@@ -318,6 +324,15 @@ public class MemberCommandServiceImpl implements MemberCommandService{
     public LanTourPurchase getPurchaseLanTourDetail(Long lanTourPurchaseId) {
 
         return lanTourPurchaseRepository.findById(lanTourPurchaseId).orElseThrow(() -> new LanTourHandler(ErrorStatus.LAN_TOUR_PURCHASE_NOT_FOUND));
+    }
+
+    @Override
+    @Transactional
+    public Dibs dibsLanTour(Long lanTourId, Member member) {
+        LanTour lanTour = lanTourRepository.findById(lanTourId).orElseThrow(() -> new LanTourHandler(ErrorStatus.LAN_TOUR_NOT_FOUND));
+        Dibs dibs = LanTourConverter.toDibs(lanTour, member);
+        dibsRepository.save(dibs);
+        return dibs;
     }
 
 }

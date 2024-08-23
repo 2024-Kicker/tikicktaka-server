@@ -6,6 +6,7 @@ import com.example.tikicktaka.domain.enums.MemberRole;
 import com.example.tikicktaka.domain.enums.MemberStatus;
 import com.example.tikicktaka.domain.enums.SocialType;
 import com.example.tikicktaka.domain.images.ProfileImg;
+import com.example.tikicktaka.domain.lanTour.LanTour;
 import com.example.tikicktaka.domain.mapping.lanTour.LanTourPurchase;
 import com.example.tikicktaka.domain.mapping.member.ChargeCoin;
 import com.example.tikicktaka.domain.mapping.member.MemberTeam;
@@ -74,6 +75,9 @@ public class Member extends BaseDateTimeEntity {
 
     @Column(columnDefinition = "TEXT")
     private String googleAuth;
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+    private List<LanTour> lanTourList = new ArrayList<>();
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<MemberTerm> memberTermList = new ArrayList<>();

@@ -2,12 +2,21 @@ package com.example.tikicktaka.converter.lanTour;
 
 import com.example.tikicktaka.domain.images.LanTourImg;
 import com.example.tikicktaka.domain.lanTour.LanTour;
+import com.example.tikicktaka.domain.mapping.member.Dibs;
+import com.example.tikicktaka.domain.member.Member;
 import com.example.tikicktaka.web.dto.lanTour.LanTourResponseDTO;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class LanTourConverter {
+
+    public static Dibs toDibs(LanTour lanTour, Member member){
+        return Dibs.builder()
+                .lanTour(lanTour)
+                .member(member)
+                .build();
+    }
 
     public static LanTourResponseDTO.LanTourImageResponseDTO toLanTourImgDTO(LanTourImg lanTourImg){
         return LanTourResponseDTO.LanTourImageResponseDTO.builder()

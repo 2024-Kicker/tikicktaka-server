@@ -209,4 +209,12 @@ public class MemberResponseDTO {
         Boolean isFirst;
         Boolean isLast;
     }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class LanTourDibsResultDTO{
+        Long lanTourId;
+    }
 }

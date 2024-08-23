@@ -4,6 +4,7 @@ import com.example.tikicktaka.domain.common.BaseDateTimeEntity;
 import com.example.tikicktaka.domain.enums.LanTourCategory;
 import com.example.tikicktaka.domain.images.LanTourImg;
 import com.example.tikicktaka.domain.mapping.lanTour.LanTourPurchase;
+import com.example.tikicktaka.domain.member.Member;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
@@ -40,6 +41,10 @@ public class LanTour extends BaseDateTimeEntity {
     private Long salesCount;
 
     private Long dibsCount;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id")
+    private Member member;
 
     @OneToMany(mappedBy = "lanTour", cascade = CascadeType.ALL)
     private List<LanTourImg> lanTourImgList = new ArrayList<>();

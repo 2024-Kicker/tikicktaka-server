@@ -6,6 +6,7 @@ import com.example.tikicktaka.domain.enums.MemberStatus;
 import com.example.tikicktaka.domain.images.ProfileImg;
 import com.example.tikicktaka.domain.mapping.lanTour.LanTourPurchase;
 import com.example.tikicktaka.domain.mapping.member.ChargeCoin;
+import com.example.tikicktaka.domain.mapping.member.Dibs;
 import com.example.tikicktaka.domain.mapping.member.MemberTeam;
 import com.example.tikicktaka.domain.mapping.member.MemberTerm;
 import com.example.tikicktaka.domain.member.Auth;
@@ -299,6 +300,12 @@ public class MemberConverter {
                 .listSize(purchaseLanTourList.getSize())
                 .totalElements(purchaseLanTourList.getTotalElements())
                 .totalPage(purchaseLanTourList.getTotalPages())
+                .build();
+    }
+
+    public static MemberResponseDTO.LanTourDibsResultDTO lanTourDibsResultDTO(Dibs dibs){
+        return MemberResponseDTO.LanTourDibsResultDTO.builder()
+                .lanTourId(dibs.getLanTour().getId())
                 .build();
     }
 }
