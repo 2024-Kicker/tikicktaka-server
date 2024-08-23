@@ -25,6 +25,7 @@ public enum ErrorStatus implements BaseErrorCode {
     MEMBER_EMAIL_AUTH_ERROR(HttpStatus.BAD_REQUEST, "MEMBER4006", "이메일 인증에 실패했습니다. 인증 코드와 이메일을 확인해주세요."),
     MEMBER_NOT_FOUND(HttpStatus.BAD_REQUEST, "MEMBER4007", "존재하지 않는 회원입니다."),
     MEMBER_TEAM_NOT_FOUND(HttpStatus.NOT_FOUND, "MEMBER4008", "존재하지 않는 사용자 선호팀 정보입니다."),
+    MEMBER_DIBS_NOT_FOUND(HttpStatus.NOT_FOUND, "MEMBER4009", "존재하지 않는 찜 내역입니다."),
 
     // Term
     TERM_NOT_FOUND(HttpStatus.NOT_FOUND, "TERM4001", "해당 약관이 존재하지 않습니다."),

@@ -48,4 +48,6 @@ public interface MemberCommandService {
     LanTourPurchase getPurchaseLanTourDetail(Long lanTourPurchaseId);
 
     Dibs dibsLanTour(Long lanTourId, Member member);
+
+    Dibs deleteDibsLanTour(Long lanTourId, Member member);
 }

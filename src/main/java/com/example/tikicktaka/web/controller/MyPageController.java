@@ -183,4 +183,17 @@ public class MyPageController {
         Dibs dibs = memberCommandService.dibsLanTour(lanTourId, member);
         return ApiResponse.onSuccess(MemberConverter.lanTourDibsResultDTO(dibs));
     }
+
+    @DeleteMapping(value = "/dibs/lan-tour/delete/{lanTourId}")
+    @Operation(summary = "랜선투어 상품 찜해제 api", description = "랜선투어 상품 찜해제를 위한 API이며, path variable로 입력 값을 받습니다." +
+            "lanTourId : 랜선투어 상품 id")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
+    })
+    public ApiResponse<MemberResponseDTO.LanTourDibsDeleteDTO> deleteDibsLanTour(@PathVariable(name = "lanTourId") Long lanTourId,
+                                                                                 Authentication authentication){
+        Member member = memberQueryService.findMemberById(Long.valueOf(authentication.getName().toString())).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        Dibs dibs = memberCommandService.deleteDibsLanTour(lanTourId, member);
+        return ApiResponse.onSuccess(MemberConverter.lanTourDibsDeleteDTO(dibs));
+    }
 }

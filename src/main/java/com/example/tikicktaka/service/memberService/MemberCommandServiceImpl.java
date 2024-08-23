@@ -335,4 +335,14 @@ public class MemberCommandServiceImpl implements MemberCommandService{
         return dibs;
     }
 
+    @Override
+    @Transactional
+    public Dibs deleteDibsLanTour(Long lanTourId, Member member) {
+        LanTour lanTour = lanTourRepository.findById(lanTourId).orElseThrow(() -> new LanTourHandler(ErrorStatus.LAN_TOUR_NOT_FOUND));
+        Dibs dibs = dibsRepository.findByLanTourAndMember(lanTour, member).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_DIBS_NOT_FOUND));
+        dibsRepository.delete(dibs);
+        dibsRepository.flush();
+        return dibs;
+    }
+
 }

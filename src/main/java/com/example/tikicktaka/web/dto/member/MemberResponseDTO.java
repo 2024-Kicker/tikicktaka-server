@@ -217,4 +217,13 @@ public class MemberResponseDTO {
     public static class LanTourDibsResultDTO{
         Long lanTourId;
     }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class LanTourDibsDeleteDTO{
+        Long lanTourId;
+        Long memberId;
+    }
 }
