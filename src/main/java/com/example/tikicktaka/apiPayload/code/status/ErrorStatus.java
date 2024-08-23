@@ -33,7 +33,8 @@ public enum ErrorStatus implements BaseErrorCode {
     TEAM_NOT_FOUND(HttpStatus.NOT_FOUND, "TEAM4001", "존재하지 않는 팀입니다."),
 
     //LanTour
-    LAN_TOUR_PURCHASE_NOT_FOUND(HttpStatus.NOT_FOUND,"LANTOUR4001","존재하지 않는 구매내역 입니다.");
+    LAN_TOUR_PURCHASE_NOT_FOUND(HttpStatus.NOT_FOUND,"LANTOUR4001","존재하지 않는 구매내역 입니다."),
+    LAN_TOUR_NOT_FOUND(HttpStatus.NOT_FOUND, "LANTOUR4002", "존재하지 않는 상품입니다.");
 
 
     private final HttpStatus httpStatus;
