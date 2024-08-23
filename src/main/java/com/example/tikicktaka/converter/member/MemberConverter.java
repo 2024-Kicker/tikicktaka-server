@@ -308,4 +308,11 @@ public class MemberConverter {
                 .lanTourId(dibs.getLanTour().getId())
                 .build();
     }
+
+    public static MemberResponseDTO.LanTourDibsDeleteDTO lanTourDibsDeleteDTO(Dibs dibs){
+        return MemberResponseDTO.LanTourDibsDeleteDTO.builder()
+                .lanTourId(dibs.getLanTour().getId())
+                .memberId(dibs.getMember().getId())
+                .build();
+    }
 }

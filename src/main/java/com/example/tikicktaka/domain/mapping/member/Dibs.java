@@ -18,11 +18,11 @@ public class Dibs extends BaseDateTimeEntity {
     @Column(name = "dibs_id")
     private Long id;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lan_tour_id", nullable = false)
     private LanTour lanTour;
 
