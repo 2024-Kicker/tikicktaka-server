@@ -273,6 +273,35 @@ public class MemberConverter {
                 .build();
     }
 
+    public static MemberResponseDTO.DibsLanTourPreviewDTO dibsLanTourPreviewDTO(Dibs dibs){
+        List<LanTourResponseDTO.LanTourImageResponseDTO> lanTourImageResponseDTOList = dibs.getLanTour().getLanTourImgList().stream()
+                .map(LanTourConverter::toLanTourImgDTO)
+                .filter(LanTourResponseDTO.LanTourImageResponseDTO::getIsThumbNail).collect(Collectors.toList());
+
+        return MemberResponseDTO.DibsLanTourPreviewDTO.builder()
+                .lanTourId(dibs.getLanTour().getId())
+                .lanTourTitle(dibs.getLanTour().getTitle())
+                .lanTourCategory(dibs.getLanTour().getLanTourCategory().name())
+                .lanTourImgList(lanTourImageResponseDTOList)
+                .price(dibs.getLanTour().getPrice())
+                .createdAt(dibs.getCreatedAt())
+                .build();
+    }
+
+    public static MemberResponseDTO.DibsLanTourPreviewListDTO dibsLanTourPreviewListDTO(Page<Dibs> dibsLanTourList){
+        List<MemberResponseDTO.DibsLanTourPreviewDTO> dibsLanTourPreviewDTOList = dibsLanTourList.stream()
+                .map(MemberConverter::dibsLanTourPreviewDTO).collect(Collectors.toList());
+
+        return MemberResponseDTO.DibsLanTourPreviewListDTO.builder()
+                .dibsLanTourPreviewDTOList(dibsLanTourPreviewDTOList)
+                .isFirst(dibsLanTourList.isFirst())
+                .isLast(dibsLanTourList.isLast())
+                .listSize(dibsLanTourList.getSize())
+                .totalElements(dibsLanTourList.getTotalElements())
+                .totalPage(dibsLanTourList.getTotalPages())
+                .build();
+    }
+
     public static MemberResponseDTO.PurchaseLanTourPreviewDTO purchaseLanTourPreviewDTO(LanTourPurchase lanTourPurchase){
         List<LanTourResponseDTO.LanTourImageResponseDTO> lanTourImageResponseDTOList = lanTourPurchase.getLanTour().getLanTourImgList().stream()
                 .map(LanTourConverter::toLanTourImgDTO)

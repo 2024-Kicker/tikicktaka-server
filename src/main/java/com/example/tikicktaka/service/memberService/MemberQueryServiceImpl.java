@@ -3,8 +3,11 @@ package com.example.tikicktaka.service.memberService;
 import com.example.tikicktaka.apiPayload.code.status.ErrorStatus;
 import com.example.tikicktaka.apiPayload.exception.handler.MemberHandler;
 import com.example.tikicktaka.domain.enums.LanTourCategory;
+import com.example.tikicktaka.domain.lanTour.LanTour;
 import com.example.tikicktaka.domain.mapping.lanTour.LanTourPurchase;
+import com.example.tikicktaka.domain.mapping.member.Dibs;
 import com.example.tikicktaka.domain.member.Member;
+import com.example.tikicktaka.repository.member.DibsRepository;
 import com.example.tikicktaka.repository.member.LanTourPurchaseRepository;
 import com.example.tikicktaka.repository.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +28,7 @@ public class MemberQueryServiceImpl implements MemberQueryService{
 
     private final MemberRepository memberRepository;
     private final LanTourPurchaseRepository lanTourPurchaseRepository;
+    private final DibsRepository dibsRepository;
 
     @Override
     public Optional<Member> findMemberById(Long id) {
@@ -54,5 +58,10 @@ public class MemberQueryServiceImpl implements MemberQueryService{
         return lanTourPurchasePage;
     }
 
+    @Override
+    public Page<Dibs> getMyDibsLanTourList(Member member, Integer page) {
+        Page<Dibs> dibsPage = dibsRepository.findAllByMember(member, PageRequest.of(page, 10, Sort.by(Sort.Direction.DESC, "createdAt")));
+        return dibsPage;
+    }
 
 }

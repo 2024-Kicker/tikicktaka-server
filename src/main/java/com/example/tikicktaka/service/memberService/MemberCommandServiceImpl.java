@@ -332,6 +332,7 @@ public class MemberCommandServiceImpl implements MemberCommandService{
         LanTour lanTour = lanTourRepository.findById(lanTourId).orElseThrow(() -> new LanTourHandler(ErrorStatus.LAN_TOUR_NOT_FOUND));
         Dibs dibs = LanTourConverter.toDibs(lanTour, member);
         dibsRepository.save(dibs);
+        lanTour.increaseDibs();
         return dibs;
     }
 
@@ -342,6 +343,7 @@ public class MemberCommandServiceImpl implements MemberCommandService{
         Dibs dibs = dibsRepository.findByLanTourAndMember(lanTour, member).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_DIBS_NOT_FOUND));
         dibsRepository.delete(dibs);
         dibsRepository.flush();
+        lanTour.decreaseDibs();
         return dibs;
     }
 

@@ -188,6 +188,32 @@ public class MemberResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
+    public static class DibsLanTourPreviewDTO{
+        private Long lanTourId;
+        private String lanTourTitle;
+        private Long price;
+        private String lanTourCategory;
+        private List<LanTourResponseDTO.LanTourImageResponseDTO> lanTourImgList;
+        private LocalDateTime createdAt;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class DibsLanTourPreviewListDTO{
+        List<DibsLanTourPreviewDTO> dibsLanTourPreviewDTOList;
+        Integer listSize;
+        Integer totalPage;
+        Long totalElements;
+        Boolean isFirst;
+        Boolean isLast;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
     public static class PurchaseLanTourPreviewDTO{
         private Long purchaseLanTourId;
         private String lanTourTitle;

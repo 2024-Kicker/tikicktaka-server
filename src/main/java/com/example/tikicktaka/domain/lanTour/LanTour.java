@@ -57,8 +57,13 @@ public class LanTour extends BaseDateTimeEntity {
         return this;
     }
 
-    public LanTour updateDibs(){
+    public LanTour increaseDibs(){
         this.dibsCount += 1;
+        return this;
+    }
+
+    public LanTour decreaseDibs(){
+        this.dibsCount -= 1;
         return this;
     }
 }

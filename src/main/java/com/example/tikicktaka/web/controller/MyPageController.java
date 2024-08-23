@@ -196,4 +196,20 @@ public class MyPageController {
         Dibs dibs = memberCommandService.deleteDibsLanTour(lanTourId, member);
         return ApiResponse.onSuccess(MemberConverter.lanTourDibsDeleteDTO(dibs));
     }
+
+    @GetMapping(value = "/dibs/lan-tour/")
+    @Operation(summary = "내가 찜한 랜선투어 상품 전체조회 api", description = "내가 찜한 랜선투어 상품 조회를 위한 API이며, request parameter로 입력 값을 받습니다." +
+            "page : 상품 조회 페이지 번호")
+    @Parameters(value = {
+            @Parameter(name = "page", description = "페이지 번호, 1 이상의 숫자를 입력해주세요.")
+    })
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
+    })
+    public ApiResponse<MemberResponseDTO.DibsLanTourPreviewListDTO> getMyDibsLanTourList(@RequestParam(name = "page") Integer page,
+                                                                                                    Authentication authentication){
+        Member member = memberQueryService.findMemberById(Long.valueOf(authentication.getName().toString())).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        Page<Dibs> dibsPage = memberQueryService.getMyDibsLanTourList(member, page - 1);
+        return ApiResponse.onSuccess(MemberConverter.dibsLanTourPreviewListDTO(dibsPage));
+    }
 }
