@@ -1,6 +1,7 @@
 package com.example.tikicktaka.service.memberService;
 
 import com.example.tikicktaka.domain.mapping.lanTour.LanTourPurchase;
+import com.example.tikicktaka.domain.mapping.member.Dibs;
 import com.example.tikicktaka.domain.mapping.member.MemberTeam;
 import com.example.tikicktaka.domain.member.Auth;
 import com.example.tikicktaka.domain.member.Member;
@@ -45,4 +46,6 @@ public interface MemberCommandService {
     Member chargeCoin(Member member, Long amount);
 
     LanTourPurchase getPurchaseLanTourDetail(Long lanTourPurchaseId);
+
+    Dibs dibsLanTour(Long lanTourId, Member member);
 }

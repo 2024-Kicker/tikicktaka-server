@@ -7,6 +7,7 @@ import com.example.tikicktaka.apiPayload.exception.handler.MemberHandler;
 import com.example.tikicktaka.converter.member.MemberConverter;
 import com.example.tikicktaka.domain.enums.LanTourCategory;
 import com.example.tikicktaka.domain.mapping.lanTour.LanTourPurchase;
+import com.example.tikicktaka.domain.mapping.member.Dibs;
 import com.example.tikicktaka.domain.mapping.member.MemberTeam;
 import com.example.tikicktaka.domain.member.Member;
 import com.example.tikicktaka.domain.member.RegisterSeller;
@@ -73,7 +74,7 @@ public class MyPageController {
 
     @PostMapping(value = "/teams/{teamId}")
     @Operation(summary = "선호 구단 등록 API", description = "request : 팀 id.")
-    public ApiResponse<MemberResponseDTO.MemberPreferTeamDTO> preferTeam(@RequestParam("teamId") Long teamId,
+    public ApiResponse<MemberResponseDTO.MemberPreferTeamDTO> preferTeam(@PathVariable("teamId") Long teamId,
                                                                          Authentication authentication){
         Member member = memberQueryService.findMemberById(Long.valueOf(authentication.getName().toString())).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
         MemberTeam memberTeam = memberCommandService.setPreferTeam(member, teamId);
@@ -168,5 +169,18 @@ public class MyPageController {
         Member member = memberQueryService.findMemberById(Long.valueOf(authentication.getName().toString())).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
         Page<LanTourPurchase> lanTourPurchasePage = memberQueryService.getMyCategoryLanTourPurchaseList(member, LanTourCategory.AUDIO, page - 1);
         return ApiResponse.onSuccess(MemberConverter.purchaseLanTourPreviewListDTO(lanTourPurchasePage));
+    }
+
+    @PostMapping(value = "/dibs/lan-tour/{lanTourId}")
+    @Operation(summary = "랜선투어 상품 찜하기 api", description = "랜선투어 상품 찜하기를 위한 API이며, path variable로 입력 값을 받습니다." +
+            "lanTourId : 랜선투어 상품 id")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
+    })
+    public ApiResponse<MemberResponseDTO.LanTourDibsResultDTO> dibsLanTour(@PathVariable(name = "lanTourId") Long lanTourId,
+                                                                           Authentication authentication){
+        Member member = memberQueryService.findMemberById(Long.valueOf(authentication.getName().toString())).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        Dibs dibs = memberCommandService.dibsLanTour(lanTourId, member);
+        return ApiResponse.onSuccess(MemberConverter.lanTourDibsResultDTO(dibs));
     }
 }
