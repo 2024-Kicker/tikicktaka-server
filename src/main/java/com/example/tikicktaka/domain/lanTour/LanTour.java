@@ -53,6 +53,9 @@ public class LanTour extends BaseDateTimeEntity {
     private List<Review> reviewList = new ArrayList<>();
 
     @OneToMany(mappedBy = "lanTour", cascade = CascadeType.ALL)
+    private List<Inquiry> inquiryList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "lanTour", cascade = CascadeType.ALL)
     private List<LanTourPurchase> lanTourPurchaseList = new ArrayList<>();
 
     public LanTour updateSales() {

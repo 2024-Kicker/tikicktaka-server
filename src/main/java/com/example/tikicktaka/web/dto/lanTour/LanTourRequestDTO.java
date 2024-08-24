@@ -13,4 +13,12 @@ public class LanTourRequestDTO {
         private String contents;
         private Double ratings;
     }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class UploadInquiryRequestDTO{
+        private String contents;
+        private Boolean secret;
+    }
 }

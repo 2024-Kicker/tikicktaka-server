@@ -1,7 +1,9 @@
 package com.example.tikicktaka.converter.lanTour;
 
 import com.example.tikicktaka.converter.member.MemberConverter;
+import com.example.tikicktaka.domain.enums.InquiryStatus;
 import com.example.tikicktaka.domain.images.LanTourImg;
+import com.example.tikicktaka.domain.lanTour.Inquiry;
 import com.example.tikicktaka.domain.lanTour.LanTour;
 import com.example.tikicktaka.domain.lanTour.Review;
 import com.example.tikicktaka.domain.mapping.lanTour.LanTourPurchase;
@@ -90,6 +92,22 @@ public class LanTourConverter {
     public static LanTourResponseDTO.UploadReviewResultDTO uploadReviewResultDTO(Review review){
         return LanTourResponseDTO.UploadReviewResultDTO.builder()
                 .memberId(review.getMember().getId())
+                .build();
+    }
+
+    public static Inquiry uploadInquiryDTO(LanTourRequestDTO.UploadInquiryRequestDTO request, Member member, LanTour lanTour){
+        return Inquiry.builder()
+                .member(member)
+                .lanTour(lanTour)
+                .status(InquiryStatus.BEFORE)
+                .contents(request.getContents())
+                .secret(request.getSecret())
+                .build();
+    }
+
+    public static LanTourResponseDTO.UploadInquiryResultDTO uploadInquiryResultDTO(Inquiry inquiry){
+        return LanTourResponseDTO.UploadInquiryResultDTO.builder()
+                .memberId(inquiry.getMember().getId())
                 .build();
     }
 }
