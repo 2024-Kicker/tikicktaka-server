@@ -252,4 +252,29 @@ public class MemberResponseDTO {
         Long lanTourId;
         Long memberId;
     }
+
+    @Getter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ChargeCoinPreviewDTO{
+        Long amount;
+        String title;
+        Long leftover;
+        LocalDateTime createdAt;
+    }
+
+    @Getter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ChargeCoinPreviewListDTO{
+        Long amount;
+        List<ChargeCoinPreviewDTO> chargeCoinPreviewDTOList;
+        Integer listSize;
+        Integer totalPage;
+        Long totalElements;
+        Boolean isFirst;
+        Boolean isLast;
+    }
 }

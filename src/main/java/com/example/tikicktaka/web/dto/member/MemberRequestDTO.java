@@ -124,5 +124,6 @@ public class MemberRequestDTO {
     @AllArgsConstructor
     public static class ChargeCoinRequestDTO{
         private Long amount;
+        private String title;
     }
 }

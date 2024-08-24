@@ -19,6 +19,10 @@ public class ChargeCoin extends BaseDateTimeEntity {
 
     private Long amount;
 
+    private Long leftover;
+
+    private String title;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;

@@ -120,10 +120,12 @@ public class MemberConverter {
                 .build();
     }
 
-    public static ChargeCoin toChargeCoin(Member member, Long amount){
+    public static ChargeCoin toChargeCoin(Member member, MemberRequestDTO.ChargeCoinRequestDTO request){
         return ChargeCoin.builder()
-                .amount(amount)
+                .amount(request.getAmount())
+                .title(request.getTitle())
                 .member(member)
+                .leftover(member.getPoint())
                 .build();
     }
 
@@ -342,6 +344,30 @@ public class MemberConverter {
         return MemberResponseDTO.LanTourDibsDeleteDTO.builder()
                 .lanTourId(dibs.getLanTour().getId())
                 .memberId(dibs.getMember().getId())
+                .build();
+    }
+
+    public static MemberResponseDTO.ChargeCoinPreviewDTO chargeCoinPreviewDTO(ChargeCoin chargeCoin){
+        return MemberResponseDTO.ChargeCoinPreviewDTO.builder()
+                .title(chargeCoin.getTitle())
+                .amount(chargeCoin.getAmount())
+                .leftover(chargeCoin.getLeftover())
+                .createdAt(chargeCoin.getCreatedAt())
+                .build();
+    }
+
+    public static MemberResponseDTO.ChargeCoinPreviewListDTO chargeCoinPreviewListDTO(Member member, Page<ChargeCoin> chargeCoinList){
+        List<MemberResponseDTO.ChargeCoinPreviewDTO> chargeCoinPreviewDTOList = chargeCoinList.stream()
+                .map(MemberConverter::chargeCoinPreviewDTO).collect(Collectors.toList());
+
+        return MemberResponseDTO.ChargeCoinPreviewListDTO.builder()
+                .amount(member.getPoint())
+                .chargeCoinPreviewDTOList(chargeCoinPreviewDTOList)
+                .isFirst(chargeCoinList.isFirst())
+                .isLast(chargeCoinList.isLast())
+                .listSize(chargeCoinList.getSize())
+                .totalPage(chargeCoinList.getTotalPages())
+                .totalElements(chargeCoinList.getTotalElements())
                 .build();
     }
 }

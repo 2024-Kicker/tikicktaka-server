@@ -313,9 +313,9 @@ public class MemberCommandServiceImpl implements MemberCommandService{
 
     @Override
     @Transactional
-    public Member chargeCoin(Member member, Long amount) {
-        member.updatePoints(amount);
-        ChargeCoin chargeCoin = MemberConverter.toChargeCoin(member,amount);
+    public Member chargeCoin(Member member, MemberRequestDTO.ChargeCoinRequestDTO request) {
+        member.updatePoints(request.getAmount());
+        ChargeCoin chargeCoin = MemberConverter.toChargeCoin(member,request);
         chargeCoinRepository.save(chargeCoin);
         return member;
     }
