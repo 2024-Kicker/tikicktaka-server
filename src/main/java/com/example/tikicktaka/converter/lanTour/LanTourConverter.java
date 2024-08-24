@@ -3,9 +3,11 @@ package com.example.tikicktaka.converter.lanTour;
 import com.example.tikicktaka.converter.member.MemberConverter;
 import com.example.tikicktaka.domain.images.LanTourImg;
 import com.example.tikicktaka.domain.lanTour.LanTour;
+import com.example.tikicktaka.domain.lanTour.Review;
 import com.example.tikicktaka.domain.mapping.lanTour.LanTourPurchase;
 import com.example.tikicktaka.domain.mapping.member.Dibs;
 import com.example.tikicktaka.domain.member.Member;
+import com.example.tikicktaka.web.dto.lanTour.LanTourRequestDTO;
 import com.example.tikicktaka.web.dto.lanTour.LanTourResponseDTO;
 import com.example.tikicktaka.web.dto.member.MemberResponseDTO;
 import org.springframework.data.domain.Page;
@@ -73,6 +75,21 @@ public class LanTourConverter {
                 .listSize(lanTourList.getSize())
                 .totalElements(lanTourList.getTotalElements())
                 .totalPage(lanTourList.getTotalPages())
+                .build();
+    }
+
+    public static Review uploadReviewDTO(LanTourRequestDTO.UploadReviewRequestDTO request, Member member, LanTour lanTour){
+        return Review.builder()
+                .lanTour(lanTour)
+                .member(member)
+                .contents(request.getContents())
+                .ratings(request.getRatings())
+                .build();
+    }
+
+    public static LanTourResponseDTO.UploadReviewResultDTO uploadReviewResultDTO(Review review){
+        return LanTourResponseDTO.UploadReviewResultDTO.builder()
+                .memberId(review.getMember().getId())
                 .build();
     }
 }
