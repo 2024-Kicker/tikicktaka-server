@@ -1,11 +1,18 @@
 package com.example.tikicktaka.web.controller;
 
 import com.example.tikicktaka.apiPayload.ApiResponse;
+import com.example.tikicktaka.apiPayload.code.status.ErrorStatus;
+import com.example.tikicktaka.apiPayload.exception.handler.MemberHandler;
 import com.example.tikicktaka.converter.lanTour.LanTourConverter;
 import com.example.tikicktaka.converter.member.MemberConverter;
 import com.example.tikicktaka.domain.lanTour.LanTour;
+import com.example.tikicktaka.domain.lanTour.Review;
 import com.example.tikicktaka.domain.mapping.lanTour.LanTourPurchase;
+import com.example.tikicktaka.domain.member.Member;
+import com.example.tikicktaka.service.lanTourService.LanTourCommandService;
 import com.example.tikicktaka.service.lanTourService.LanTourQueryService;
+import com.example.tikicktaka.service.memberService.MemberQueryService;
+import com.example.tikicktaka.web.dto.lanTour.LanTourRequestDTO;
 import com.example.tikicktaka.web.dto.lanTour.LanTourResponseDTO;
 import com.example.tikicktaka.web.dto.member.MemberResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -13,9 +20,11 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,6 +37,8 @@ import org.springframework.web.bind.annotation.*;
 public class LanTourController {
 
     private final LanTourQueryService lanTourQueryService;
+    private final LanTourCommandService lanTourCommandService;
+    private final MemberQueryService memberQueryService;
 
     @GetMapping(value = "/{lanTourId}")
     @Operation(summary = "랜선투어 상품 상세조회 api", description = "request: 조회하고자 하는 랜선 투어 상품 아이디를 입력해주시면 됩니다.")
@@ -52,5 +63,19 @@ public class LanTourController {
                                                                                 @RequestParam Integer page){
         Page<LanTour> lanTourPage = lanTourQueryService.getLanTourList(region, orderType, page - 1);
         return ApiResponse.onSuccess(LanTourConverter.lanTourPreviewListDTO(lanTourPage));
+    }
+
+    @PostMapping(value = "/upload/review/{lanTourId}")
+    @Operation(summary = "랜선투어 리뷰 등록 API", description = "랜선투어 리뷰 등록을 위한 API이며, request body, path variable 로 입력 값을 받습니다. \n\n" +
+            "lanTourId : 랜선투어 id")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
+    })
+    public ApiResponse<LanTourResponseDTO.UploadReviewResultDTO> uploadReview(@RequestBody @Valid LanTourRequestDTO.UploadReviewRequestDTO request,
+                                                                              @PathVariable Long lanTourId,
+                                                                              Authentication authentication){
+        Member member = memberQueryService.findMemberById(Long.valueOf(authentication.getName().toString())).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        Review review = lanTourCommandService.uploadReview(request, lanTourId, member);
+        return ApiResponse.onSuccess(LanTourConverter.uploadReviewResultDTO(review));
     }
 }

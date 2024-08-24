@@ -62,4 +62,12 @@ public class LanTourResponseDTO {
         Boolean isFirst;
         Boolean isLast;
     }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class UploadReviewResultDTO{
+        Long memberId;
+    }
 }
