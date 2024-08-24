@@ -45,6 +45,8 @@ public class LanTourConverter {
                 .dibsCount(lanTour.getDibsCount())
                 .price(lanTour.getPrice())
                 .salesCount(lanTour.getSalesCount())
+                .reviewCount(lanTour.getReviewList().size())
+                .inquiryCount(lanTour.getInquiryList().size())
                 .createdAt(lanTour.getCreatedAt())
                 .location(lanTour.getLocation())
                 .build();
@@ -108,6 +110,30 @@ public class LanTourConverter {
     public static LanTourResponseDTO.UploadInquiryResultDTO uploadInquiryResultDTO(Inquiry inquiry){
         return LanTourResponseDTO.UploadInquiryResultDTO.builder()
                 .memberId(inquiry.getMember().getId())
+                .build();
+    }
+
+    public static LanTourResponseDTO.LanTourReviewPreviewDTO lanTourReviewPreviewDTO(Review review){
+        return LanTourResponseDTO.LanTourReviewPreviewDTO.builder()
+                .memberNickname(review.getMember().getName())
+                .profileImgUrl(review.getMember().getProfileImg().getUrl())
+                .contents(review.getContents())
+                .ratings(review.getRatings())
+                .createdAt(review.getCreatedAt())
+                .build();
+    }
+
+    public static LanTourResponseDTO.LanTourReviewPreviewListDTO lanTourReviewPreviewListDTO(Page<Review> lanTourReviewList){
+        List<LanTourResponseDTO.LanTourReviewPreviewDTO> lanTourPreviewDTOList = lanTourReviewList.stream()
+                .map(LanTourConverter::lanTourReviewPreviewDTO).collect(Collectors.toList());
+
+        return LanTourResponseDTO.LanTourReviewPreviewListDTO.builder()
+                .LanTourReviewPreviewDTOList(lanTourPreviewDTOList)
+                .isFirst(lanTourReviewList.isFirst())
+                .isLast(lanTourReviewList.isLast())
+                .listSize(lanTourReviewList.getSize())
+                .totalElements(lanTourReviewList.getTotalElements())
+                .totalPage(lanTourReviewList.getTotalPages())
                 .build();
     }
 }

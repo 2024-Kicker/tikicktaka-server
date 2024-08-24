@@ -93,4 +93,16 @@ public class LanTourController {
         Inquiry inquiry = lanTourCommandService.uploadInquiry(request, lanTourId, member);
         return ApiResponse.onSuccess(LanTourConverter.uploadInquiryResultDTO(inquiry));
     }
+
+    @GetMapping(value = "/review/{lanTourId}")
+    @Operation(summary = "랜선투어 리뷰 조회 API", description = "랜선투어 리뷰 조회를 위한 API이며, request param, path variable 로 입력 값을 받습니다. \n\n" +
+            "page : 상품 조회 페이지 번호 \n\n lanTourId : 랜선투어 id")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
+    })
+    public ApiResponse<LanTourResponseDTO.LanTourReviewPreviewListDTO> getReviewList(@PathVariable Long lanTourId,
+                                                                                     @RequestParam Integer page){
+        Page<Review> reviewPage = lanTourQueryService.getReviewList(lanTourId, page - 1);
+        return ApiResponse.onSuccess(LanTourConverter.lanTourReviewPreviewListDTO(reviewPage));
+    }
 }

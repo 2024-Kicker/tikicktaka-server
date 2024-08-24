@@ -29,6 +29,8 @@ public class LanTourResponseDTO {
         String contents;
         Long price;
         List<LanTourImageResponseDTO> lanTourImgList;
+        int reviewCount;
+        int inquiryCount;
         Long salesCount;
         Long dibsCount;
         String location;
@@ -77,5 +79,30 @@ public class LanTourResponseDTO {
     @AllArgsConstructor
     public static class UploadInquiryResultDTO{
         Long memberId;
+    }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class LanTourReviewPreviewDTO{
+        String memberNickname;
+        String profileImgUrl;
+        String contents;
+        Double ratings;
+        LocalDateTime createdAt;
+    }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class LanTourReviewPreviewListDTO{
+        List<LanTourReviewPreviewDTO> LanTourReviewPreviewDTOList;
+        Integer listSize;
+        Integer totalPage;
+        Long totalElements;
+        Boolean isFirst;
+        Boolean isLast;
     }
 }
