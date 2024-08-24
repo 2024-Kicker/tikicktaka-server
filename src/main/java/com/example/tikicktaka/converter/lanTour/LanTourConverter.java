@@ -73,7 +73,7 @@ public class LanTourConverter {
                 .map(LanTourConverter::lanTourPreviewDTO).collect(Collectors.toList());
 
         return LanTourResponseDTO.LanTourPreviewListDTO.builder()
-                .LanTourPreviewDTOList(lanTourPreviewDTOList)
+                .lanTourPreviewDTOList(lanTourPreviewDTOList)
                 .isFirst(lanTourList.isFirst())
                 .isLast(lanTourList.isLast())
                 .listSize(lanTourList.getSize())
@@ -128,12 +128,37 @@ public class LanTourConverter {
                 .map(LanTourConverter::lanTourReviewPreviewDTO).collect(Collectors.toList());
 
         return LanTourResponseDTO.LanTourReviewPreviewListDTO.builder()
-                .LanTourReviewPreviewDTOList(lanTourPreviewDTOList)
+                .lanTourReviewPreviewDTOList(lanTourPreviewDTOList)
                 .isFirst(lanTourReviewList.isFirst())
                 .isLast(lanTourReviewList.isLast())
                 .listSize(lanTourReviewList.getSize())
                 .totalElements(lanTourReviewList.getTotalElements())
                 .totalPage(lanTourReviewList.getTotalPages())
+                .build();
+    }
+
+    public static LanTourResponseDTO.LanTourInquiryPreviewDTO lanTourInquiryPreviewDTO(Inquiry inquiry){
+        return LanTourResponseDTO.LanTourInquiryPreviewDTO.builder()
+                .memberNickname(inquiry.getMember().getName())
+                .profileImgUrl(inquiry.getMember().getProfileImg().getUrl())
+                .inquiryStatus(inquiry.getStatus().name())
+                .secret(inquiry.getSecret())
+                .contents(inquiry.getContents())
+                .createdAt(inquiry.getCreatedAt())
+                .build();
+    }
+
+    public static LanTourResponseDTO.LanTourInquiryPreviewListDTO lanTourInquiryPreviewListDTO(Page<Inquiry> lanTourInquiryList){
+        List<LanTourResponseDTO.LanTourInquiryPreviewDTO> lanTourInquiryPreviewDTOList = lanTourInquiryList.stream()
+                .map(LanTourConverter::lanTourInquiryPreviewDTO).collect(Collectors.toList());
+
+        return LanTourResponseDTO.LanTourInquiryPreviewListDTO.builder()
+                .lanTourInquiryPreviewDTOList(lanTourInquiryPreviewDTOList)
+                .isFirst(lanTourInquiryList.isFirst())
+                .isLast(lanTourInquiryList.isLast())
+                .listSize(lanTourInquiryList.getSize())
+                .totalElements(lanTourInquiryList.getTotalElements())
+                .totalPage(lanTourInquiryList.getTotalPages())
                 .build();
     }
 }

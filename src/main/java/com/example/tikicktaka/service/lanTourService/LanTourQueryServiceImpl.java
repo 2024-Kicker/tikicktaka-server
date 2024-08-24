@@ -2,9 +2,11 @@ package com.example.tikicktaka.service.lanTourService;
 
 import com.example.tikicktaka.apiPayload.code.status.ErrorStatus;
 import com.example.tikicktaka.apiPayload.exception.handler.LanTourHandler;
+import com.example.tikicktaka.domain.lanTour.Inquiry;
 import com.example.tikicktaka.domain.lanTour.LanTour;
 import com.example.tikicktaka.domain.lanTour.Review;
 import com.example.tikicktaka.domain.mapping.lanTour.LanTourPurchase;
+import com.example.tikicktaka.repository.lanTour.InquiryRepository;
 import com.example.tikicktaka.repository.lanTour.LanTourRepository;
 import com.example.tikicktaka.repository.lanTour.ReviewRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,7 @@ public class LanTourQueryServiceImpl implements LanTourQueryService{
 
     private final LanTourRepository lanTourRepository;
     private final ReviewRepository reviewRepository;
+    private final InquiryRepository inquiryRepository;
 
     @Override
     public LanTour getLanTourContent(Long lanTourId) {
@@ -56,5 +59,12 @@ public class LanTourQueryServiceImpl implements LanTourQueryService{
         LanTour lanTour = lanTourRepository.findById(lanTourId).orElseThrow(() -> new LanTourHandler(ErrorStatus.LAN_TOUR_NOT_FOUND));
         Page<Review> reviewPage = reviewRepository.findAllByLanTour(lanTour, PageRequest.of(page, 10, Sort.by(Sort.Direction.DESC, "createdAt")));
         return reviewPage;
+    }
+
+    @Override
+    public Page<Inquiry> getInquiryList(Long lanTourId, Integer page) {
+        LanTour lanTour = lanTourRepository.findById(lanTourId).orElseThrow(() -> new LanTourHandler(ErrorStatus.LAN_TOUR_NOT_FOUND));
+        Page<Inquiry> inquiryPage = inquiryRepository.findAllByLanTour(lanTour, PageRequest.of(page, 10, Sort.by(Sort.Direction.DESC, "createdAt")));
+        return inquiryPage;
     }
 }
