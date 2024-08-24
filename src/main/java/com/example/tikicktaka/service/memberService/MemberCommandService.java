@@ -43,7 +43,7 @@ public interface MemberCommandService {
 
     Member modifySeller(Long memberId);
 
-    Member chargeCoin(Member member, Long amount);
+    Member chargeCoin(Member member, MemberRequestDTO.ChargeCoinRequestDTO request);
 
     LanTourPurchase getPurchaseLanTourDetail(Long lanTourPurchaseId);
 
