@@ -1,5 +1,6 @@
 package com.example.tikicktaka.web.dto.lanTour;
 
+import com.example.tikicktaka.web.dto.member.MemberResponseDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -33,5 +34,32 @@ public class LanTourResponseDTO {
         String location;
         String lanTourCategory;
         LocalDateTime createdAt;
+    }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class LanTourPreviewDTO{
+        String title;
+        String location;
+        Long price;
+        List<LanTourImageResponseDTO> lanTourImgList;
+        Long salesCount;
+        Long dibsCount;
+        LocalDateTime createdAt;
+    }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class LanTourPreviewListDTO{
+        List<LanTourPreviewDTO> LanTourPreviewDTOList;
+        Integer listSize;
+        Integer totalPage;
+        Long totalElements;
+        Boolean isFirst;
+        Boolean isLast;
     }
 }
