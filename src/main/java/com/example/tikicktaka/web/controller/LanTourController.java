@@ -5,6 +5,7 @@ import com.example.tikicktaka.apiPayload.code.status.ErrorStatus;
 import com.example.tikicktaka.apiPayload.exception.handler.MemberHandler;
 import com.example.tikicktaka.converter.lanTour.LanTourConverter;
 import com.example.tikicktaka.converter.member.MemberConverter;
+import com.example.tikicktaka.domain.lanTour.Inquiry;
 import com.example.tikicktaka.domain.lanTour.LanTour;
 import com.example.tikicktaka.domain.lanTour.Review;
 import com.example.tikicktaka.domain.mapping.lanTour.LanTourPurchase;
@@ -77,5 +78,19 @@ public class LanTourController {
         Member member = memberQueryService.findMemberById(Long.valueOf(authentication.getName().toString())).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
         Review review = lanTourCommandService.uploadReview(request, lanTourId, member);
         return ApiResponse.onSuccess(LanTourConverter.uploadReviewResultDTO(review));
+    }
+
+    @PostMapping(value = "/upload/inquiry/{lanTourId}")
+    @Operation(summary = "랜선투어 문의 등록 API", description = "랜선투어 문의 등록을 위한 API이며, request body, path variable 로 입력 값을 받습니다. \n\n" +
+            "lanTourId : 랜선투어 id")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
+    })
+    public ApiResponse<LanTourResponseDTO.UploadInquiryResultDTO> uploadInquiry(@RequestBody @Valid LanTourRequestDTO.UploadInquiryRequestDTO request,
+                                                                                @PathVariable Long lanTourId,
+                                                                                Authentication authentication){
+        Member member = memberQueryService.findMemberById(Long.valueOf(authentication.getName().toString())).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        Inquiry inquiry = lanTourCommandService.uploadInquiry(request, lanTourId, member);
+        return ApiResponse.onSuccess(LanTourConverter.uploadInquiryResultDTO(inquiry));
     }
 }

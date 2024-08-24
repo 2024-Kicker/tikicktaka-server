@@ -70,4 +70,12 @@ public class LanTourResponseDTO {
     public static class UploadReviewResultDTO{
         Long memberId;
     }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class UploadInquiryResultDTO{
+        Long memberId;
+    }
 }
