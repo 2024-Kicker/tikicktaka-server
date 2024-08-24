@@ -1,5 +1,6 @@
 package com.example.tikicktaka.web.dto.lanTour;
 
+import com.example.tikicktaka.domain.enums.InquiryStatus;
 import com.example.tikicktaka.web.dto.member.MemberResponseDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -57,7 +58,7 @@ public class LanTourResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class LanTourPreviewListDTO{
-        List<LanTourPreviewDTO> LanTourPreviewDTOList;
+        List<LanTourPreviewDTO> lanTourPreviewDTOList;
         Integer listSize;
         Integer totalPage;
         Long totalElements;
@@ -98,7 +99,33 @@ public class LanTourResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class LanTourReviewPreviewListDTO{
-        List<LanTourReviewPreviewDTO> LanTourReviewPreviewDTOList;
+        List<LanTourReviewPreviewDTO> lanTourReviewPreviewDTOList;
+        Integer listSize;
+        Integer totalPage;
+        Long totalElements;
+        Boolean isFirst;
+        Boolean isLast;
+    }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class LanTourInquiryPreviewDTO{
+        String memberNickname;
+        String profileImgUrl;
+        String contents;
+        String inquiryStatus;
+        Boolean secret;
+        LocalDateTime createdAt;
+    }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class LanTourInquiryPreviewListDTO{
+        List<LanTourInquiryPreviewDTO> lanTourInquiryPreviewDTOList;
         Integer listSize;
         Integer totalPage;
         Long totalElements;

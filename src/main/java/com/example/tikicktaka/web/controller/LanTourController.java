@@ -26,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.parameters.P;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -104,5 +105,17 @@ public class LanTourController {
                                                                                      @RequestParam Integer page){
         Page<Review> reviewPage = lanTourQueryService.getReviewList(lanTourId, page - 1);
         return ApiResponse.onSuccess(LanTourConverter.lanTourReviewPreviewListDTO(reviewPage));
+    }
+
+    @GetMapping(value = "/inquiry/{lanTourId}")
+    @Operation(summary = "랜선투어 문의 조회 API", description = "랜선투어 문의 조회를 위한 API이며, request param, path variable 로 입력 값을 받습니다. \n\n" +
+            "page : 상품 조회 페이지 번호 \n\n lanTourId : 랜선투어 id")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
+    })
+    public ApiResponse<LanTourResponseDTO.LanTourInquiryPreviewListDTO> getInquiryList(@PathVariable Long lanTourId,
+                                                                                       @RequestParam Integer page){
+        Page<Inquiry> inquiryPage = lanTourQueryService.getInquiryList(lanTourId, page - 1);
+        return ApiResponse.onSuccess(LanTourConverter.lanTourInquiryPreviewListDTO(inquiryPage));
     }
 }
