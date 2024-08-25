@@ -18,7 +18,15 @@ public class LanTourRequestDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class UploadInquiryRequestDTO{
+        private String title;
         private String contents;
         private Boolean secret;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class UploadInquiryAnswerRequestDTO{
+        private String contents;
     }
 }

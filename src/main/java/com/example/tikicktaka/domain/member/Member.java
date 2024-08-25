@@ -7,6 +7,7 @@ import com.example.tikicktaka.domain.enums.MemberStatus;
 import com.example.tikicktaka.domain.enums.SocialType;
 import com.example.tikicktaka.domain.images.ProfileImg;
 import com.example.tikicktaka.domain.lanTour.Inquiry;
+import com.example.tikicktaka.domain.lanTour.InquiryAnswer;
 import com.example.tikicktaka.domain.lanTour.LanTour;
 import com.example.tikicktaka.domain.mapping.lanTour.LanTourPurchase;
 import com.example.tikicktaka.domain.lanTour.Review;
@@ -90,6 +91,9 @@ public class Member extends BaseDateTimeEntity {
     private List<Inquiry> inquiryList = new ArrayList<>();
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+    private List<InquiryAnswer> inquiryAnswerList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<MemberTerm> memberTermList = new ArrayList<>();
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
@@ -101,7 +105,7 @@ public class Member extends BaseDateTimeEntity {
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<LanTourPurchase> lanTourPurchaseList = new ArrayList<>();
 
-    @OneToOne(mappedBy = "member")
+    @OneToOne(mappedBy = "member", cascade = CascadeType.ALL)
     private MemberTeam memberTeam;
 
     public void setProfileImg(ProfileImg profileImg) {

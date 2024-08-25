@@ -4,6 +4,7 @@ import com.example.tikicktaka.converter.member.MemberConverter;
 import com.example.tikicktaka.domain.enums.InquiryStatus;
 import com.example.tikicktaka.domain.images.LanTourImg;
 import com.example.tikicktaka.domain.lanTour.Inquiry;
+import com.example.tikicktaka.domain.lanTour.InquiryAnswer;
 import com.example.tikicktaka.domain.lanTour.LanTour;
 import com.example.tikicktaka.domain.lanTour.Review;
 import com.example.tikicktaka.domain.mapping.lanTour.LanTourPurchase;
@@ -102,6 +103,7 @@ public class LanTourConverter {
                 .member(member)
                 .lanTour(lanTour)
                 .status(InquiryStatus.BEFORE)
+                .title(request.getTitle())
                 .contents(request.getContents())
                 .secret(request.getSecret())
                 .build();
@@ -110,6 +112,29 @@ public class LanTourConverter {
     public static LanTourResponseDTO.UploadInquiryResultDTO uploadInquiryResultDTO(Inquiry inquiry){
         return LanTourResponseDTO.UploadInquiryResultDTO.builder()
                 .memberId(inquiry.getMember().getId())
+                .build();
+    }
+
+    public static InquiryAnswer uploadInquiryAnswerDTO(LanTourRequestDTO.UploadInquiryAnswerRequestDTO request, Member member, Inquiry inquiry){
+        return InquiryAnswer.builder()
+                .inquiry(inquiry)
+                .member(member)
+                .contents(request.getContents())
+                .build();
+    }
+
+    public static LanTourResponseDTO.UploadInquiryAnswerResultDTO uploadInquiryAnswerResultDTO(InquiryAnswer inquiryAnswer){
+        return LanTourResponseDTO.UploadInquiryAnswerResultDTO.builder()
+                .memberId(inquiryAnswer.getMember().getId())
+                .build();
+    }
+
+    public static LanTourResponseDTO.LanTourInquiryAnswerPreviewDTO lanTourInquiryAnswerPreviewDTO(InquiryAnswer inquiryAnswer){
+        return LanTourResponseDTO.LanTourInquiryAnswerPreviewDTO.builder()
+                .memberNickname(inquiryAnswer.getMember().getName())
+                .profileImgUrl(inquiryAnswer.getMember().getProfileImg().getUrl())
+                .contents(inquiryAnswer.getContents())
+                .createdAt(inquiryAnswer.getCreatedAt())
                 .build();
     }
 
@@ -138,12 +163,22 @@ public class LanTourConverter {
     }
 
     public static LanTourResponseDTO.LanTourInquiryPreviewDTO lanTourInquiryPreviewDTO(Inquiry inquiry){
+        InquiryAnswer inquiryAnswer = inquiry.getInquiryAnswer();
+        LanTourResponseDTO.LanTourInquiryAnswerPreviewDTO inquiryAnswerResultDTO = null;
+        if(inquiryAnswer == null){
+            inquiryAnswerResultDTO = null;
+        } else{
+            inquiryAnswerResultDTO = LanTourConverter.lanTourInquiryAnswerPreviewDTO(inquiryAnswer);
+        }
+
         return LanTourResponseDTO.LanTourInquiryPreviewDTO.builder()
                 .memberNickname(inquiry.getMember().getName())
                 .profileImgUrl(inquiry.getMember().getProfileImg().getUrl())
                 .inquiryStatus(inquiry.getStatus().name())
                 .secret(inquiry.getSecret())
+                .title(inquiry.getTitle())
                 .contents(inquiry.getContents())
+                .lanTourInquiryAnswer(inquiryAnswerResultDTO)
                 .createdAt(inquiry.getCreatedAt())
                 .build();
     }

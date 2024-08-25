@@ -86,6 +86,14 @@ public class LanTourResponseDTO {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
+    public static class UploadInquiryAnswerResultDTO{
+        Long memberId;
+    }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class LanTourReviewPreviewDTO{
         String memberNickname;
         String profileImgUrl;
@@ -114,9 +122,11 @@ public class LanTourResponseDTO {
     public static class LanTourInquiryPreviewDTO{
         String memberNickname;
         String profileImgUrl;
+        String title;
         String contents;
         String inquiryStatus;
         Boolean secret;
+        LanTourResponseDTO.LanTourInquiryAnswerPreviewDTO lanTourInquiryAnswer;
         LocalDateTime createdAt;
     }
 
@@ -131,5 +141,16 @@ public class LanTourResponseDTO {
         Long totalElements;
         Boolean isFirst;
         Boolean isLast;
+    }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class LanTourInquiryAnswerPreviewDTO{
+        String memberNickname;
+        String profileImgUrl;
+        String contents;
+        LocalDateTime createdAt;
     }
 }
