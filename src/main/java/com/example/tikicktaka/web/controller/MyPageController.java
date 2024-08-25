@@ -6,6 +6,7 @@ import com.example.tikicktaka.apiPayload.code.status.SuccessStatus;
 import com.example.tikicktaka.apiPayload.exception.handler.MemberHandler;
 import com.example.tikicktaka.converter.member.MemberConverter;
 import com.example.tikicktaka.domain.enums.LanTourCategory;
+import com.example.tikicktaka.domain.lanTour.Review;
 import com.example.tikicktaka.domain.mapping.lanTour.LanTourPurchase;
 import com.example.tikicktaka.domain.mapping.member.ChargeCoin;
 import com.example.tikicktaka.domain.mapping.member.Dibs;
@@ -239,10 +240,26 @@ public class MyPageController {
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
     })
-    public ApiResponse<MemberResponseDTO.SpendCoinPreviewListDTO> getMySpendCointList(@RequestParam(name = "page") Integer page,
+    public ApiResponse<MemberResponseDTO.SpendCoinPreviewListDTO> getMySpendCoinList(@RequestParam(name = "page") Integer page,
                                                                                       Authentication authentication){
         Member member = memberQueryService.findMemberById(Long.valueOf(authentication.getName().toString())).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
         Page<LanTourPurchase> spendCoinList = memberQueryService.getMySpendCoinList(member, page - 1);
         return ApiResponse.onSuccess(MemberConverter.spendCoinPreviewListDTO(member, spendCoinList));
+    }
+
+    @GetMapping(value = "/reviews")
+    @Operation(summary = "내가 작성한 리뷰 조회 api", description = "내가 작성한 리뷰 조회를 위한 API이며, request parameter로 입력 값을 받습니다." +
+            "page : 상품 조회 페이지 번호")
+    @Parameters(value = {
+            @Parameter(name = "page", description = "페이지 번호, 1 이상의 숫자를 입력해주세요.")
+    })
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
+    })
+    public ApiResponse<MemberResponseDTO.MyReviewPreviewListDTO> getMyReviewList(@RequestParam(name = "page") Integer page,
+                                                                                 Authentication authentication){
+        Member member = memberQueryService.findMemberById(Long.valueOf(authentication.getName().toString())).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        Page<Review> reviewList = memberQueryService.getMyReviewList(member, page - 1);
+        return ApiResponse.onSuccess(MemberConverter.myReviewPreviewListDTO(reviewList));
     }
 }

@@ -4,10 +4,12 @@ import com.example.tikicktaka.apiPayload.code.status.ErrorStatus;
 import com.example.tikicktaka.apiPayload.exception.handler.MemberHandler;
 import com.example.tikicktaka.domain.enums.LanTourCategory;
 import com.example.tikicktaka.domain.lanTour.LanTour;
+import com.example.tikicktaka.domain.lanTour.Review;
 import com.example.tikicktaka.domain.mapping.lanTour.LanTourPurchase;
 import com.example.tikicktaka.domain.mapping.member.ChargeCoin;
 import com.example.tikicktaka.domain.mapping.member.Dibs;
 import com.example.tikicktaka.domain.member.Member;
+import com.example.tikicktaka.repository.lanTour.ReviewRepository;
 import com.example.tikicktaka.repository.member.ChargeCoinRepository;
 import com.example.tikicktaka.repository.member.DibsRepository;
 import com.example.tikicktaka.repository.member.LanTourPurchaseRepository;
@@ -32,6 +34,7 @@ public class MemberQueryServiceImpl implements MemberQueryService{
     private final LanTourPurchaseRepository lanTourPurchaseRepository;
     private final DibsRepository dibsRepository;
     private final ChargeCoinRepository chargeCoinRepository;
+    private final ReviewRepository reviewRepository;
 
     @Override
     public Optional<Member> findMemberById(Long id) {
@@ -75,8 +78,14 @@ public class MemberQueryServiceImpl implements MemberQueryService{
 
     @Override
     public Page<LanTourPurchase> getMySpendCoinList(Member member, Integer page) {
-        Page<LanTourPurchase> spendCoinList = lanTourPurchaseRepository.findAllByMember(member,PageRequest.of(page, 10, Sort.by(Sort.Direction.DESC, "createdAt")));
-        return spendCoinList;
+        Page<LanTourPurchase> spendCoinPage = lanTourPurchaseRepository.findAllByMember(member, PageRequest.of(page, 10, Sort.by(Sort.Direction.DESC, "createdAt")));
+        return spendCoinPage;
+    }
+
+    @Override
+    public Page<Review> getMyReviewList(Member member, Integer page) {
+        Page<Review> reviewPage = reviewRepository.findAllByMember(member, PageRequest.of(page, 10, Sort.by(Sort.Direction.DESC, "createdAt")));
+        return reviewPage;
     }
 
 }

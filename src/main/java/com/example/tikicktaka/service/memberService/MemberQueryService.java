@@ -2,6 +2,7 @@ package com.example.tikicktaka.service.memberService;
 
 import com.example.tikicktaka.domain.enums.LanTourCategory;
 import com.example.tikicktaka.domain.lanTour.LanTour;
+import com.example.tikicktaka.domain.lanTour.Review;
 import com.example.tikicktaka.domain.mapping.lanTour.LanTourPurchase;
 import com.example.tikicktaka.domain.mapping.member.ChargeCoin;
 import com.example.tikicktaka.domain.mapping.member.Dibs;
@@ -27,4 +28,6 @@ public interface MemberQueryService {
     Page<ChargeCoin> getMyChargeCoinList(Member member, Integer page);
 
     Page<LanTourPurchase> getMySpendCoinList(Member member, Integer page);
+
+    Page<Review> getMyReviewList(Member member, Integer page);
 }

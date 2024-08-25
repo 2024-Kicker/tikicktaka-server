@@ -4,6 +4,7 @@ import com.example.tikicktaka.converter.lanTour.LanTourConverter;
 import com.example.tikicktaka.domain.enums.MemberRole;
 import com.example.tikicktaka.domain.enums.MemberStatus;
 import com.example.tikicktaka.domain.images.ProfileImg;
+import com.example.tikicktaka.domain.lanTour.Review;
 import com.example.tikicktaka.domain.mapping.lanTour.LanTourPurchase;
 import com.example.tikicktaka.domain.mapping.member.ChargeCoin;
 import com.example.tikicktaka.domain.mapping.member.Dibs;
@@ -396,6 +397,31 @@ public class MemberConverter {
                 .listSize(lanTourList.getSize())
                 .totalPage(lanTourList.getTotalPages())
                 .totalElements(lanTourList.getTotalElements())
+                .build();
+    }
+
+    public static MemberResponseDTO.MyReviewPreviewDTO myReviewPreviewDTO(Review review){
+        return MemberResponseDTO.MyReviewPreviewDTO.builder()
+                .lanTourId(review.getLanTour().getId())
+                .nickname(review.getMember().getName())
+                .contents(review.getContents())
+                .ratings(review.getRatings())
+                .profileImgUrl(review.getMember().getProfileImg().getUrl())
+                .createdAt(review.getCreatedAt())
+                .build();
+    }
+
+    public static MemberResponseDTO.MyReviewPreviewListDTO myReviewPreviewListDTO(Page<Review> reviewList){
+        List<MemberResponseDTO.MyReviewPreviewDTO> myReviewPreviewDTOList = reviewList.stream()
+                .map(MemberConverter::myReviewPreviewDTO).collect(Collectors.toList());
+
+        return MemberResponseDTO.MyReviewPreviewListDTO.builder()
+                .myReviewPreviewDTOList(myReviewPreviewDTOList)
+                .isFirst(reviewList.isFirst())
+                .isLast(reviewList.isLast())
+                .listSize(reviewList.getSize())
+                .totalPage(reviewList.getTotalPages())
+                .totalElements(reviewList.getTotalElements())
                 .build();
     }
 }
