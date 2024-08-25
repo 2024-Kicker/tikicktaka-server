@@ -277,4 +277,29 @@ public class MemberResponseDTO {
         Boolean isFirst;
         Boolean isLast;
     }
+
+    @Getter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class SpendCoinPreviewDTO{
+        Long price;
+        String title;
+        LocalDateTime createdAt;
+        List<LanTourResponseDTO.LanTourImageResponseDTO> lanTourImgList;
+    }
+
+    @Getter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class SpendCoinPreviewListDTO{
+        Long amount;
+        List<SpendCoinPreviewDTO> spendCoinPreviewDTOList;
+        Integer listSize;
+        Integer totalPage;
+        Long totalElements;
+        Boolean isFirst;
+        Boolean isLast;
+    }
 }

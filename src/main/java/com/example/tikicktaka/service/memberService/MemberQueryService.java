@@ -25,4 +25,6 @@ public interface MemberQueryService {
     Page<Dibs> getMyDibsLanTourList(Member member, Integer page);
 
     Page<ChargeCoin> getMyChargeCoinList(Member member, Integer page);
+
+    Page<LanTourPurchase> getMySpendCoinList(Member member, Integer page);
 }

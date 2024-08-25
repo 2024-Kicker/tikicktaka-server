@@ -73,4 +73,10 @@ public class MemberQueryServiceImpl implements MemberQueryService{
         return chargeCoinPage;
     }
 
+    @Override
+    public Page<LanTourPurchase> getMySpendCoinList(Member member, Integer page) {
+        Page<LanTourPurchase> spendCoinList = lanTourPurchaseRepository.findAllByMember(member,PageRequest.of(page, 10, Sort.by(Sort.Direction.DESC, "createdAt")));
+        return spendCoinList;
+    }
+
 }
