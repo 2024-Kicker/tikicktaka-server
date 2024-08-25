@@ -370,4 +370,32 @@ public class MemberConverter {
                 .totalElements(chargeCoinList.getTotalElements())
                 .build();
     }
+
+    public static MemberResponseDTO.SpendCoinPreviewDTO spendCoinPreviewDTO(LanTourPurchase lanTourPurchase){
+        List<LanTourResponseDTO.LanTourImageResponseDTO> lanTourImageResponseDTOList = lanTourPurchase.getLanTour().getLanTourImgList().stream()
+                .map(LanTourConverter::toLanTourImgDTO)
+                .filter(LanTourResponseDTO.LanTourImageResponseDTO::getIsThumbNail).collect(Collectors.toList());
+
+        return MemberResponseDTO.SpendCoinPreviewDTO.builder()
+                .title(lanTourPurchase.getLanTour().getTitle())
+                .price(lanTourPurchase.getLanTour().getPrice())
+                .createdAt(lanTourPurchase.getCreatedAt())
+                .lanTourImgList(lanTourImageResponseDTOList)
+                .build();
+    }
+
+    public static MemberResponseDTO.SpendCoinPreviewListDTO spendCoinPreviewListDTO(Member member, Page<LanTourPurchase> lanTourList){
+        List<MemberResponseDTO.SpendCoinPreviewDTO> spendCoinPreviewDTOList = lanTourList.stream()
+                .map(MemberConverter::spendCoinPreviewDTO).collect(Collectors.toList());
+
+        return MemberResponseDTO.SpendCoinPreviewListDTO.builder()
+                .amount(member.getPoint())
+                .spendCoinPreviewDTOList(spendCoinPreviewDTOList)
+                .isFirst(lanTourList.isFirst())
+                .isLast(lanTourList.isLast())
+                .listSize(lanTourList.getSize())
+                .totalPage(lanTourList.getTotalPages())
+                .totalElements(lanTourList.getTotalElements())
+                .build();
+    }
 }
