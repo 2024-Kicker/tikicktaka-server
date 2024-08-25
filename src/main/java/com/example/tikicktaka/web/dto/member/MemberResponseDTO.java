@@ -302,4 +302,30 @@ public class MemberResponseDTO {
         Boolean isFirst;
         Boolean isLast;
     }
+
+    @Getter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class MyReviewPreviewDTO{
+        Long lanTourId;
+        String nickname;
+        String contents;
+        Double ratings;
+        String profileImgUrl;
+        LocalDateTime createdAt;
+    }
+
+    @Getter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class  MyReviewPreviewListDTO{
+        List<MyReviewPreviewDTO> myReviewPreviewDTOList;
+        Integer listSize;
+        Integer totalPage;
+        Long totalElements;
+        Boolean isFirst;
+        Boolean isLast;
+    }
 }
