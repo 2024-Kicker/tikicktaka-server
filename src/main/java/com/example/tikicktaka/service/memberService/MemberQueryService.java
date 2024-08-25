@@ -1,12 +1,14 @@
 package com.example.tikicktaka.service.memberService;
 
 import com.example.tikicktaka.domain.enums.LanTourCategory;
+import com.example.tikicktaka.domain.lanTour.Inquiry;
 import com.example.tikicktaka.domain.lanTour.LanTour;
 import com.example.tikicktaka.domain.lanTour.Review;
 import com.example.tikicktaka.domain.mapping.lanTour.LanTourPurchase;
 import com.example.tikicktaka.domain.mapping.member.ChargeCoin;
 import com.example.tikicktaka.domain.mapping.member.Dibs;
 import com.example.tikicktaka.domain.member.Member;
+import io.swagger.models.auth.In;
 import org.springframework.data.domain.Page;
 
 import java.util.Optional;
@@ -30,4 +32,6 @@ public interface MemberQueryService {
     Page<LanTourPurchase> getMySpendCoinList(Member member, Integer page);
 
     Page<Review> getMyReviewList(Member member, Integer page);
+
+    Page<Inquiry> getMyInquiryList(Member member, Integer page);
 }
