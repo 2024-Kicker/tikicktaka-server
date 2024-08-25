@@ -4,6 +4,7 @@ import com.example.tikicktaka.converter.lanTour.LanTourConverter;
 import com.example.tikicktaka.domain.enums.MemberRole;
 import com.example.tikicktaka.domain.enums.MemberStatus;
 import com.example.tikicktaka.domain.images.ProfileImg;
+import com.example.tikicktaka.domain.lanTour.Inquiry;
 import com.example.tikicktaka.domain.lanTour.Review;
 import com.example.tikicktaka.domain.mapping.lanTour.LanTourPurchase;
 import com.example.tikicktaka.domain.mapping.member.ChargeCoin;
@@ -422,6 +423,31 @@ public class MemberConverter {
                 .listSize(reviewList.getSize())
                 .totalPage(reviewList.getTotalPages())
                 .totalElements(reviewList.getTotalElements())
+                .build();
+    }
+
+    public static MemberResponseDTO.MyInquiryPreviewDTO myInquiryPreviewDTO(Inquiry inquiry){
+        return MemberResponseDTO.MyInquiryPreviewDTO.builder()
+                .nickname(inquiry.getMember().getName())
+                .profileImgUrl(inquiry.getMember().getProfileImg().getUrl())
+                .contents(inquiry.getContents())
+                .inquiryStatus(inquiry.getStatus().name())
+                .secret(inquiry.getSecret())
+                .createdAt(inquiry.getCreatedAt())
+                .build();
+    }
+
+    public static MemberResponseDTO.MyInquiryPreviewListDTO myInquiryPreviewListDTO(Page<Inquiry> inquiryList){
+        List<MemberResponseDTO.MyInquiryPreviewDTO> myInquiryPreviewDTOList = inquiryList.stream()
+                .map(MemberConverter::myInquiryPreviewDTO).collect(Collectors.toList());
+
+        return MemberResponseDTO.MyInquiryPreviewListDTO.builder()
+                .myInquiryPreviewDTOList(myInquiryPreviewDTOList)
+                .isFirst(inquiryList.isFirst())
+                .isLast(inquiryList.isLast())
+                .listSize(inquiryList.getSize())
+                .totalPage(inquiryList.getTotalPages())
+                .totalElements(inquiryList.getTotalElements())
                 .build();
     }
 }

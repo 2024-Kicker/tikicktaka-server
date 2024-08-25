@@ -320,8 +320,34 @@ public class MemberResponseDTO {
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class  MyReviewPreviewListDTO{
+    public static class MyReviewPreviewListDTO{
         List<MyReviewPreviewDTO> myReviewPreviewDTOList;
+        Integer listSize;
+        Integer totalPage;
+        Long totalElements;
+        Boolean isFirst;
+        Boolean isLast;
+    }
+
+    @Getter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class MyInquiryPreviewDTO{
+        String nickname;
+        String profileImgUrl;
+        String contents;
+        String inquiryStatus;
+        Boolean secret;
+        LocalDateTime createdAt;
+    }
+
+    @Getter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class MyInquiryPreviewListDTO{
+        List<MyInquiryPreviewDTO> myInquiryPreviewDTOList;
         Integer listSize;
         Integer totalPage;
         Long totalElements;

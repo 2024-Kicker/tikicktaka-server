@@ -3,12 +3,14 @@ package com.example.tikicktaka.service.memberService;
 import com.example.tikicktaka.apiPayload.code.status.ErrorStatus;
 import com.example.tikicktaka.apiPayload.exception.handler.MemberHandler;
 import com.example.tikicktaka.domain.enums.LanTourCategory;
+import com.example.tikicktaka.domain.lanTour.Inquiry;
 import com.example.tikicktaka.domain.lanTour.LanTour;
 import com.example.tikicktaka.domain.lanTour.Review;
 import com.example.tikicktaka.domain.mapping.lanTour.LanTourPurchase;
 import com.example.tikicktaka.domain.mapping.member.ChargeCoin;
 import com.example.tikicktaka.domain.mapping.member.Dibs;
 import com.example.tikicktaka.domain.member.Member;
+import com.example.tikicktaka.repository.lanTour.InquiryRepository;
 import com.example.tikicktaka.repository.lanTour.ReviewRepository;
 import com.example.tikicktaka.repository.member.ChargeCoinRepository;
 import com.example.tikicktaka.repository.member.DibsRepository;
@@ -35,6 +37,7 @@ public class MemberQueryServiceImpl implements MemberQueryService{
     private final DibsRepository dibsRepository;
     private final ChargeCoinRepository chargeCoinRepository;
     private final ReviewRepository reviewRepository;
+    private final InquiryRepository inquiryRepository;
 
     @Override
     public Optional<Member> findMemberById(Long id) {
@@ -86,6 +89,12 @@ public class MemberQueryServiceImpl implements MemberQueryService{
     public Page<Review> getMyReviewList(Member member, Integer page) {
         Page<Review> reviewPage = reviewRepository.findAllByMember(member, PageRequest.of(page, 10, Sort.by(Sort.Direction.DESC, "createdAt")));
         return reviewPage;
+    }
+
+    @Override
+    public Page<Inquiry> getMyInquiryList(Member member, Integer page) {
+        Page<Inquiry> inquiryPage = inquiryRepository.findAllByMember(member, PageRequest.of(page, 10, Sort.by(Sort.Direction.DESC, "createdAt")));
+        return inquiryPage;
     }
 
 }
