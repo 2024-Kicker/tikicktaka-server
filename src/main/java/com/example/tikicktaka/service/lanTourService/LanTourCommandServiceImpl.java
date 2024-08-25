@@ -2,11 +2,15 @@ package com.example.tikicktaka.service.lanTourService;
 
 import com.example.tikicktaka.apiPayload.code.status.ErrorStatus;
 import com.example.tikicktaka.apiPayload.exception.handler.LanTourHandler;
+import com.example.tikicktaka.apiPayload.exception.handler.MemberHandler;
 import com.example.tikicktaka.converter.lanTour.LanTourConverter;
+import com.example.tikicktaka.domain.enums.InquiryStatus;
 import com.example.tikicktaka.domain.lanTour.Inquiry;
+import com.example.tikicktaka.domain.lanTour.InquiryAnswer;
 import com.example.tikicktaka.domain.lanTour.LanTour;
 import com.example.tikicktaka.domain.lanTour.Review;
 import com.example.tikicktaka.domain.member.Member;
+import com.example.tikicktaka.repository.lanTour.InquiryAnswerRepository;
 import com.example.tikicktaka.repository.lanTour.InquiryRepository;
 import com.example.tikicktaka.repository.lanTour.LanTourRepository;
 import com.example.tikicktaka.repository.lanTour.ReviewRepository;
@@ -25,6 +29,7 @@ public class LanTourCommandServiceImpl implements LanTourCommandService{
     private final LanTourRepository lanTourRepository;
     private final ReviewRepository reviewRepository;
     private final InquiryRepository inquiryRepository;
+    private final InquiryAnswerRepository inquiryAnswerRepository;
 
     @Override
     @Transactional
@@ -42,5 +47,21 @@ public class LanTourCommandServiceImpl implements LanTourCommandService{
         Inquiry inquiry = LanTourConverter.uploadInquiryDTO(request, member, lanTour);
         inquiryRepository.save(inquiry);
         return inquiry;
+    }
+
+    @Override
+    @Transactional
+    public InquiryAnswer uploadInquiryAnswer(LanTourRequestDTO.UploadInquiryAnswerRequestDTO request, Long inquiryId, Member member) {
+        Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(() -> new LanTourHandler(ErrorStatus.INQUIRY_NOT_FOUND));
+
+        if(!member.getMemberRole().name().equals("SELLER") || !inquiry.getMember().getId().equals(member.getId())){
+            throw new MemberHandler(ErrorStatus.MEMBER_NOT_SELLER);
+        }
+
+        InquiryAnswer inquiryAnswer = LanTourConverter.uploadInquiryAnswerDTO(request, member, inquiry);
+        inquiryAnswerRepository.save(inquiryAnswer);
+        inquiry.setInquiryStatus(InquiryStatus.COMPLETE);
+
+        return inquiryAnswer;
     }
 }

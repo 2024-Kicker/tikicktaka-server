@@ -6,6 +6,7 @@ import com.example.tikicktaka.apiPayload.exception.handler.MemberHandler;
 import com.example.tikicktaka.converter.lanTour.LanTourConverter;
 import com.example.tikicktaka.converter.member.MemberConverter;
 import com.example.tikicktaka.domain.lanTour.Inquiry;
+import com.example.tikicktaka.domain.lanTour.InquiryAnswer;
 import com.example.tikicktaka.domain.lanTour.LanTour;
 import com.example.tikicktaka.domain.lanTour.Review;
 import com.example.tikicktaka.domain.mapping.lanTour.LanTourPurchase;
@@ -117,5 +118,23 @@ public class LanTourController {
                                                                                        @RequestParam Integer page){
         Page<Inquiry> inquiryPage = lanTourQueryService.getInquiryList(lanTourId, page - 1);
         return ApiResponse.onSuccess(LanTourConverter.lanTourInquiryPreviewListDTO(inquiryPage));
+    }
+
+
+    @PostMapping(value = "/upload/inquiry-answer/{inquiryId}")
+    @Operation(summary = "랜선투어 문의 답변 등록 API", description = "랜선투어 문의 답변 등록을 위한 API이며, request body, path variable로 입력 값을 받습니다. \n\n" +
+            "inquiryId : 문의 id")
+    @Parameters(value = {
+            @Parameter(name = "inquiryId", description = "답변을 달고자 하는 문의의 id를 입력해주세요."),
+    })
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
+    })
+    public ApiResponse<LanTourResponseDTO.UploadInquiryAnswerResultDTO> uploadInquiryAnswer(@RequestBody @Valid LanTourRequestDTO.UploadInquiryAnswerRequestDTO request,
+                                                                                            @PathVariable(name = "inquiryId") Long inquiryId,
+                                                                                            Authentication authentication){
+        Member member = memberQueryService.findMemberById(Long.valueOf(authentication.getName().toString())).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        InquiryAnswer inquiryAnswer = lanTourCommandService.uploadInquiryAnswer(request, inquiryId, member);
+        return ApiResponse.onSuccess(LanTourConverter.uploadInquiryAnswerResultDTO(inquiryAnswer));
     }
 }

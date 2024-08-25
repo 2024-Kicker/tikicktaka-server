@@ -8,6 +8,9 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Getter
 @Builder
@@ -19,6 +22,8 @@ public class Inquiry extends BaseDateTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "inquiry_id")
     private Long id;
+
+    private String title;
 
     @Column(columnDefinition = "TEXT")
     private String contents;
@@ -37,6 +42,9 @@ public class Inquiry extends BaseDateTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "lan_tour_id", nullable = false)
     private LanTour lanTour;
+
+    @OneToOne(mappedBy = "inquiry", cascade = CascadeType.ALL)
+    private InquiryAnswer inquiryAnswer;
 
     public void setInquiryStatus(InquiryStatus inquiryStatus) { this.status = inquiryStatus; }
 }

@@ -5,6 +5,7 @@ import com.example.tikicktaka.domain.enums.MemberRole;
 import com.example.tikicktaka.domain.enums.MemberStatus;
 import com.example.tikicktaka.domain.images.ProfileImg;
 import com.example.tikicktaka.domain.lanTour.Inquiry;
+import com.example.tikicktaka.domain.lanTour.InquiryAnswer;
 import com.example.tikicktaka.domain.lanTour.Review;
 import com.example.tikicktaka.domain.mapping.lanTour.LanTourPurchase;
 import com.example.tikicktaka.domain.mapping.member.ChargeCoin;
@@ -427,12 +428,22 @@ public class MemberConverter {
     }
 
     public static MemberResponseDTO.MyInquiryPreviewDTO myInquiryPreviewDTO(Inquiry inquiry){
+        InquiryAnswer inquiryAnswer = inquiry.getInquiryAnswer();
+        LanTourResponseDTO.LanTourInquiryAnswerPreviewDTO inquiryAnswerResultDTO = null;
+        if(inquiryAnswer == null){
+            inquiryAnswerResultDTO = null;
+        } else{
+            inquiryAnswerResultDTO = LanTourConverter.lanTourInquiryAnswerPreviewDTO(inquiryAnswer);
+        }
+
         return MemberResponseDTO.MyInquiryPreviewDTO.builder()
                 .nickname(inquiry.getMember().getName())
                 .profileImgUrl(inquiry.getMember().getProfileImg().getUrl())
+                .title(inquiry.getTitle())
                 .contents(inquiry.getContents())
                 .inquiryStatus(inquiry.getStatus().name())
                 .secret(inquiry.getSecret())
+                .lanTourInquiryAnswer(inquiryAnswerResultDTO)
                 .createdAt(inquiry.getCreatedAt())
                 .build();
     }

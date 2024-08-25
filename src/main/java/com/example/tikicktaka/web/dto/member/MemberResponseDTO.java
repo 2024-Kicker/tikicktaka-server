@@ -336,9 +336,11 @@ public class MemberResponseDTO {
     public static class MyInquiryPreviewDTO{
         String nickname;
         String profileImgUrl;
+        String title;
         String contents;
         String inquiryStatus;
         Boolean secret;
+        LanTourResponseDTO.LanTourInquiryAnswerPreviewDTO lanTourInquiryAnswer;
         LocalDateTime createdAt;
     }
 

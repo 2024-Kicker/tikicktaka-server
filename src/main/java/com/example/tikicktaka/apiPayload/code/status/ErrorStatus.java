@@ -26,12 +26,16 @@ public enum ErrorStatus implements BaseErrorCode {
     MEMBER_NOT_FOUND(HttpStatus.BAD_REQUEST, "MEMBER4007", "존재하지 않는 회원입니다."),
     MEMBER_TEAM_NOT_FOUND(HttpStatus.NOT_FOUND, "MEMBER4008", "존재하지 않는 사용자 선호팀 정보입니다."),
     MEMBER_DIBS_NOT_FOUND(HttpStatus.NOT_FOUND, "MEMBER4009", "존재하지 않는 찜 내역입니다."),
+    MEMBER_NOT_SELLER(HttpStatus.BAD_REQUEST, "MEMBER4010", "회원이 판매자가 아닙니다."),
 
     // Term
     TERM_NOT_FOUND(HttpStatus.NOT_FOUND, "TERM4001", "해당 약관이 존재하지 않습니다."),
 
     //Team
     TEAM_NOT_FOUND(HttpStatus.NOT_FOUND, "TEAM4001", "존재하지 않는 팀입니다."),
+
+    //Inquiry
+    INQUIRY_NOT_FOUND(HttpStatus.NOT_FOUND, "INQUIRY4001", "존재하지 않는 문의입니다."),
 
     //LanTour
     LAN_TOUR_PURCHASE_NOT_FOUND(HttpStatus.NOT_FOUND,"LANTOUR4001","존재하지 않는 구매내역 입니다."),
