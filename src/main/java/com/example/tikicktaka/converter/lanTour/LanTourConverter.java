@@ -109,6 +109,13 @@ public class LanTourConverter {
                 .build();
     }
 
+    public static LanTourPurchase purchaseLanTourDTO(LanTour lanTour, Member member){
+        return LanTourPurchase.builder()
+                .lanTour(lanTour)
+                .member(member)
+                .build();
+    }
+
     public static LanTourResponseDTO.UploadInquiryResultDTO uploadInquiryResultDTO(Inquiry inquiry){
         return LanTourResponseDTO.UploadInquiryResultDTO.builder()
                 .memberId(inquiry.getMember().getId())
@@ -194,6 +201,14 @@ public class LanTourConverter {
                 .listSize(lanTourInquiryList.getSize())
                 .totalElements(lanTourInquiryList.getTotalElements())
                 .totalPage(lanTourInquiryList.getTotalPages())
+                .build();
+    }
+
+    public static LanTourResponseDTO.PurchaseLanTourResultDTO purchaseLanTourResultDTO(LanTour lanTour, Member member){
+        return LanTourResponseDTO.PurchaseLanTourResultDTO.builder()
+                .lanTourName(lanTour.getTitle())
+                .lanTourId(lanTour.getId())
+                .memberId(member.getId())
                 .build();
     }
 }

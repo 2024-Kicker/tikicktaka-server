@@ -27,6 +27,7 @@ public enum ErrorStatus implements BaseErrorCode {
     MEMBER_TEAM_NOT_FOUND(HttpStatus.NOT_FOUND, "MEMBER4008", "존재하지 않는 사용자 선호팀 정보입니다."),
     MEMBER_DIBS_NOT_FOUND(HttpStatus.NOT_FOUND, "MEMBER4009", "존재하지 않는 찜 내역입니다."),
     MEMBER_NOT_SELLER(HttpStatus.BAD_REQUEST, "MEMBER4010", "회원이 판매자가 아닙니다."),
+    MEMBER_NOT_ENOUGH_COIN(HttpStatus.BAD_REQUEST, "MEMBER4011", "잔액이 부족합니다."),
 
     // Term
     TERM_NOT_FOUND(HttpStatus.NOT_FOUND, "TERM4001", "해당 약관이 존재하지 않습니다."),
@@ -39,7 +40,8 @@ public enum ErrorStatus implements BaseErrorCode {
 
     //LanTour
     LAN_TOUR_PURCHASE_NOT_FOUND(HttpStatus.NOT_FOUND,"LANTOUR4001","존재하지 않는 구매내역 입니다."),
-    LAN_TOUR_NOT_FOUND(HttpStatus.NOT_FOUND, "LANTOUR4002", "존재하지 않는 상품입니다.");
+    LAN_TOUR_NOT_FOUND(HttpStatus.NOT_FOUND, "LANTOUR4002", "존재하지 않는 상품입니다."),
+    LAN_TOUR_ALREADY_PURCHASE(HttpStatus.BAD_REQUEST, "LANTOUR4003", "이미 구매한 상품입니다.");
 
 
     private final HttpStatus httpStatus;

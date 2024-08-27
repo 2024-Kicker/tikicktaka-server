@@ -137,4 +137,20 @@ public class LanTourController {
         InquiryAnswer inquiryAnswer = lanTourCommandService.uploadInquiryAnswer(request, inquiryId, member);
         return ApiResponse.onSuccess(LanTourConverter.uploadInquiryAnswerResultDTO(inquiryAnswer));
     }
+
+    @PostMapping(value = "/purhcase/{lanTourId}")
+    @Operation(summary = "랜선투어 구매 API", description = "랜선투어 구매를 위한 API이며, path variable로 입력 값을 받습니다. \n\n" +
+            "lanTourId : 랜선투어 상품 id")
+    @Parameters(value = {
+            @Parameter(name = "lanTourId", description = "구매 하고자 하는 상품의 id를 입력해주세요."),
+    })
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
+    })
+    public ApiResponse<LanTourResponseDTO.PurchaseLanTourResultDTO> purchaseLanTour(@PathVariable(name = "lanTourId") Long lanTourId,
+                                                                                    Authentication authentication){
+        Member member = memberQueryService.findMemberById(Long.valueOf(authentication.getName().toString())).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        LanTour lanTour = lanTourCommandService.purchaseLanTour(lanTourId, member);
+        return ApiResponse.onSuccess(LanTourConverter.purchaseLanTourResultDTO(lanTour, member));
+    }
 }
