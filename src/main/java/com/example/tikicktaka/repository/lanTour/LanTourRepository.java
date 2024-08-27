@@ -8,4 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface LanTourRepository extends JpaRepository<LanTour, Long> {
     Page<LanTour> findAllByLocation(String Location, PageRequest pageRequest);
+
+    Page<LanTour> findAllByTitleContaining(String lanTourTitle, PageRequest pageRequest);
 }

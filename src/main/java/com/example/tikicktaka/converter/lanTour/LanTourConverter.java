@@ -204,6 +204,37 @@ public class LanTourConverter {
                 .build();
     }
 
+    public static LanTourResponseDTO.SearchResultPreviewDTO searchResultPreviewDTO(LanTour lanTour){
+        List<LanTourResponseDTO.LanTourImageResponseDTO> lanTourImageResponseDTOList = lanTour.getLanTourImgList().stream()
+                .map(LanTourConverter::toLanTourImgDTO)
+                .filter(LanTourResponseDTO.LanTourImageResponseDTO::getIsThumbNail).collect(Collectors.toList());
+
+        return LanTourResponseDTO.SearchResultPreviewDTO.builder()
+                .lanTourId(lanTour.getId())
+                .title(lanTour.getTitle())
+                .price(lanTour.getPrice())
+                .salesCount(lanTour.getSalesCount())
+                .dibsCount(lanTour.getDibsCount())
+                .location(lanTour.getLocation())
+                .lanTourImgList(lanTourImageResponseDTOList)
+                .createdAt(lanTour.getCreatedAt())
+                .build();
+    }
+
+    public static LanTourResponseDTO.SearchResultPreviewDTOListDTO searchResultPreviewDTOListDTO(Page<LanTour> lanTourList){
+        List<LanTourResponseDTO.SearchResultPreviewDTO> searchResultPreviewDTOList = lanTourList.stream()
+                .map(LanTourConverter::searchResultPreviewDTO).collect(Collectors.toList());
+
+        return LanTourResponseDTO.SearchResultPreviewDTOListDTO.builder()
+                .searchResultPreviewDTOList(searchResultPreviewDTOList)
+                .isFirst(lanTourList.isFirst())
+                .isLast(lanTourList.isLast())
+                .listSize(lanTourList.getSize())
+                .totalElements(lanTourList.getTotalElements())
+                .totalPage(lanTourList.getTotalPages())
+                .build();
+    }
+
     public static LanTourResponseDTO.PurchaseLanTourResultDTO purchaseLanTourResultDTO(LanTour lanTour, Member member){
         return LanTourResponseDTO.PurchaseLanTourResultDTO.builder()
                 .lanTourName(lanTour.getTitle())

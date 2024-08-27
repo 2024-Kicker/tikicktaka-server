@@ -163,4 +163,32 @@ public class LanTourResponseDTO {
         Long memberId;
         String lanTourName;
     }
+
+    @Getter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class SearchResultPreviewDTO{
+        Long lanTourId;
+        String title;
+        String location;
+        Long price;
+        List<LanTourImageResponseDTO> lanTourImgList;
+        Long salesCount;
+        Long dibsCount;
+        LocalDateTime createdAt;
+    }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class SearchResultPreviewDTOListDTO{
+        List<SearchResultPreviewDTO> searchResultPreviewDTOList;
+        Integer listSize;
+        Integer totalPage;
+        Long totalElements;
+        Boolean isFirst;
+        Boolean isLast;
+    }
 }

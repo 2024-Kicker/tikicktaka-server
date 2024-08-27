@@ -153,4 +153,20 @@ public class LanTourController {
         LanTour lanTour = lanTourCommandService.purchaseLanTour(lanTourId, member);
         return ApiResponse.onSuccess(LanTourConverter.purchaseLanTourResultDTO(lanTour, member));
     }
+
+    @GetMapping(value = "/search/item")
+    @Operation(summary = "랜선투어 상품 검색 API", description = "랜선투어 상품 검색을 위한 API이며, request param 으로 입력 값을 받습니다. \n\n" +
+            "page : 상품 조회 페이지 번호 \n\n title : 랜선투어 상품 이름")
+    @Parameters(value = {
+            @Parameter(name = "page", description = "페이지 번호, 1 이상의 숫자를 입력해주세요."),
+            @Parameter(name = "title", description = "검색 하고자 하는 상품의 이름을 입력해주세요.")
+    })
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
+    })
+    public ApiResponse<LanTourResponseDTO.SearchResultPreviewDTOListDTO> searchLanTour(@RequestParam(name = "title") String title,
+                                                                                       @RequestParam(name = "page") Integer page){
+        Page<LanTour> lanTourPage = lanTourQueryService.searchLanTour(title, page - 1);
+        return ApiResponse.onSuccess(LanTourConverter.searchResultPreviewDTOListDTO(lanTourPage));
+    }
 }
