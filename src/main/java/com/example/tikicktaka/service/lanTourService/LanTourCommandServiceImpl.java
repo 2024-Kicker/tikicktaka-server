@@ -9,16 +9,20 @@ import com.example.tikicktaka.domain.lanTour.Inquiry;
 import com.example.tikicktaka.domain.lanTour.InquiryAnswer;
 import com.example.tikicktaka.domain.lanTour.LanTour;
 import com.example.tikicktaka.domain.lanTour.Review;
+import com.example.tikicktaka.domain.mapping.lanTour.LanTourPurchase;
 import com.example.tikicktaka.domain.member.Member;
 import com.example.tikicktaka.repository.lanTour.InquiryAnswerRepository;
 import com.example.tikicktaka.repository.lanTour.InquiryRepository;
 import com.example.tikicktaka.repository.lanTour.LanTourRepository;
 import com.example.tikicktaka.repository.lanTour.ReviewRepository;
+import com.example.tikicktaka.repository.member.LanTourPurchaseRepository;
 import com.example.tikicktaka.web.dto.lanTour.LanTourRequestDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -27,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class LanTourCommandServiceImpl implements LanTourCommandService{
 
     private final LanTourRepository lanTourRepository;
+    private final LanTourPurchaseRepository lanTourPurchaseRepository;
     private final ReviewRepository reviewRepository;
     private final InquiryRepository inquiryRepository;
     private final InquiryAnswerRepository inquiryAnswerRepository;
@@ -63,5 +68,28 @@ public class LanTourCommandServiceImpl implements LanTourCommandService{
         inquiry.setInquiryStatus(InquiryStatus.COMPLETE);
 
         return inquiryAnswer;
+    }
+
+    @Override
+    @Transactional
+    public LanTour purchaseLanTour(Long lanTourId, Member member) {
+        LanTour lanTour = lanTourRepository.findById(lanTourId).orElseThrow(() -> new LanTourHandler(ErrorStatus.LAN_TOUR_NOT_FOUND));
+
+        Optional<LanTourPurchase> purchaseRecord = lanTourPurchaseRepository.findByMemberAndLanTour(member, lanTour);
+
+        if(member.getPoint() < lanTour.getPrice()){
+            throw new MemberHandler(ErrorStatus.MEMBER_NOT_ENOUGH_COIN);
+        } else{
+            member.spendCoin(lanTour.getPrice());
+        }
+
+        if (purchaseRecord.isPresent()){
+            throw new LanTourHandler(ErrorStatus.LAN_TOUR_ALREADY_PURCHASE);
+        } else{
+            LanTourPurchase lanTourPurchase = LanTourConverter.purchaseLanTourDTO(lanTour, member);
+            lanTourPurchaseRepository.save(lanTourPurchase);
+        }
+
+        return lanTour;
     }
 }

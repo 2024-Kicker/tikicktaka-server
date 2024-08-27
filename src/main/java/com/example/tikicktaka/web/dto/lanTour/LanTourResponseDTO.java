@@ -153,4 +153,14 @@ public class LanTourResponseDTO {
         String contents;
         LocalDateTime createdAt;
     }
+
+    @Getter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class PurchaseLanTourResultDTO{
+        Long lanTourId;
+        Long memberId;
+        String lanTourName;
+    }
 }

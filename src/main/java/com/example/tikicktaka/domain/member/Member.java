@@ -136,6 +136,11 @@ public class Member extends BaseDateTimeEntity {
         return this;
     }
 
+    public Member spendCoin(Long price){
+        this.point -= price;
+        return this;
+    }
+
 //    // Method to update additional information after social login
 //    public void updateAdditionalInfo(String name, Date birthday, Gender gender, String phone, List<MemberTerm> memberTermList) {
 //        this.birthday = birthday;
