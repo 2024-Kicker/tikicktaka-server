@@ -13,4 +13,6 @@ public interface LanTourQueryService {
     Page<Review> getReviewList(Long lanTourId, Integer page);
 
     Page<Inquiry> getInquiryList(Long lanTourId, Integer page);
+
+    Page<LanTour> searchLanTour(String title, Integer page);
 }

@@ -67,4 +67,10 @@ public class LanTourQueryServiceImpl implements LanTourQueryService{
         Page<Inquiry> inquiryPage = inquiryRepository.findAllByLanTour(lanTour, PageRequest.of(page, 10, Sort.by(Sort.Direction.DESC, "createdAt")));
         return inquiryPage;
     }
+
+    @Override
+    public Page<LanTour> searchLanTour(String title, Integer page) {
+        Page<LanTour> lanTourPage = lanTourRepository.findAllByTitleContaining(title, PageRequest.of(page, 10, Sort.by(Sort.Direction.DESC, "createdAt")));
+        return lanTourPage;
+    }
 }
