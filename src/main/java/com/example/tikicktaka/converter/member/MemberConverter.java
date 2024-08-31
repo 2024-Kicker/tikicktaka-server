@@ -461,4 +461,10 @@ public class MemberConverter {
                 .totalElements(inquiryList.getTotalElements())
                 .build();
     }
+
+    public static MemberResponseDTO.ChangePasswordResultDTO changePasswordResultDTO(Member member){
+        return MemberResponseDTO.ChangePasswordResultDTO.builder()
+                .nickname(member.getName())
+                .build();
+    }
 }

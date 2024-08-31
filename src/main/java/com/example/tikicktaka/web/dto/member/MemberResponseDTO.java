@@ -356,4 +356,12 @@ public class MemberResponseDTO {
         Boolean isFirst;
         Boolean isLast;
     }
+
+    @Getter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ChangePasswordResultDTO{
+        String nickname;
+    }
 }

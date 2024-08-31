@@ -8,6 +8,7 @@ import com.example.tikicktaka.domain.member.Member;
 import com.example.tikicktaka.domain.member.RegisterSeller;
 import com.example.tikicktaka.web.dto.member.MemberRequestDTO;
 
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -50,4 +51,6 @@ public interface MemberCommandService {
     Dibs dibsLanTour(Long lanTourId, Member member);
 
     Dibs deleteDibsLanTour(Long lanTourId, Member member);
+
+    Member changePassword(MemberRequestDTO.ChangePasswordRequestDTO request);
 }

@@ -117,4 +117,11 @@ public class MemberController {
             return ApiResponse.onFailure("404", "User not found", null);
         }
     }
+
+    @PostMapping("/find/password")
+    @Operation(summary = "비밀번호 찾기 api", description = "request : 이메일, 변경할 비밀번호")
+    public ApiResponse<MemberResponseDTO.ChangePasswordResultDTO> findPassword(@RequestBody @Valid MemberRequestDTO.ChangePasswordRequestDTO request){
+        Member member = memberCommandService.changePassword(request);
+        return ApiResponse.onSuccess(MemberConverter.changePasswordResultDTO(member));
+    }
 }
