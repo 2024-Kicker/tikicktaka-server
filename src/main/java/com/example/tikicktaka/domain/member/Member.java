@@ -136,6 +136,11 @@ public class Member extends BaseDateTimeEntity {
         return this;
     }
 
+    public Member updatePassword(String password){
+        this.password = password;
+        return this;
+    }
+
     public Member spendCoin(Long price){
         this.point -= price;
         return this;

@@ -126,4 +126,12 @@ public class MemberRequestDTO {
         private Long amount;
         private String title;
     }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ChangePasswordRequestDTO{
+        String email;
+        String password;
+    }
 }

@@ -347,4 +347,14 @@ public class MemberCommandServiceImpl implements MemberCommandService{
         return dibs;
     }
 
+    @Override
+    @Transactional
+    public Member changePassword(MemberRequestDTO.ChangePasswordRequestDTO request) {
+        Member member = memberRepository.findByEmail(request.getEmail()).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        member.updatePassword(encoder.encode(request.getPassword()));
+
+        return member;
+    }
+
+
 }
