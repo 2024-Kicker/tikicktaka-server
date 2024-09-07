@@ -52,7 +52,7 @@ public class TravelRegion extends BaseDateTimeEntity {
 
     private Double mapX;
 
-    private Double mayY;
+    private Double mapY;
 
     private Long mLevel;
 
