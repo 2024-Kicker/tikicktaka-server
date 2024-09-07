@@ -11,11 +11,11 @@ import org.hibernate.annotations.DynamicInsert;
 @DynamicInsert
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class TravelLocation extends BaseDateTimeEntity {
+public class TravelRegionEng extends BaseDateTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "travel_location_id")
+    @Column(name = "travel_region_eng_id")
     private Long id;
 
     @Column(columnDefinition = "TEXT")
@@ -63,4 +63,6 @@ public class TravelLocation extends BaseDateTimeEntity {
     private String tel;
 
     private String title;
+
+    private String zipCode;
 }
