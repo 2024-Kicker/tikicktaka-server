@@ -11,5 +11,4 @@ public class TikickTakaApplication {
     public static void main(String[] args) {
         SpringApplication.run(TikickTakaApplication.class, args);
     }
-
 }
