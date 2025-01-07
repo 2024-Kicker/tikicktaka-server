@@ -48,7 +48,10 @@ dependencies {
 
     implementation 'org.springframework.boot:spring-boot-starter-json'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.seleniumhq.selenium:selenium-java:4.0.0'
+    implementation 'org.seleniumhq.selenium:selenium-java:4.19.1'
+    implementation 'io.github.bonigarcia:webdrivermanager:5.8.0'
+    // JSON parsing for storing data in JSON format
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
     implementation 'org.jsoup:jsoup:1.14.3'
     implementation 'org.json:json:20210307'
 

@@ -1,5 +1,6 @@
 package com.example.tikicktaka.service.matchService;
 
+import com.example.tikicktaka.domain.matches.Match;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -23,7 +24,7 @@ public class MatchDetailService {
     // 15분마다 경기 세부 내용 업데이트
     //@Scheduled(fixedRate = 15 * 60 * 1000) // 15분 간격
     @Scheduled(cron = "0 56 20 * * *")
-    @Scheduled(fixedRate = 3 * 60 * 1000)
+    @Scheduled(fixedRate = 15 * 60 * 1000)
     public void updateMatchDetails() {
         LocalDateTime now = LocalDateTime.now();
 

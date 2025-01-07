@@ -1,5 +1,6 @@
 package com.example.tikicktaka.service.matchService;
 
+import com.example.tikicktaka.domain.matches.Match;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -32,7 +33,7 @@ public class MatchUpdateService {
         List<Match> allMatches = matchRepository.findAll();
         for (Match match : allMatches) {
             match.setMatchStatus(false);  // 모든 경기 상태를 false로 초기화
-            matchRepository.save(match); //이거 저장해주는 코드 까먹어서 디비에 초기화가 반영이 안됨
+            matchRepository.save(match); 
 
         }
         System.out.println("초기화 완료");

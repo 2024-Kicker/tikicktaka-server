@@ -7,7 +7,9 @@ import com.example.tikicktaka.apiPayload.exception.handler.MemberHandler;
 import com.example.tikicktaka.converter.member.MemberConverter;
 import com.example.tikicktaka.domain.member.Auth;
 import com.example.tikicktaka.domain.member.Member;
+import com.example.tikicktaka.infra.kakao.KakaoLoginParams;
 import com.example.tikicktaka.repository.member.MemberRepository;
+import com.example.tikicktaka.service.OAuthService.OAuthLoginService;
 import com.example.tikicktaka.service.memberService.MemberCommandService;
 import com.example.tikicktaka.service.memberService.MemberQueryService;
 import com.example.tikicktaka.web.dto.member.MemberRequestDTO;
@@ -95,6 +97,14 @@ public class MemberController {
 
         return ResponseEntity.ok().body(member.getEmail());
     }
+
+//    private final OAuthLoginService oAuthLoginService;
+//    @PostMapping("/kakao")
+//    @Operation(summary = "카카오 소셜 로그인 API", description = "카카오 소셜 로그인 response : authorization Code") //이거 실행 부분 수정하기
+//    public ResponseEntity<MemberResponseDTO.MemberLoginResponseDTO> loginKakao(@RequestBody KakaoLoginParams params) {
+//        MemberResponseDTO.MemberLoginResponseDTO response = oAuthLoginService.login(params);
+//        return ResponseEntity.ok(response);
+//    }
 
     //소셜 로그인 후 회원가입
     @PostMapping("/complete-signup/{memberId}")
