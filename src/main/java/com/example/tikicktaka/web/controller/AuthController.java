@@ -15,13 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/auth")
 public class AuthController {
     private final OAuthLoginService oAuthLoginService;
-
-//    @PostMapping("/kakao")
-//    public ResponseEntity<MemberResponseDTO.KakaoLoginResultDTO> loginKakao(@RequestBody KakaoLoginParams params) {
-//        MemberResponseDTO.KakaoLoginResultDTO result = oAuthLoginService.login(params);
-//        return ResponseEntity.ok(result);
-//    }
-
     @PostMapping("/kakao")
     public ResponseEntity<MemberResponseDTO.MemberLoginResponseDTO> loginKakao(@RequestBody KakaoLoginParams params) {
         MemberResponseDTO.MemberLoginResponseDTO response = oAuthLoginService.login(params);

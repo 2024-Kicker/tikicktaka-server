@@ -79,7 +79,7 @@ public class OAuthLoginService {
         String nickname;
         do {
             int randomNumber = random.nextInt(10000); // 0에서 9999 사이의 랜덤 숫자 생성
-            nickname = "키커" + String.format("%04d", randomNumber);
+            nickname = "이닝" + String.format("%04d", randomNumber);
         } while (memberRepository.existsByName(nickname));
         return nickname;
     }
