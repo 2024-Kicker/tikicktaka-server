@@ -1,4 +1,4 @@
-package com.example.tikicktaka.domain.matches;
+package com.example.tikicktaka.domain.gameSchedule;
 
 import jakarta.persistence.*;
 import lombok.*;

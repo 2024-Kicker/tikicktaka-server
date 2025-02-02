@@ -1,9 +1,7 @@
 package com.example.tikicktaka.service.KBOmatchService;
 
-import com.example.tikicktaka.domain.matches.GameSchedule;
-import com.example.tikicktaka.domain.matches.Match;
+import com.example.tikicktaka.domain.gameSchedule.GameSchedule;
 import com.example.tikicktaka.repository.match.GameScheduleRepository;
-import com.example.tikicktaka.repository.match.MatchRepository;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -20,8 +18,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service

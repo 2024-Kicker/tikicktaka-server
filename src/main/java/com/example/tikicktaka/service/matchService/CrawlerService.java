@@ -12,7 +12,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.example.tikicktaka.domain.matches.Match;
+import com.example.tikicktaka.domain.gameSchedule.Match;
 import com.example.tikicktaka.repository.match.MatchRepository;
 
 import java.time.Duration;
