@@ -1,7 +1,6 @@
 package com.example.tikicktaka.repository.match;
 
-import com.example.tikicktaka.domain.matches.GameSchedule;
-import com.example.tikicktaka.domain.matches.Match;
+import com.example.tikicktaka.domain.gameSchedule.Match;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import java.time.LocalDate;

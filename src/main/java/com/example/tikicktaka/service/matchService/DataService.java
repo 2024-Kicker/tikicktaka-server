@@ -1,7 +1,7 @@
 package com.example.tikicktaka.service.matchService;
 
 import com.example.tikicktaka.repository.match.MatchRepository;
-import com.example.tikicktaka.domain.matches.Match;
+import com.example.tikicktaka.domain.gameSchedule.Match;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

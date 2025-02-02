@@ -1,16 +1,20 @@
 package com.example.tikicktaka.web.controller;
 
-import com.example.tikicktaka.domain.matches.GameSchedule;
+import com.example.tikicktaka.apiPayload.ApiResponse;
+import com.example.tikicktaka.apiPayload.code.status.ErrorStatus;
+import com.example.tikicktaka.converter.gameSchedule.GameScheduleConverter;
+import com.example.tikicktaka.domain.gameSchedule.GameSchedule;
 import com.example.tikicktaka.service.KBOmatchService.GameScheduleService;
+import com.example.tikicktaka.web.dto.match.GameScheduleRequestDTO;
+import com.example.tikicktaka.web.dto.match.GameScheduleResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -43,5 +47,30 @@ public class GameScheduleCrawlerController {
                         schedule.getMatchField(), // 경기 구장
                         schedule.getMatchStatus() ? "경기 완료" : "경기 예정"))
                 .collect(Collectors.toList());
+    }
+
+    // 특정 경기 정보 조회 API
+    // 특정 경기 정보 조회 (JSON 요청)
+    @PostMapping("/searchMatch")
+    @Operation(summary = "특정 경기 정보 조회", description = "request: 날짜, 홈팀, 어웨이팀")
+    public ApiResponse<GameScheduleResponseDTO> getSpecificGameSchedule(@RequestBody GameScheduleRequestDTO request) {
+        String matchDate = request.getMatchDate();
+        String homeTeam = request.getHomeTeam();
+        String awayTeam = request.getAwayTeam();
+
+        if (matchDate == null || homeTeam == null || awayTeam == null) {
+            return ApiResponse.onFailure(ErrorStatus.GAME_SCHEDULE_REQUIRED_FIELDS_MISSING.getCode(),
+                    ErrorStatus.GAME_SCHEDULE_REQUIRED_FIELDS_MISSING.getMessage(), null);
+        }
+        GameSchedule gameSchedule = gameScheduleService.findGameScheduleByDateAndTeams(
+                LocalDate.parse(matchDate), homeTeam, awayTeam);
+
+        if (gameSchedule != null) {
+            GameScheduleResponseDTO responseDTO = GameScheduleConverter.toGameScheduleResponseDTO(gameSchedule);
+            return ApiResponse.onSuccess(responseDTO);
+        } else {
+            return ApiResponse.onFailure(ErrorStatus.GAME_SCHEDULE_NOT_FOUND.getCode(),
+                    ErrorStatus.GAME_SCHEDULE_NOT_FOUND.getMessage(), null);
+        }
     }
 }

@@ -1,9 +1,7 @@
 package com.example.tikicktaka.repository.match;
 
-import com.example.tikicktaka.domain.matches.GameSchedule;
-import com.example.tikicktaka.domain.matches.Match;
+import com.example.tikicktaka.domain.gameSchedule.GameSchedule;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -19,4 +17,7 @@ public interface GameScheduleRepository extends JpaRepository<GameSchedule, Long
 
     // 모든 경기의 상태를 가져오기 (예시: status가 false로 되어 있는 경기들만 가져오기)
     List<GameSchedule> findByMatchStatusFalse();
+
+    //특정 경기 정보를 가져오기
+    GameSchedule findByMatchDateAndHomeTeamAndAwayTeam(LocalDate matchDate, String homeTeam, String awayTeam);
 }

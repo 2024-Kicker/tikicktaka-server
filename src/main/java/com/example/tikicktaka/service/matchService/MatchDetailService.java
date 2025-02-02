@@ -1,11 +1,10 @@
 package com.example.tikicktaka.service.matchService;
 
-import com.example.tikicktaka.domain.matches.Match;
+import com.example.tikicktaka.domain.gameSchedule.Match;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import com.example.tikicktaka.domain.matches.Match;
 import com.example.tikicktaka.repository.match.MatchRepository;
 
 import java.time.LocalDateTime;

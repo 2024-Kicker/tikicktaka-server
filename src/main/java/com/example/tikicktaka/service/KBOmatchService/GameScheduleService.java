@@ -1,6 +1,6 @@
 package com.example.tikicktaka.service.KBOmatchService;
 
-import com.example.tikicktaka.domain.matches.GameSchedule;
+import com.example.tikicktaka.domain.gameSchedule.GameSchedule;
 import com.example.tikicktaka.repository.match.GameScheduleRepository;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -146,6 +146,10 @@ public class GameScheduleService {
     // 모든 KBO 경기 일정 조회 메서드 추가
     public List<GameSchedule> getAllGameSchedules() {
         return gameScheduleRepository.findAll();
+    }
+
+    public GameSchedule findGameScheduleByDateAndTeams(LocalDate matchDate, String homeTeam, String awayTeam) {
+        return gameScheduleRepository.findByMatchDateAndHomeTeamAndAwayTeam(matchDate, homeTeam, awayTeam);
     }
 }
 

@@ -1,4 +1,4 @@
-package com.example.tikicktaka.domain.matches;
+package com.example.tikicktaka.domain.gameSchedule;
 
 import lombok.*;
 
@@ -6,7 +6,6 @@ import jakarta.persistence.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 @Entity
 @Table(name = "matches")

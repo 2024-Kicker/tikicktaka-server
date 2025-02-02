@@ -41,8 +41,11 @@ public enum ErrorStatus implements BaseErrorCode {
     //LanTour
     LAN_TOUR_PURCHASE_NOT_FOUND(HttpStatus.NOT_FOUND,"LANTOUR4001","존재하지 않는 구매내역 입니다."),
     LAN_TOUR_NOT_FOUND(HttpStatus.NOT_FOUND, "LANTOUR4002", "존재하지 않는 상품입니다."),
-    LAN_TOUR_ALREADY_PURCHASE(HttpStatus.BAD_REQUEST, "LANTOUR4003", "이미 구매한 상품입니다.");
+    LAN_TOUR_ALREADY_PURCHASE(HttpStatus.BAD_REQUEST, "LANTOUR4003", "이미 구매한 상품입니다."),
 
+    // Game Schedule Errors
+    GAME_SCHEDULE_REQUIRED_FIELDS_MISSING(HttpStatus.BAD_REQUEST, "GAMESCHEDULE4001", "날짜, 홈팀, 어웨이팀 정보를 모두 입력해야 합니다."),
+    GAME_SCHEDULE_NOT_FOUND(HttpStatus.NOT_FOUND, "GAMESCHEDULE4002", "해당 경기 정보를 찾을 수 없습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;
