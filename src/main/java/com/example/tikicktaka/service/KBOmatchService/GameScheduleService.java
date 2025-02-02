@@ -29,9 +29,16 @@ public class GameScheduleService {
         // 크롬 드라이버 옵션 설정 (헤드리스 모드)
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--headless", "--no-sandbox");
+        LocalDate today = LocalDate.now();
+
 
         WebDriver driver = new ChromeDriver(options);
         driver.get(URL);
+
+        //년도 설정
+        Select selectYear = new Select(driver.findElement(By.id("ddlYear"))); //연도 설정
+        selectYear.selectByValue(String.format("%02d", today.getYear()));
+        //select1.selectByValue(String.format("%02d", 2024));
 
         // 1월부터 12월까지 순차적으로 크롤링 수행
         for (int month = 3; month <= 12; month++) {
@@ -95,7 +102,7 @@ public class GameScheduleService {
 
                 // 현재 연도를 자동으로 가져옴
                 int currentYear = LocalDate.now().getYear();  // 현재 연도 (예: 2025)
-
+                //int currentYear = LocalDate.of(2024,4,2).getYear();
                 // 날짜에서 요일을 제거하고 yyyy-MM-dd 형태로 변환
                 //cleanedDate = gameDate.split("\\(")[0].replace(".", "-"); // "03-22"
                 cleanedDate = previousGameDate;
