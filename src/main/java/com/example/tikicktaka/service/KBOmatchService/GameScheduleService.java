@@ -142,6 +142,11 @@ public class GameScheduleService {
 
         driver.quit();
     }
+
+    // 모든 KBO 경기 일정 조회 메서드 추가
+    public List<GameSchedule> getAllGameSchedules() {
+        return gameScheduleRepository.findAll();
+    }
 }
 
 
