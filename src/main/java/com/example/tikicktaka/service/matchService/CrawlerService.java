@@ -45,8 +45,7 @@ public class CrawlerService {
                     driver.get(frame.getAttribute("src"));
                 }
             }
-
-//            // JavaScript 실행
+    //            // JavaScript 실행
 //            JavascriptExecutor jsExecutor = (JavascriptExecutor) driver;
 //            jsExecutor.executeScript("moveMainFrame('0025')");
 //
