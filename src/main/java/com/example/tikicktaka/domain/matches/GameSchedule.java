@@ -37,7 +37,7 @@ public class GameSchedule {
     @Column(name = "score")
     private String score;
 
-    @Column(nullable = false)
+    @Column(name = "match_staus", nullable = false)
     private Boolean matchStatus;
 }
 
