@@ -11,10 +11,10 @@ public class GameScheduleRequestDTO {
     @Schema(description = "경기 날짜", example = "2025-06-15")
     private String matchDate;
 
-    @Schema(description = "홈 팀")
+    @Schema(description = "홈 팀", example = "두산")
     private String homeTeam;
 
-    @Schema(description = "어웨이 팀")
+    @Schema(description = "어웨이 팀", example = "키움")
     private String awayTeam;
 }
 
