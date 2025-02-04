@@ -23,6 +23,8 @@ public class Team extends BaseDateTimeEntity {
 
     private String teamName;
 
+    private String stadiumName;
+
     @Column(columnDefinition = "TEXT")
     private String teamInfo;
 

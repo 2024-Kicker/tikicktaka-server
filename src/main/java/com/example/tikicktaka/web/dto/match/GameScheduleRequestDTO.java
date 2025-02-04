@@ -16,5 +16,6 @@ public class GameScheduleRequestDTO {
 
     @Schema(description = "어웨이 팀", example = "키움")
     private String awayTeam;
+
 }
 

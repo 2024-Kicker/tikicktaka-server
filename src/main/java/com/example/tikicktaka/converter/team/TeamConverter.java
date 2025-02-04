@@ -17,6 +17,7 @@ public class TeamConverter {
                 .teamId(team.getId())
                 .teamName(team.getTeamName())
                 .teamInfo(team.getTeamInfo())
+                .stadiumName(team.getStadiumName())
                 .location(team.getLocation())
                 .build();
     }
@@ -41,6 +42,7 @@ public class TeamConverter {
                 .teamId(team.getId())
                 .teamName(team.getTeamName())
                 .location(team.getLocation())
+                .stadiumName(team.getStadiumName())
                 .logoUrl(team.getTeamImg().getLogoUrl())
                 .stadiumUrl(team.getTeamImg().getStadiumUrl())
                 .createdAt(team.getCreatedAt())
