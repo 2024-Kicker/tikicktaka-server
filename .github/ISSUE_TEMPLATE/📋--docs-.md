@@ -2,7 +2,7 @@
 name: "\U0001F4CB [docs]"
 about: API 명세서 등 문서 관련 템플릿입니다.
 title: "\U0001F4CB [docs]"
-labels: ":memo: documentation"
+labels: ''
 assignees: ''
 
 ---

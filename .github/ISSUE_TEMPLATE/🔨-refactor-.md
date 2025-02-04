@@ -2,7 +2,7 @@
 name: "\U0001F528[refactor]"
 about: 리팩토링 관련 템플릿입니다.
 title: "\U0001F528[refactor]"
-labels: ":recycle: refactor"
+labels: ''
 assignees: ''
 
 ---

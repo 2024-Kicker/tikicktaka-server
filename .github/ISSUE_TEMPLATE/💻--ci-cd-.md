@@ -2,7 +2,7 @@
 name: "\U0001F4BB [ci/cd]"
 about: "\bCI/CD 관련 설정, 개선, 문제 해결을 위한 이슈 템플릿입니다."
 title: "\U0001F4BB [ci/cd]"
-labels: ":computer: ci"
+labels: ''
 assignees: ''
 
 ---
