@@ -15,11 +15,12 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/match")
-@Tag(name = "Match", description = "KBO 경기 일정 크롤링 관련 API")
+@Tag(name = "Match", description = "KBO 경기 일정 관련 API")
 public class GameScheduleCrawlerController {
 
     @Autowired
@@ -67,6 +68,29 @@ public class GameScheduleCrawlerController {
 
         if (gameSchedule != null) {
             GameScheduleResponseDTO responseDTO = GameScheduleConverter.toGameScheduleResponseDTO(gameSchedule);
+            return ApiResponse.onSuccess(responseDTO);
+        } else {
+            return ApiResponse.onFailure(ErrorStatus.GAME_SCHEDULE_NOT_FOUND.getCode(),
+                    ErrorStatus.GAME_SCHEDULE_NOT_FOUND.getMessage(), null);
+        }
+    }
+
+    // 팀별 다음 경기 일정 반환 API
+    //JSON 입력으로 팀 이름을 받아 다음 경기 반환
+    @GetMapping("/nextMatch")
+    @Operation(summary = "특정 팀 다음 경기 정보 조회", description = "parameter: 팀 이름 간략하게 (두산, 키움, 롯데...) ")
+    public ApiResponse<GameScheduleResponseDTO> getNextMatch(@RequestParam String teamName) {
+        Optional<GameSchedule> nextMatch = gameScheduleService.findNextMatchByTeamName(teamName);
+
+        if (nextMatch.isPresent()) {
+            GameSchedule gameSchedule = nextMatch.get();
+            GameScheduleResponseDTO responseDTO = new GameScheduleResponseDTO(
+                    gameSchedule.getMatchDate(),
+                    gameSchedule.getHomeTeam(),
+                    gameSchedule.getAwayTeam(),
+                    gameSchedule.getMatchField()
+            );
+
             return ApiResponse.onSuccess(responseDTO);
         } else {
             return ApiResponse.onFailure(ErrorStatus.GAME_SCHEDULE_NOT_FOUND.getCode(),

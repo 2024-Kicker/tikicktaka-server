@@ -19,6 +19,7 @@ public class TeamResponseDTO {
         Long teamId;
         String teamName;
         String teamInfo;
+        String stadiumName;
         String location;
     }
 
@@ -55,6 +56,7 @@ public class TeamResponseDTO {
         Long teamId;
         String teamName;
         String location;
+        String stadiumName;
         String logoUrl;
         String stadiumUrl;
         LocalDateTime createdAt;

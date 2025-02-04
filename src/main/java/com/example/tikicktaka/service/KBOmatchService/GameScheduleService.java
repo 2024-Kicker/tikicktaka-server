@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.time.format.DateTimeFormatter;
 
@@ -150,6 +151,13 @@ public class GameScheduleService {
 
     public GameSchedule findGameScheduleByDateAndTeams(LocalDate matchDate, String homeTeam, String awayTeam) {
         return gameScheduleRepository.findByMatchDateAndHomeTeamAndAwayTeam(matchDate, homeTeam, awayTeam);
+    }
+
+    public Optional<GameSchedule> findNextMatchByTeamName(String teamName) {
+        LocalDate currentDate = LocalDate.now();
+        return gameScheduleRepository.findFirstByHomeTeamOrAwayTeamAndMatchDateGreaterThanEqualOrderByMatchDateAsc(
+                teamName, teamName, currentDate
+        );
     }
 }
 

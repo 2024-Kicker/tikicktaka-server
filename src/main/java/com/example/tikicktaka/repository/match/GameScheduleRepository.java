@@ -2,9 +2,11 @@ package com.example.tikicktaka.repository.match;
 
 import com.example.tikicktaka.domain.gameSchedule.GameSchedule;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public interface GameScheduleRepository extends JpaRepository<GameSchedule, Long> {
     List<GameSchedule> findByMatchDate(LocalDate matchDate);
@@ -20,4 +22,7 @@ public interface GameScheduleRepository extends JpaRepository<GameSchedule, Long
 
     //특정 경기 정보를 가져오기
     GameSchedule findByMatchDateAndHomeTeamAndAwayTeam(LocalDate matchDate, String homeTeam, String awayTeam);
-}
+
+    Optional<GameSchedule> findFirstByHomeTeamOrAwayTeamAndMatchDateGreaterThanEqualOrderByMatchDateAsc(
+            String homeTeam, String awayTeam, LocalDate matchDate
+    );}

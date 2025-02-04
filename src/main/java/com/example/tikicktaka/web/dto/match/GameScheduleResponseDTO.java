@@ -23,4 +23,11 @@ public class GameScheduleResponseDTO {
         this.score = score;
         this.matchField = matchField;
     }
+
+    public GameScheduleResponseDTO(LocalDate matchDate, String homeTeam, String awayTeam, String matchField) {
+        this.matchDate = matchDate;
+        this.homeTeam = homeTeam;
+        this.awayTeam = awayTeam;
+        this.matchField = matchField;
+    }
 }
