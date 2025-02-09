@@ -73,11 +73,40 @@ public class CompanionPostServiceImpl implements CompanionPostService {
             // 이미지 저장
             companionPostImageRepository.saveAll(images);
 
-            // ✅ 첫 번째 이미지를 대표 이미지(썸네일)로 설정
+            // 첫 번째 이미지를 대표 이미지(썸네일)로 설정
             if (!images.isEmpty()) {
                 post.setThumbnailUrl(images.get(0).getImageUrl());
             }
         }
+
+        return post;
+    }
+
+    @Override
+    @Transactional
+    public CompanionPost deletePost(Long postId, Long memberId) {
+        //게시글 조회
+        CompanionPost post = companionPostRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
+
+        // 본인 게시글인지 확인
+        if (!post.getAuthor().getId().equals(memberId)) {
+            throw new IllegalStateException("본인이 작성한 게시글만 삭제할 수 있습니다.");
+        }
+
+        // 게시글에 연결된 이미지 리스트 조회
+        List<CompanionPostImg> images = companionPostImageRepository.findByCompanionPost(post);
+
+        if (images != null && !images.isEmpty()) {
+            //S3에서 이미지 삭제
+            images.forEach(image -> utilService.deleteS3Img(image.getImageUrl()));
+
+            //DB에서 이미지 삭제
+            companionPostImageRepository.deleteAll(images);
+        }
+
+        //DB에서 게시글 삭제
+        companionPostRepository.delete(post);
 
         return post;
     }

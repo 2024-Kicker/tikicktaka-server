@@ -65,4 +65,19 @@ public class CompanionPostController {
         return ApiResponse.onSuccess(responseDTO);
     }
 
+    @DeleteMapping("/{postId}")
+    @Operation(summary = "게시글 삭제", description = "본인이 작성한 게시글을 삭제합니다.")
+    public ApiResponse<CompanionPostResponseDTO> deletePost(@PathVariable Long postId, Authentication authentication) {
+        if (authentication == null || authentication.getName() == null) {
+            return ApiResponse.onFailure(ErrorStatus._UNAUTHORIZED.getCode(),
+                    ErrorStatus._UNAUTHORIZED.getMessage(),
+                    null);
+        }
+
+        Long memberId = Long.valueOf(authentication.getName());
+        CompanionPost deletedPost = postService.deletePost(postId, memberId);
+
+        return ApiResponse.onSuccess(new CompanionPostResponseDTO(deletedPost));
+    }
+
 }
