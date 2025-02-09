@@ -1,5 +1,5 @@
-blank_issues_enabled: false
+blank_issues_enabled: true
 contact_links:
   - name: ❓ 기타 문의
-    url: https://github.com/your-repo/issues/new
+    url: https://github.com/2024-Kicker/tikicktaka-server/issues/new
     about: 버그나 기능 요청이 아닌 기타 문의는 여기에서 작성하세요.
