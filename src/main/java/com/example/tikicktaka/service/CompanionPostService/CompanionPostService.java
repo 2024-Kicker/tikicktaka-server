@@ -12,7 +12,7 @@ public interface CompanionPostService {
 
 
     @Transactional
-    CompanionPost createPostWithImages(String title, String content, Long memberId, List<MultipartFile> imageFiles, CompanionPost.PostStatus status);
+    CompanionPost createPostWithImages(String title, String content, Long memberId, List<MultipartFile> imageFiles, CompanionPost.PostStatus status, CompanionPost.TravelStatus travelStatus);
 
     @Transactional
     CompanionPost deletePost (Long postId, Long memberID); //게시글 삭제 기능

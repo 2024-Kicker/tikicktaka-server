@@ -36,6 +36,9 @@ public class CompanionPost {
     @Enumerated(EnumType.STRING)
     private PostStatus status;
 
+    @Enumerated(EnumType.STRING)
+    private TravelStatus travelStatus;
+
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
@@ -68,6 +71,12 @@ public class CompanionPost {
         FINDING, // 동행 구하는 중
         FOUND    // 동행 구했음
     }
+
+    public enum TravelStatus {
+        Baseball, // 동행 구하는 중
+        Travel    // 동행 구했음
+    }
+
     public List<CompanionPostImg> getImages() {
         return images != null ? images : new ArrayList<>();
     }

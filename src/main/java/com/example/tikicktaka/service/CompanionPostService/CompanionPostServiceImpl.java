@@ -37,7 +37,7 @@ public class CompanionPostServiceImpl implements CompanionPostService {
 
     @Override
     @Transactional
-    public CompanionPost createPostWithImages(String title, String content, Long memberId, List<MultipartFile> imageFiles, CompanionPost.PostStatus status) {
+    public CompanionPost createPostWithImages(String title, String content, Long memberId, List<MultipartFile> imageFiles, CompanionPost.PostStatus status, CompanionPost.TravelStatus travelStatus) {
         // Member 찾기
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("Member not found with ID: " + memberId));
@@ -47,6 +47,7 @@ public class CompanionPostServiceImpl implements CompanionPostService {
                 .title(title)
                 .content(content)
                 .status(status)
+                .travelStatus(travelStatus)
                 .author(member)
                 .build();
 
