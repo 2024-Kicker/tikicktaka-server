@@ -1,5 +1,6 @@
 package com.example.tikicktaka.service;
 
+import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.example.tikicktaka.aws.s3.AmazonS3Manager;
 import com.example.tikicktaka.domain.images.Uuid;
 import com.example.tikicktaka.repository.UuidRepository;
@@ -25,5 +26,9 @@ public class UtilService {
         String imgUrl = amazonS3Manager.uploadFile(path, saveUuid, multipartFile);
 
         return imgUrl;
+    }
+
+    public void deleteS3Img(String imageUrl) {
+        amazonS3Manager.deleteFile(imageUrl);
     }
 }

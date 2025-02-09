@@ -1,6 +1,7 @@
 package com.example.tikicktaka.aws.s3;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.example.tikicktaka.config.AmazonConfig;
@@ -55,6 +56,24 @@ public class AmazonS3Manager {
         }
 
         return amazonS3.getUrl(amazonConfig.getBucket(), keyName).toString();
+    }
+
+    public void deleteFile(String imageUrl) {
+        try {
+            String bucketName = amazonConfig.getBucket();
+            String keyName = extractKeyFromUrl(imageUrl);
+
+            amazonS3.deleteObject(new DeleteObjectRequest(bucketName, keyName));
+            log.info("S3 이미지 삭제 완료: {}", imageUrl);
+        } catch (Exception e) {
+            log.error("S3 이미지 삭제 실패: {}", imageUrl, e);
+            throw new RuntimeException("파일 삭제 중 오류가 발생했습니다.");
+        }
+    }
+
+    private String extractKeyFromUrl(String imageUrl) {
+        String bucketName = amazonConfig.getBucket();
+        return imageUrl.replace("https://" + bucketName + ".s3.amazonaws.com/", "");
     }
 
     public String generateMemberKeyName(Uuid uuid) {
