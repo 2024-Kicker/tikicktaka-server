@@ -40,6 +40,7 @@ public class CompanionPostController {
                                                             @RequestParam String content,
                                                             @RequestParam(required = false) List<MultipartFile> imageFiles, // 여러 이미지 처리
                                                             @RequestParam CompanionPost.PostStatus status,
+                                                            @RequestParam CompanionPost.TravelStatus travelStatus,
                                                             Authentication authentication) {
 
         // 인증된 사용자 정보 가져오기
@@ -57,7 +58,7 @@ public class CompanionPostController {
         );
 
         // 게시글 생성
-        CompanionPost post = postService.createPostWithImages(title, content, memberId, imageFiles, status);
+        CompanionPost post = postService.createPostWithImages(title, content, memberId, imageFiles, status, travelStatus);
 
         // 게시글을 응답 DTO로 변환
         CompanionPostResponseDTO responseDTO = new CompanionPostResponseDTO(post);
