@@ -27,6 +27,8 @@ public class AmazonS3Manager {
     public String uploadFile(String path, Uuid uuid, MultipartFile file){
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentLength(file.getSize());
+        metadata.setContentType(file.getContentType());
+
         String keyName = "";
         switch (path) {
             case "member":
@@ -38,8 +40,13 @@ public class AmazonS3Manager {
             case "stadium":
                 keyName = generateStadiumKeyName(uuid);
                 break;
+            case "companionPost":
+                keyName = generateCompanionPostKeyName(uuid);
+                break;
             default:
                 keyName = "./" + uuid.getUuid();
+
+
         }
         try {
             amazonS3.putObject(new PutObjectRequest(amazonConfig.getBucket(), keyName, file.getInputStream(), metadata));
@@ -61,5 +68,6 @@ public class AmazonS3Manager {
     public String generateStadiumKeyName(Uuid uuid) {
         return amazonConfig.getStadiumPath() + '/' + uuid.getUuid();
     }
+    public String generateCompanionPostKeyName(Uuid uuid){ return amazonConfig.getCompanionPostPath() + '/' + uuid.getUuid();}
 
 }
