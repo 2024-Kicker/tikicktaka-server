@@ -1,4 +1,4 @@
-blank_issues_enabled: true
+blank_issues_enabled: false
 contact_links:
   - name: ❓ 기타 문의
     url: https://github.com/2024-Kicker/tikicktaka-server/issues/new
