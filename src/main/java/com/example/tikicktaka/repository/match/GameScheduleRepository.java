@@ -8,7 +8,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-public interface GameScheduleRepository extends JpaRepository<GameSchedule, Long> {
+public interface  GameScheduleRepository extends JpaRepository<GameSchedule, Long> {
     List<GameSchedule> findByMatchDate(LocalDate matchDate);
 
     // 진행 중인 경기를 가져오는 쿼리 (matchStatus가 true인 경우)

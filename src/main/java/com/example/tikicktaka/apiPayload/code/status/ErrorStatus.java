@@ -47,6 +47,8 @@ public enum ErrorStatus implements BaseErrorCode {
     GAME_SCHEDULE_REQUIRED_FIELDS_MISSING(HttpStatus.BAD_REQUEST, "GAMESCHEDULE4001", "정보를 모두 입력해야 합니다."),
     GAME_SCHEDULE_NOT_FOUND(HttpStatus.NOT_FOUND, "GAMESCHEDULE4002", "해당 경기 정보를 찾을 수 없습니다.");
 
+
+
     private final HttpStatus httpStatus;
     private final String code;
     private final String message;
