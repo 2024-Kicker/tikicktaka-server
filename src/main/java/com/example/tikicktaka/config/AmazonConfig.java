@@ -39,6 +39,9 @@ public class AmazonConfig {
     @Value("${cloud.aws.s3.path.stadium}")
     private String stadiumPath;
 
+    @Value("companionPost")
+    private String companionPostPath;
+
     @PostConstruct
     public void init() { this.awsCredentials = new BasicAWSCredentials(accessKey, secretKey); }
 
