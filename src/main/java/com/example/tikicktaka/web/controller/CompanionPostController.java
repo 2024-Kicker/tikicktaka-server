@@ -7,11 +7,16 @@ import com.example.tikicktaka.domain.companionPost.CompanionPost;
 import com.example.tikicktaka.service.CompanionPostService.CompanionPostService;
 import com.example.tikicktaka.service.memberService.MemberCommandService;
 import com.example.tikicktaka.service.memberService.MemberQueryService;
+import com.example.tikicktaka.web.dto.companionPost.CompanionPostListResponseDTO;
 import com.example.tikicktaka.web.dto.companionPost.CompanionPostResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,6 +24,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 import static org.bouncycastle.asn1.x500.style.RFC4519Style.member;
@@ -79,6 +85,15 @@ public class CompanionPostController {
         CompanionPost deletedPost = postService.deletePost(postId, memberId);
 
         return ApiResponse.onSuccess(new CompanionPostResponseDTO(deletedPost));
+    }
+
+    @GetMapping("/list")
+    @Operation(summary = "게시글 목록 조회", description = "모든 게시글 목록을 조회합니다.")
+    public ApiResponse<Page<CompanionPostListResponseDTO>> getPostList(
+            @ParameterObject
+            @PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        Page<CompanionPostListResponseDTO> postList = postService.getPostList(pageable);
+        return ApiResponse.onSuccess(postList);
     }
 
 }

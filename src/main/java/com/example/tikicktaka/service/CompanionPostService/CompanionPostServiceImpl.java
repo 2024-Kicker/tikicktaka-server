@@ -7,13 +7,17 @@ import com.example.tikicktaka.repository.companionPost.CompanionPostRepository;
 import com.example.tikicktaka.repository.companionPost.CompanionPostImageRepository;
 import com.example.tikicktaka.repository.member.MemberRepository;
 import com.example.tikicktaka.service.UtilService;
+import com.example.tikicktaka.web.dto.companionPost.CompanionPostListResponseDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-import jakarta.transaction.Transactional;
+//import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import org.springframework.data.domain.Pageable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -110,6 +114,14 @@ public class CompanionPostServiceImpl implements CompanionPostService {
         companionPostRepository.delete(post);
 
         return post;
+    }
+
+    //@Transactional(readOnly = true)
+    @Override
+    @Transactional(readOnly = true)
+    public Page<CompanionPostListResponseDTO> getPostList(Pageable pageable) {
+        return companionPostRepository.findAllByOrderByCreatedAtDesc(pageable)
+                .map(CompanionPostListResponseDTO::new);
     }
 
 }
