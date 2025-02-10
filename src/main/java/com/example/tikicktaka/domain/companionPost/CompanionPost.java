@@ -85,7 +85,7 @@ public class CompanionPost {
         images.add(image);
         image.setCompanionPost(this);
 
-        // ✅ 첫 번째 이미지를 썸네일로 저장
+        // 첫 번째 이미지를 썸네일로 저장
         if (thumbnailUrl == null) {
             this.thumbnailUrl = image.getImageUrl();
         }
