@@ -25,20 +25,20 @@ import com.example.tikicktaka.repository.lanTour.LanTourRepository;
 import com.example.tikicktaka.repository.member.*;
 import com.example.tikicktaka.repository.team.TeamRepository;
 import com.example.tikicktaka.service.UtilService;
+import com.example.tikicktaka.service.smsService.SmsService;
 import com.example.tikicktaka.web.dto.member.MemberRequestDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import static com.example.tikicktaka.config.springSecurity.utils.JwtUtil.createJwt;
 
@@ -48,6 +48,7 @@ import static com.example.tikicktaka.config.springSecurity.utils.JwtUtil.createJ
 @Transactional
 public class MemberCommandServiceImpl implements MemberCommandService{
 
+    private static final long SMS_EXPIRATION_TIME = 5;
     private final MemberRepository memberRepository;
     private final TermRepository termRepository;
     private final TeamRepository teamRepository;
@@ -62,6 +63,8 @@ public class MemberCommandServiceImpl implements MemberCommandService{
     private final AuthRepository authRepository;
     private final MailConfig mailConfig;
     private final UtilService utilService;
+    private final StringRedisTemplate redisTemplate;
+    private final SmsService smsService;
 
     @Value("${jwt.token.secret}")
     private String key;
@@ -96,12 +99,17 @@ public class MemberCommandServiceImpl implements MemberCommandService{
         if (existingMember != null) {
             //탈퇴한 회원이 다시 회원가입하는 경우
             existingMember.setMemberStatus(MemberStatus.ACTIVE);
+            String encryptedPasssword = encoder.encode(request.getPassword());
             memberRepository.reregister(existingMember.getId(), request.getNickname(),
-                    request.getPassword(), request.getEmail(),
-                    request.getBirthday(), request.getGender(), request.getPhone());
+                    encryptedPasssword, request.getEmail(),
+                    //request.getBirthday(),
+                    request.getGender());
+                    //request.getPhone());
+            existingMember.updateIntroduceMessage(request.getIntroduceMessage());
             return existingMember;
         } else {
             member = MemberConverter.toMember(request, encoder);
+            member.updateIntroduceMessage(request.getIntroduceMessage());
         }
 
         // 약관 동의 저장 로직
@@ -114,7 +122,6 @@ public class MemberCommandServiceImpl implements MemberCommandService{
         memberTermList.forEach(memberTerm -> {
             memberTerm.setMember(member);
         });
-
         memberRepository.save(member);
         return member;
     }
@@ -175,6 +182,35 @@ public class MemberCommandServiceImpl implements MemberCommandService{
     }
 
     @Override
+    public Auth sendSmsAuthCode(String phoneNumber) {
+        String verificationCode = String.valueOf(new Random().nextInt(900000) + 100000);
+        smsService.sendSms(phoneNumber, verificationCode); // SMS 전송
+        redisTemplate.opsForValue().set(phoneNumber, verificationCode, SMS_EXPIRATION_TIME, TimeUnit.MINUTES); // Redis에 저장
+        Optional<Auth> existingAuth = authRepository.findByPhone(phoneNumber);
+        existingAuth.ifPresent(authRepository::delete);
+
+        Auth auth = MemberConverter.toSmsAuth(phoneNumber, verificationCode);
+        authRepository.save(auth);
+
+        return auth;
+    }
+
+    @Override
+    public Boolean confirmSmsAuth(MemberRequestDTO.SmsAuthConfirmDTO request) {
+        String storedCode = redisTemplate.opsForValue().get(request.getPhoneNumber());
+        if (storedCode == null) {
+            throw new MemberHandler(ErrorStatus.MEMBER_SMS_AUTH_EXPIRED); // 인증번호 불일치 or 만료
+        }
+        if (!storedCode.equals(request.getCode())) {
+            throw new MemberHandler(ErrorStatus.MEMBER_SMS_AUTH_INVALID); // 인증번호 불일치
+        }
+        redisTemplate.delete(request.getPhoneNumber()); //인증 성공 시 Redis에서 삭제
+
+        return true;
+    }
+
+
+    @Override
     @Transactional
     public Auth sendEmailAuth(String email) {
 
@@ -231,21 +267,21 @@ public class MemberCommandServiceImpl implements MemberCommandService{
         return memberTeamRepository.save(memberTeam);//Member Team repository 생성
     }
 
-    @Transactional
-    @Override
-    public Member completeSignup(Long memberId, MemberRequestDTO.CompleteSignupDTO request) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
-
-        // Update member with additional info
-        member.updateAdditionalInfo(
-                request.getBirthday(),
-                request.getPhone()
-        );
-
-
-        return memberRepository.save(member);
-    }
+//    @Transactional
+//    @Override
+//    public Member completeSignup(Long memberId, MemberRequestDTO.CompleteSignupDTO request) {
+//        Member member = memberRepository.findById(memberId)
+//                .orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
+//
+//        // Update member with additional info
+//        member.updateAdditionalInfo(
+//                request.getBirthday(),
+//                request.getPhone()
+//        );
+//
+//
+//        return memberRepository.save(member);
+//    }
 
     @Override
     @Transactional
@@ -277,12 +313,12 @@ public class MemberCommandServiceImpl implements MemberCommandService{
         return update;
     }
 
-    @Override
-    @Transactional
-    public Member findByPhone(String phone) {
-        return memberRepository.findByPhone(phone)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-    }
+//    @Override
+//    @Transactional
+//    public Member findByPhone(String phone) {
+//        return memberRepository.findByPhone(phone)
+//                .orElseThrow(() -> new RuntimeException("User not found"));
+//    }
 
     @Override
     @Transactional

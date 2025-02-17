@@ -81,6 +81,24 @@ public class MemberResponseDTO {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
+    public static class SmsAuthSendResultDTO{
+        String phoneNumber; // 전화번호
+        String authCode;     // 응답 메시지
+    }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class SmsAuthConfirmResultDTO{
+        Boolean checkPhone;
+        String phoneNumber;
+    }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class EmailAuthSendResultDTO{
         String email;
         String authCode;

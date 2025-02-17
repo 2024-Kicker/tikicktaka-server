@@ -16,12 +16,12 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     Optional<Member> findByName(String name);
 
-    Optional<Member> findByPhone(String phone);
+    //Optional<Member> findByPhone(String phone);
 
     boolean existsByName(String nickname); // 닉네임 중복 체크 메소드 추가
 
     @Transactional
     @Modifying(clearAutomatically = true)
-    @Query("UPDATE Member m SET m.name = :name, m.email = :email, m.phone = :phone, m.birthday = :birthday, m.gender = :gender, m.password = :password WHERE m.id = :memberId")
-    void reregister(Long memberId, String name, String password, String email, Date birthday, Gender gender, String phone);
+    @Query("UPDATE Member m SET m.name = :name, m.email = :email,  m.gender = :gender, m.password = :password WHERE m.id = :memberId")
+    void reregister(Long memberId, String name, String password, String email, Gender gender);
 }

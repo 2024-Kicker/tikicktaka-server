@@ -18,7 +18,9 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -50,15 +52,22 @@ public class Member extends BaseDateTimeEntity {
     @Column(columnDefinition = "TEXT")
     private String password;
 
-    @Temporal(TemporalType.DATE)
-    private Date birthday;
+    //@Temporal(TemporalType.DATE)
+    //private Date birthday;
 
     private Long point;
 
     private String tendency;
 
-    @Column(columnDefinition = "VARCHAR(13)")
-    private String phone;
+    private String introduceMessage;
+
+//    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+//    private Boolean isVerified; //전화번호 본인인증 여부 저장
+//
+//    private LocalDateTime verifiedAt; //본인인증 완료 시간
+
+//    @Column(columnDefinition = "VARCHAR(13)")
+//    private String phone;
 
     @Enumerated(EnumType.STRING)
     @Column(columnDefinition = "VARCHAR(10)")
@@ -75,11 +84,11 @@ public class Member extends BaseDateTimeEntity {
     @ColumnDefault("'ACTIVE'")
     private MemberStatus memberStatus;
 
-    @Column(columnDefinition = "TEXT")
-    private String kakaoAuth;
-
-    @Column(columnDefinition = "TEXT")
-    private String googleAuth;
+//    @Column(columnDefinition = "TEXT")
+//    private String kakaoAuth;
+//
+//    @Column(columnDefinition = "TEXT")
+//    private String googleAuth;
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<LanTour> lanTourList = new ArrayList<>();
@@ -118,18 +127,19 @@ public class Member extends BaseDateTimeEntity {
 
     public void setMemberRole(MemberRole memberRole) { this.memberRole = memberRole; }
 
-    public Member(String email, String nickname, String name, Date birthday, Gender gender, String phone, List<MemberTerm> memberTermList) {
-
+    public Member(String email, String nickname, String name, Gender gender, List<MemberTerm> memberTermList) {
     }
+//    public Member(String email, String nickname, String name, Date birthday, Gender gender, String phone, List<MemberTerm> memberTermList) {
+//    }
     public Member(String email, String nickname, List<MemberTerm> memberTermList) {
 
     }
     // Method to update additional information after social login
-    public void updateAdditionalInfo(Date birthday, String phone) {
-        this.birthday = birthday;
-        this.phone = phone;
-        this.memberStatus = MemberStatus.ACTIVE;
-    }
+//    public void updateAdditionalInfo(Date birthday, String phone) {
+//        this.birthday = birthday;
+//        this.phone = phone;
+//        this.memberStatus = MemberStatus.ACTIVE;
+//    }
 
     public Member updatePoints(Long point){
         this.point += point;
@@ -145,6 +155,11 @@ public class Member extends BaseDateTimeEntity {
         this.point -= price;
         return this;
     }
+
+    public void updateIntroduceMessage (String message){
+        this.introduceMessage = message;
+    }
+
 
 //    // Method to update additional information after social login
 //    public void updateAdditionalInfo(String name, Date birthday, Gender gender, String phone, List<MemberTerm> memberTermList) {
