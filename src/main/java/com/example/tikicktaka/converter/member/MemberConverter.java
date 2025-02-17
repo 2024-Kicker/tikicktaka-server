@@ -46,9 +46,9 @@ public class MemberConverter {
                 .name(request.getNickname())
                 .password(encoder.encode(request.getPassword()))
                 .email(request.getEmail())
-                .birthday(request.getBirthday())
+                //.birthday(request.getBirthday())
                 .gender(request.getGender())
-                .phone(request.getPhone())
+                //.phone(request.getPhone())
                 .point(0L)
                 .memberRole(MemberRole.MEMBER)
                 .memberTermList(new ArrayList<>())
@@ -82,6 +82,30 @@ public class MemberConverter {
                         .build())
                 .collect(Collectors.toList());
     }
+
+    public static MemberResponseDTO.SmsAuthSendResultDTO toSmsAuthSendResultDTO(Auth auth) {
+        return MemberResponseDTO.SmsAuthSendResultDTO.builder()
+                .phoneNumber(auth.getPhone())
+                .authCode(auth.getCode())
+                .build();
+    }
+
+    public static MemberResponseDTO.SmsAuthConfirmResultDTO toSmsAuthConfirmResultDTO(String phoneNumber, Boolean checkPhone) {
+        return MemberResponseDTO.SmsAuthConfirmResultDTO.builder()
+                .phoneNumber(phoneNumber)
+                .checkPhone(checkPhone)
+                .build();
+    }
+
+    public static Auth toSmsAuth(String phoneNumber, String code) {
+        return Auth.builder()
+                .phone(phoneNumber)
+                .code(code)
+                .expireDate(LocalDateTime.now().plusMinutes(5)) // 5분 후 만료
+                .expired(false)
+                .build();
+    }
+
 
     public static MemberResponseDTO.EmailAuthSendResultDTO toEmailAuthSendResultDTO(Auth auth){
         return MemberResponseDTO.EmailAuthSendResultDTO.builder()
@@ -152,9 +176,9 @@ public class MemberConverter {
                 //.nickname(request.getNickname())
                 .password(member.getPassword())
                 .email(member.getEmail())
-                .birthday(request.getBirthday())
+                //.birthday(request.getBirthday())
                 .gender(member.getGender())
-                .phone(request.getPhone())
+                //.phone(request.getPhone())
                 .memberRole(member.getMemberRole())
                 .memberStatus(member.getMemberStatus())
                 .memberTermList(memberTermList)
@@ -190,9 +214,9 @@ public class MemberConverter {
                 //.name(member.getName())
                 .profileImgUrl(profileImgUrl)
                 .teamName(preferTeamName)
-                .phoneNumber(member.getPhone())
+                //.phoneNumber(member.getPhone())
                 .gender(member.getGender().name())
-                .phoneNumber(member.getPhone())
+                //.phoneNumber(member.getPhone())
                 .point(member.getPoint())
                 .memberTerm(memberTermList.stream().map(memberTeam -> memberTeam.getMemberAgree()).toList())
                 .build();

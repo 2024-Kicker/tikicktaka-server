@@ -25,20 +25,24 @@ public interface MemberCommandService {
 
     Boolean confirmNicknameDuplicate(MemberRequestDTO.NicknameDuplicateConfirmDTO request);
 
+    Auth sendSmsAuthCode(String phoneNumber);
+
+    Boolean confirmSmsAuth(MemberRequestDTO.SmsAuthConfirmDTO request);
+
     Auth sendEmailAuth(String email);
 
     Boolean confirmEmailAuth(MemberRequestDTO.EmailAuthConfirmDTO request);
 
     MemberTeam setPreferTeam(Member member, Long teamId);
 
-    @Transactional
-    Member completeSignup(Long memberId, MemberRequestDTO.CompleteSignupDTO request);
+//    @Transactional
+//    Member completeSignup(Long memberId, MemberRequestDTO.CompleteSignupDTO request);
 
     Member profileImageUpload(MultipartFile profile, Member member);
 
     Member modifyProfile(MemberRequestDTO.UpdateMemberDTO request, Member member);
 
-    Member findByPhone(String phone);
+//    Member findByPhone(String phone);
 
     void deleteMember(Long memberId);
 

@@ -1,6 +1,7 @@
 package com.example.tikicktaka.web.dto.member;
 
 import com.example.tikicktaka.domain.enums.Gender;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -8,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Date;
 import java.util.List;
@@ -32,12 +34,20 @@ public class MemberRequestDTO {
 
         private Date birthday;
 
-        @NotBlank(message = "휴대폰 번호를 입력해주세요")
-        private String phone;
+//        @NotBlank(message = "휴대폰 번호를 입력해주세요")
+//        private String phone; //본인인증으로 변경하고 저장하지는 말기
 
         private Gender gender;
 
+        private String introduceMessage;
+
         private List<Boolean> memberTerm;
+
+        //프로필 이미지
+        @Setter
+        @JsonIgnore
+        private MultipartFile profileImg;
+
     }
 
     @Getter
@@ -81,6 +91,22 @@ public class MemberRequestDTO {
     @AllArgsConstructor
     public static class EmailDuplicateConfirmDTO{
         private String email;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class SmsAuthDTO {
+        @NotBlank(message = "전화번호는 필수 입력 값입니다.")
+        private String phoneNumber;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class SmsAuthConfirmDTO{
+        private String phoneNumber;
+        private String code;
     }
 
     @Getter

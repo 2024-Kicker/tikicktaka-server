@@ -12,19 +12,28 @@ import com.example.tikicktaka.repository.member.MemberRepository;
 import com.example.tikicktaka.service.OAuthService.OAuthLoginService;
 import com.example.tikicktaka.service.memberService.MemberCommandService;
 import com.example.tikicktaka.service.memberService.MemberQueryService;
+import com.example.tikicktaka.service.smsService.SmsService;
 import com.example.tikicktaka.web.dto.member.MemberRequestDTO;
 import com.example.tikicktaka.web.dto.member.MemberResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Optional;
+import java.util.Random;
+
 
 @RestController
 @Slf4j
@@ -37,11 +46,24 @@ public class MemberController {
     private final MemberCommandService memberCommandService;
     private final MemberQueryService memberQueryService;
     private final MemberRepository memberRepository;
+    private final SmsService smsService;
 
-    @PostMapping("/join")
-    @Operation(summary = "회원가입 API", description = "request 파라미터 : 닉네임, 이름, 로그인 아이디(String), 비밀번호(String), 이메일, 생일(yyyymmdd), 성별(MALE, FEMALE, NO_SELECET), 폰번호(010xxxxxxxx),이용약관(Boolean 배열)")
-    public ApiResponse<MemberResponseDTO.JoinResultDTO> join(@RequestBody @Valid MemberRequestDTO.JoinDTO request) {
+
+    @PostMapping(value ="/join", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    @Operation(summary = "회원가입 API", description = "request 파라미터 : 닉네임, 이름, 로그인 아이디(String), 비밀번호(String), 이메일, 성별(MALE, FEMALE, NO_SELECET),소개메시지(String),이용약관(Boolean 배열)")
+    public ApiResponse<MemberResponseDTO.JoinResultDTO> join(@Parameter(description = "회원가입 정보 (JSON)", required = true,
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = MemberRequestDTO.JoinDTO.class)))
+                                                                 @RequestPart("data") @Valid MemberRequestDTO.JoinDTO request,  // JSON 데이터 받기
+
+                                                             @Parameter(description = "프로필 이미지 파일 (선택 사항)", required = false)
+                                                                 @RequestPart(value = "profileImage", required = false) MultipartFile profileImage) {
+        request.setProfileImg(profileImage);
         Member member = memberCommandService.join(request);
+
+        if (profileImage != null && !profileImage.isEmpty()) {
+            member = memberCommandService.profileImageUpload(profileImage, member);
+        }
 
         return ApiResponse.onSuccess(MemberConverter.toJoinResultDTO(member));
     }
@@ -71,6 +93,22 @@ public class MemberController {
         Boolean checkNickname = memberCommandService.confirmNicknameDuplicate(request);
 
         return ApiResponse.onSuccess(MemberConverter.toNicknameDuplicateConfirmResultDTO(checkNickname));
+    }
+
+    // SMS 본인인증
+    @PostMapping("/sms/auth")
+    @Operation(summary = "SMS 인증번호 요청 API", description = "사용자의 휴대폰 번호로 인증번호를 전송합니다.")
+    public ApiResponse<MemberResponseDTO.SmsAuthSendResultDTO> sendSmsAuthCode(@RequestBody @Valid MemberRequestDTO.SmsAuthDTO request) {
+        Auth auth = memberCommandService.sendSmsAuthCode(request.getPhoneNumber());
+        return ApiResponse.onSuccess(MemberConverter.toSmsAuthSendResultDTO(auth));
+    }
+
+    @PostMapping("/sms/auth/verify")
+    @Operation(summary = "SMS 인증번호 검증 API", description = "사용자가 입력한 인증번호가 올바른지 확인합니다.")
+    public ApiResponse<MemberResponseDTO.SmsAuthConfirmResultDTO> verifySmsCode(@RequestBody @Valid MemberRequestDTO.SmsAuthConfirmDTO request) {
+        String phoneNumber = request.getPhoneNumber();
+        Boolean checkPhone = memberCommandService.confirmSmsAuth(request);
+        return ApiResponse.onSuccess(MemberConverter.toSmsAuthConfirmResultDTO(phoneNumber, checkPhone));
     }
 
     @PostMapping("/email/auth")
@@ -106,27 +144,27 @@ public class MemberController {
 //        return ResponseEntity.ok(response);
 //    }
 
-    //소셜 로그인 후 회원가입
-    @PostMapping("/complete-signup/{memberId}")
-    @Operation(summary = "추가 정보 입력 API", description = "소셜 로그인 후 추가 정보 입력을 처리합니다.")
-    public ApiResponse<MemberResponseDTO.CompleteSignupResultDTO> completeSignup(@PathVariable Long memberId, @RequestBody @Valid MemberRequestDTO.CompleteSignupDTO request) {
-        Member member = memberCommandService.completeSignup(memberId, request);
-        return ApiResponse.onSuccess(MemberConverter.toCompleteSignupResultDTO(member));
-    }
+//    //소셜 로그인 후 회원가입
+//    @PostMapping("/complete-signup/{memberId}")
+//    @Operation(summary = "추가 정보 입력 API", description = "소셜 로그인 후 추가 정보 입력을 처리합니다.")
+//    public ApiResponse<MemberResponseDTO.CompleteSignupResultDTO> completeSignup(@PathVariable Long memberId, @RequestBody @Valid MemberRequestDTO.CompleteSignupDTO request) {
+//        Member member = memberCommandService.completeSignup(memberId, request);
+//        return ApiResponse.onSuccess(MemberConverter.toCompleteSignupResultDTO(member));
+//    }
 
     // 아이디 찾기
-    @PostMapping("/find/id")
-    @Operation(summary = "전화번호로 사용자 찾기", description = "request 파라미터: 전화번호, response: 사용자 정보")
-    public ApiResponse<MemberResponseDTO.SearchIdDTO> findUserByPhone(@RequestBody @Valid MemberRequestDTO.SearchIdDTO request) {
-        String phone = request.getPhone();
-        Optional<Member> member = memberRepository.findByPhone(phone);
-        if (member.isPresent()) {
-            Member foundmember = member.get();
-            return ApiResponse.onSuccess(MemberConverter.toSearchIdResultDTO(foundmember));
-        } else {
-            return ApiResponse.onFailure("404", "User not found", null);
-        }
-    }
+//    @PostMapping("/find/id")
+//    @Operation(summary = "전화번호로 사용자 찾기", description = "request 파라미터: 전화번호, response: 사용자 정보")
+//    public ApiResponse<MemberResponseDTO.SearchIdDTO> findUserByPhone(@RequestBody @Valid MemberRequestDTO.SearchIdDTO request) {
+//        String phone = request.getPhone();
+//        Optional<Member> member = memberRepository.findByPhone(phone);
+//        if (member.isPresent()) {
+//            Member foundmember = member.get();
+//            return ApiResponse.onSuccess(MemberConverter.toSearchIdResultDTO(foundmember));
+//        } else {
+//            return ApiResponse.onFailure("404", "User not found", null);
+//        }
+//    }
 
     @PostMapping("/find/password")
     @Operation(summary = "비밀번호 찾기 api", description = "request : 이메일, 변경할 비밀번호")
@@ -134,4 +172,7 @@ public class MemberController {
         Member member = memberCommandService.changePassword(request);
         return ApiResponse.onSuccess(MemberConverter.changePasswordResultDTO(member));
     }
+
+
+
 }
