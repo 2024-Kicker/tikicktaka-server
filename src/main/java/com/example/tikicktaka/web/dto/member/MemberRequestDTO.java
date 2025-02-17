@@ -5,10 +5,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.validation.constraints.Size;
+import lombok.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Date;
@@ -160,4 +158,28 @@ public class MemberRequestDTO {
         String email;
         String password;
     }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class MemberPreferTravelStyleDTO {
+        @Size(min = 2, max = 2, message = "여행 스타일은 2개 선택해야 합니다.")
+        private List<String> travelStyles; // 선택한 여행 스타일 목록
+    }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class TravelStyleDTO {
+        @NotBlank(message = "첫 번째 여행 스타일을 선택해야 합니다.")
+        private String styleOne; // 첫 번째 스타일
+
+        @NotBlank(message = "두 번째 여행 스타일을 선택해야 합니다.")
+        private String styleTwo; // 두 번째 스타일
+    }
+
 }

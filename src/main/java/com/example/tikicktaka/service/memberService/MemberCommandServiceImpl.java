@@ -12,21 +12,21 @@ import com.example.tikicktaka.domain.enums.MemberStatus;
 import com.example.tikicktaka.domain.images.ProfileImg;
 import com.example.tikicktaka.domain.lanTour.LanTour;
 import com.example.tikicktaka.domain.mapping.lanTour.LanTourPurchase;
-import com.example.tikicktaka.domain.mapping.member.ChargeCoin;
-import com.example.tikicktaka.domain.mapping.member.Dibs;
-import com.example.tikicktaka.domain.mapping.member.MemberTeam;
-import com.example.tikicktaka.domain.mapping.member.MemberTerm;
+import com.example.tikicktaka.domain.mapping.member.*;
 import com.example.tikicktaka.domain.member.Auth;
 import com.example.tikicktaka.domain.member.Member;
 import com.example.tikicktaka.domain.member.RegisterSeller;
 import com.example.tikicktaka.domain.member.Term;
 import com.example.tikicktaka.domain.teams.Team;
+import com.example.tikicktaka.domain.travel.TravelStyle;
 import com.example.tikicktaka.repository.lanTour.LanTourRepository;
 import com.example.tikicktaka.repository.member.*;
 import com.example.tikicktaka.repository.team.TeamRepository;
+import com.example.tikicktaka.repository.travel.TravelStyleRepository;
 import com.example.tikicktaka.service.UtilService;
 import com.example.tikicktaka.service.smsService.SmsService;
 import com.example.tikicktaka.web.dto.member.MemberRequestDTO;
+import com.example.tikicktaka.web.dto.member.MemberResponseDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,6 +39,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static com.example.tikicktaka.config.springSecurity.utils.JwtUtil.createJwt;
 
@@ -65,6 +66,8 @@ public class MemberCommandServiceImpl implements MemberCommandService{
     private final UtilService utilService;
     private final StringRedisTemplate redisTemplate;
     private final SmsService smsService;
+    private final TravelStyleRepository travelStyleRepository;
+    private final MemberTravelStyleRepository memberTravelStyleRepository;
 
     @Value("${jwt.token.secret}")
     private String key;
@@ -266,6 +269,45 @@ public class MemberCommandServiceImpl implements MemberCommandService{
 
         return memberTeamRepository.save(memberTeam);//Member Team repository 생성
     }
+
+
+
+    //선호 여행스타일 저장
+    @Override
+    @Transactional
+    public void saveOrUpdateMemberTravelStyles(Member member, String styleOne, String styleTwo) {
+        // 기존 여행 스타일 삭제
+        memberTravelStyleRepository.deleteByMember(member);
+
+        // 여행 스타일 조회
+        TravelStyle firstStyle = travelStyleRepository.findByName(styleOne)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 여행 스타일입니다: " + styleOne));
+
+        TravelStyle secondStyle = travelStyleRepository.findByName(styleTwo)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 여행 스타일입니다: " + styleTwo));
+
+        // 새로운 여행 스타일 저장
+        MemberTravelStyle memberTravelStyle = MemberTravelStyle.builder()
+                .member(member)
+                .styleOne(firstStyle)
+                .styleTwo(secondStyle)
+                .build();
+
+        memberTravelStyleRepository.save(memberTravelStyle);
+    }
+
+    //선호 여행 스타일 조회
+    @Transactional(readOnly = true)
+    public MemberResponseDTO.MemberPreferTravelStyleDTO getMemberTravelStyles(Member member) {
+        MemberTravelStyle memberTravelStyle = memberTravelStyleRepository.findByMember(member)
+                .orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_TRAVEL_STYLE_NOT_SET));
+
+        return new MemberResponseDTO.MemberPreferTravelStyleDTO(
+                memberTravelStyle.getStyleOne().getName(),
+                memberTravelStyle.getStyleTwo().getName()
+        );
+    }
+
 
 //    @Transactional
 //    @Override
