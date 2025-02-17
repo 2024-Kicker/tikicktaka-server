@@ -13,6 +13,7 @@ import com.example.tikicktaka.domain.mapping.lanTour.LanTourPurchase;
 import com.example.tikicktaka.domain.mapping.member.ChargeCoin;
 import com.example.tikicktaka.domain.mapping.member.Dibs;
 import com.example.tikicktaka.domain.mapping.member.MemberTeam;
+import com.example.tikicktaka.domain.mapping.member.MemberTravelStyle;
 import com.example.tikicktaka.domain.member.Member;
 import com.example.tikicktaka.domain.member.RegisterSeller;
 import com.example.tikicktaka.service.memberService.MemberCommandService;
@@ -34,6 +35,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @Slf4j
@@ -87,6 +90,28 @@ public class MyPageController {
         MemberTeam memberTeam = memberCommandService.setPreferTeam(member, teamId);
         return ApiResponse.onSuccess(MemberConverter.toMemberPreferTeamDTO(memberTeam));
     }
+
+    @PostMapping("/travel/style")
+    @Operation(summary = "사용자의 선호 여행 스타일 저장/변경 API", description = "여행 스타일 2개를 선택하여 저장 또는 변경합니다.")
+    public ApiResponse<String> saveOrUpdateTravelStyles(@RequestBody @Valid MemberRequestDTO.TravelStyleDTO request,
+                                                        Authentication authentication) {
+        Member member = memberQueryService.findMemberById(Long.valueOf(authentication.getName()))
+                .orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
+
+        memberCommandService.saveOrUpdateMemberTravelStyles(member, request.getStyleOne(), request.getStyleTwo());
+        return ApiResponse.onSuccess("여행 스타일이 저장되었습니다.");
+    }
+
+    // 여행 스타일 조회 API
+    @GetMapping("/travel/style")
+    @Operation(summary = "사용자의 선호 여행 스타일 조회 API")
+    public ApiResponse<MemberResponseDTO.MemberPreferTravelStyleDTO> getTravelStyles(Authentication authentication) {
+        Member member = memberQueryService.findMemberById(Long.valueOf(authentication.getName()))
+                .orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
+
+        return ApiResponse.onSuccess(memberCommandService.getMemberTravelStyles(member));
+    }
+
 
     @DeleteMapping(value = "/delete")
     @Operation(summary = "회원 탈퇴 api")

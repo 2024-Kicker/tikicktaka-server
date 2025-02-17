@@ -3,10 +3,7 @@ package com.example.tikicktaka.web.dto.member;
 import com.example.tikicktaka.domain.enums.LanTourCategory;
 import com.example.tikicktaka.domain.images.LanTourImg;
 import com.example.tikicktaka.web.dto.lanTour.LanTourResponseDTO;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -148,6 +145,16 @@ public class MemberResponseDTO {
     public static class MemberPreferTeamDTO{
         Long memberTeamId;
         LocalDateTime createdAt;
+    }
+
+    @Builder
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class MemberPreferTravelStyleDTO {
+        private String styleOne;  // 첫 번째 여행 스타일
+        private String styleTwo;  // 두 번째 여행 스타일
     }
 
     @Getter

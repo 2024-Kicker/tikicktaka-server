@@ -3,6 +3,8 @@ package com.example.tikicktaka.service.memberService;
 import com.example.tikicktaka.domain.mapping.lanTour.LanTourPurchase;
 import com.example.tikicktaka.domain.mapping.member.Dibs;
 import com.example.tikicktaka.domain.mapping.member.MemberTeam;
+import com.example.tikicktaka.web.dto.member.MemberResponseDTO;
+import com.example.tikicktaka.domain.mapping.member.MemberTravelStyle;
 import com.example.tikicktaka.domain.member.Auth;
 import com.example.tikicktaka.domain.member.Member;
 import com.example.tikicktaka.domain.member.RegisterSeller;
@@ -11,6 +13,8 @@ import com.example.tikicktaka.web.dto.member.MemberRequestDTO;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 
 public interface MemberCommandService {
@@ -35,6 +39,9 @@ public interface MemberCommandService {
 
     MemberTeam setPreferTeam(Member member, Long teamId);
 
+    MemberResponseDTO.MemberPreferTravelStyleDTO getMemberTravelStyles(Member member);
+
+
 //    @Transactional
 //    Member completeSignup(Long memberId, MemberRequestDTO.CompleteSignupDTO request);
 
@@ -57,4 +64,6 @@ public interface MemberCommandService {
     Dibs deleteDibsLanTour(Long lanTourId, Member member);
 
     Member changePassword(MemberRequestDTO.ChangePasswordRequestDTO request);
+
+    void saveOrUpdateMemberTravelStyles(Member member, String styleOne, String styleTwo);
 }
