@@ -278,6 +278,7 @@ public class MemberCommandServiceImpl implements MemberCommandService{
     public void saveOrUpdateMemberTravelStyles(Member member, String styleOne, String styleTwo) {
         // 기존 여행 스타일 삭제
         memberTravelStyleRepository.deleteByMember(member);
+        memberTravelStyleRepository.flush(); //바로 적용
 
         // 여행 스타일 조회
         TravelStyle firstStyle = travelStyleRepository.findByName(styleOne)
