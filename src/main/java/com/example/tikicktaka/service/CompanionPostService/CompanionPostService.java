@@ -22,5 +22,7 @@ public interface CompanionPostService {
     CompanionPost deletePost (Long postId, Long memberID); //게시글 삭제 기능
 
     Page<CompanionPostListResponseDTO> getPostList(Pageable pageable); //게시글 목록 조회
+
+    CompanionPostResponseDTO getPostDetail(Long postId); //게시글 상세 조회
 }
 

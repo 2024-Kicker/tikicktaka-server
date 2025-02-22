@@ -6,8 +6,11 @@ import com.example.tikicktaka.apiPayload.code.status.ErrorStatus;
 import com.example.tikicktaka.domain.companionPost.CompanionPost;
 import com.example.tikicktaka.service.CompanionPostService.CompanionPostService;
 import com.example.tikicktaka.service.memberService.MemberCommandService;
+import com.example.tikicktaka.domain.images.CompanionPostImg;
+
 import com.example.tikicktaka.service.memberService.MemberQueryService;
 import com.example.tikicktaka.web.dto.companionPost.CompanionPostListResponseDTO;
+import com.example.tikicktaka.repository.companionPost.CompanionPostImageRepository;
 import com.example.tikicktaka.web.dto.companionPost.CompanionPostResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -26,6 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import org.springframework.data.domain.Pageable;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.bouncycastle.asn1.x500.style.RFC4519Style.member;
 
@@ -39,6 +43,10 @@ public class CompanionPostController {
 
     @Autowired
     private MemberQueryService memberQueryService; // MemberQueryService 주입
+
+    @Autowired
+    private CompanionPostImageRepository companionPostImageRepository;
+
 
     @PostMapping(value="/create", consumes = "multipart/form-data")
     @Operation(summary = "동행찾기 게시판 게시글 작성", description = "request: 날짜, 홈팀, 어웨이팀")
@@ -66,8 +74,13 @@ public class CompanionPostController {
         // 게시글 생성
         CompanionPost post = postService.createPostWithImages(title, content, memberId, imageFiles, status, travelStatus);
 
+        // 게시글의 이미지 URL 가져오기
+        List<String> imageUrls = companionPostImageRepository.findByCompanionPost(post).stream()
+                .map(CompanionPostImg::getImageUrl)
+                .collect(Collectors.toList());
+
         // 게시글을 응답 DTO로 변환
-        CompanionPostResponseDTO responseDTO = new CompanionPostResponseDTO(post);
+        CompanionPostResponseDTO responseDTO = new CompanionPostResponseDTO(post, imageUrls);
 
         return ApiResponse.onSuccess(responseDTO);
     }
@@ -84,7 +97,12 @@ public class CompanionPostController {
         Long memberId = Long.valueOf(authentication.getName());
         CompanionPost deletedPost = postService.deletePost(postId, memberId);
 
-        return ApiResponse.onSuccess(new CompanionPostResponseDTO(deletedPost));
+        // 삭제된 게시글의 이미지 URL 가져오기
+        List<String> imageUrls = companionPostImageRepository.findByCompanionPost(deletedPost).stream()
+                .map(CompanionPostImg::getImageUrl)
+                .collect(Collectors.toList());
+
+        return ApiResponse.onSuccess(new CompanionPostResponseDTO(deletedPost, imageUrls));
     }
 
     @GetMapping("/list")
@@ -94,6 +112,13 @@ public class CompanionPostController {
             @PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         Page<CompanionPostListResponseDTO> postList = postService.getPostList(pageable);
         return ApiResponse.onSuccess(postList);
+    }
+
+    @GetMapping("/{postId}")
+    @Operation(summary = "동행찾기 게시글 상세 조회 API", description = "게시글 ID를 기반으로 상세 내용을 조회합니다.")
+    public ApiResponse<CompanionPostResponseDTO> getPostDetail(@PathVariable Long postId) {
+        CompanionPostResponseDTO responseDTO = postService.getPostDetail(postId);
+        return ApiResponse.onSuccess(responseDTO);
     }
 
 }

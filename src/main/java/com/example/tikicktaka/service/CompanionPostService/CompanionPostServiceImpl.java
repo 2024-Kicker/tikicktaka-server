@@ -8,6 +8,7 @@ import com.example.tikicktaka.repository.companionPost.CompanionPostImageReposit
 import com.example.tikicktaka.repository.member.MemberRepository;
 import com.example.tikicktaka.service.UtilService;
 import com.example.tikicktaka.web.dto.companionPost.CompanionPostListResponseDTO;
+import com.example.tikicktaka.web.dto.companionPost.CompanionPostResponseDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.data.domain.Pageable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -114,6 +116,19 @@ public class CompanionPostServiceImpl implements CompanionPostService {
         companionPostRepository.delete(post);
 
         return post;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public CompanionPostResponseDTO getPostDetail(Long postId){
+        //게시글 조회
+        CompanionPost post = companionPostRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 게시글을 찾을 수 없습니다."));
+        List<String> imageUrls = companionPostImageRepository.findByCompanionPost(post).stream()
+                .map(CompanionPostImg::getImageUrl)
+                .collect(Collectors.toList());
+
+        return new CompanionPostResponseDTO(post, imageUrls);
     }
 
     //@Transactional(readOnly = true)
