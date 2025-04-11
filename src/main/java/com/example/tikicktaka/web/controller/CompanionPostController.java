@@ -121,4 +121,11 @@ public class CompanionPostController {
         return ApiResponse.onSuccess(responseDTO);
     }
 
+    //공유 게시글 조회
+    @GetMapping("/public/{postId}")
+    @Operation(summary = "공개용 동행찾기 게시글 상세 조회", description = "비회원도 접근 가능한 게시글 상세 조회 API입니다.")
+    public ApiResponse<CompanionPostResponseDTO> getPublicPostDetail(@PathVariable Long postId) {
+        CompanionPostResponseDTO responseDTO = postService.getPostDetail(postId);
+        return ApiResponse.onSuccess(responseDTO);
+    }
 }
