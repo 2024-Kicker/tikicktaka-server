@@ -62,7 +62,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'\
 
     //socket.io
-    implementation 'com.corundumstudio.socketio:netty-socketio:1.7.19'
+    implementation 'io.github.opensabe-tech:netty-socketio:2.0.3'
 }
 
 tasks.named('test') {

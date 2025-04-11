@@ -43,6 +43,9 @@ spring:
     redis:
       host: localhost
       port: 6379
+      inviteCode:
+        key:
+          prefix: "inviteCode:"
 
 jwt:
   token:
@@ -78,5 +81,19 @@ coolsms:
     number: ${COOLSMS_NUMBER}
 
 
-
+socketio:
+  host: localhost  # 모든 IP에서 접근 가능하도록 설정
+  port: 8082  # 웹소켓 서버 포트 (ws://localhost:8081)
+  boss-count: 1
+  work-count: 100
+  allow-custom-requests: true
+  upgrade-timeout: 10000
+  ping-interval: 25000
+  ping-timeout: 60000
+  max-frame-payload-length: 1048576
+  max-http-content-length: 1048576
+  allow-headers: "*"
+  allow-origin: "*"
+  allow-method: "GET,POST"
+  allow-credentials: true
 
