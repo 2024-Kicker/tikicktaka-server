@@ -19,6 +19,7 @@ public class CompanionPostResponseDTO {
     private String thumbnailUrl;
     private CompanionPost.PostStatus status;
     private CompanionPost.TravelStatus travelStatus;
+    private String chatRoomId;
     private List<String> imageUrls;
 
     // 필요한 추가 필드가 있다면 추가
@@ -32,6 +33,7 @@ public class CompanionPostResponseDTO {
         this.status = post.getStatus();
         this.travelStatus = post.getTravelStatus();
         this.thumbnailUrl = post.getThumbnailUrl();
+        //this.chatRoomId = post.getChatRoomId();
         this.imageUrls = (imageUrls != null) ? imageUrls : new ArrayList<>(); // Null 체크
     }
 }

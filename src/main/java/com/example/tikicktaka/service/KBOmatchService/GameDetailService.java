@@ -58,7 +58,7 @@ public class GameDetailService {
             driver.get(KBO_URL); // KBO 경기 일정 페이지로 이동
             //오늘 일자의 경기를 크롤링
             Select selectYear = new Select(driver.findElement(By.id("ddlYear"))); //연도 설정
-            selectYear.selectByValue(String.format("%02d", today.getYear()));
+            selectYear.selectByValue(String.valueOf(today.getYear()));
 
             //월 설정
             Select selectMonth = new Select(driver.findElement(By.id("ddlMonth")));
@@ -113,59 +113,63 @@ public class GameDetailService {
                 // 안전한 팀과 점수 추출 로직
                 String[] parts = teams.split("vs");
 
-                if (parts.length == 2) {
-                    String awayTeamRaw = parts[0].trim();  // NC7
-                    String homeTeamRaw = parts[1].trim();  // 5LG
+                if (parts.length != 2) {  // [변경됨] 팀 정보가 잘못된 경우 필터링
+                    System.err.println("팀과 점수를 파싱할 수 없습니다: " + teams);
+                    continue;
+                }
 
-                    // 숫자와 문자 분리 (정규 표현식 사용)
-                    String awayTeam = awayTeamRaw.replaceAll("\\d", ""); // "NC"
-                    int awayScore = Integer.parseInt(awayTeamRaw.replaceAll("\\D", "")); // "7"
+                String awayTeamRaw = parts[0].trim();  // NC7
+                String homeTeamRaw = parts[1].trim();  // 5LG
 
-                    String homeTeam = homeTeamRaw.replaceAll("\\d", ""); // "LG"
-                    int homeScore = Integer.parseInt(homeTeamRaw.replaceAll("\\D", "")); // "5"
+                // 숫자와 문자 분리 (정규 표현식 사용)
+                String awayTeam = awayTeamRaw.replaceAll("\\d", ""); // "NC"
+                //int awayScore = Integer.parseInt(awayTeamRaw.replaceAll("\\D", "")); // "7"
+                int awayScore = awayTeamRaw.matches(".*\\d.*") ? Integer.parseInt(awayTeamRaw.replaceAll("\\D", "")) : 0;
 
-                    System.out.println("awayTeam: " + awayTeam);
-                    System.out.println("awayScore: " + awayScore);
-                    System.out.println("homeScore: " + homeScore);
-                    System.out.println("homeTeam: " + homeTeam);
+                String homeTeam = homeTeamRaw.replaceAll("\\d", ""); // "LG"
+                //int homeScore = Integer.parseInt(homeTeamRaw.replaceAll("\\D", "")); // "5"
+                int homeScore = homeTeamRaw.matches(".*\\d.*") ? Integer.parseInt(homeTeamRaw.replaceAll("\\D", "")) : 0;
 
-                    // 오늘 경기에 해당하는지 확인
-                    for (GameSchedule gameschedule : todayMatches) {
-                        if (gameschedule.getHomeTeam().equals(homeTeam) && gameschedule.getAwayTeam().equals(awayTeam)) {
-                            LocalDateTime matchStartTime = gameschedule.getMatchDateTime();
+                System.out.println("awayTeam: " + awayTeam);
+                System.out.println("awayScore: " + awayScore);
+                System.out.println("homeScore: " + homeScore);
+                System.out.println("homeTeam: " + homeTeam);
 
-                            // 경기가 진행 중이면 (현재 시간이 경기 시작시간과 그 이후 8시간 이내일 때)
-                            if (now.isAfter(matchStartTime) && now.isBefore(matchStartTime.plusHours(4))) {
-                                try {
-                                    List<WebElement> gameElements = driver.findElements(By.className("tbl-type06"));
-                                    for (WebElement element : gameElements) {
-                                        if (element.getText().contains(homeTeam) && element.getText().contains(awayTeam)) {
-                                            String score = awayScore + "-" + homeScore; // 예: "7-5" 형식으로 저장
-                                            System.out.println("score: " + score);
+                // 오늘 경기에 해당하는지 확인
+                for (GameSchedule gameschedule : todayMatches) {
+                    if (gameschedule.getHomeTeam().equals(homeTeam) && gameschedule.getAwayTeam().equals(awayTeam)) {
+                        LocalDateTime matchStartTime = gameschedule.getMatchDateTime();
 
-                                            String gameStatus=rowData.get(3);
-                                            System.out.println("gameStatus: " + gameStatus);
+                        // 경기가 진행 중이면 (현재 시간이 경기 시작시간과 그 이후 8시간 이내일 때)
+                        if (now.isAfter(matchStartTime) && now.isBefore(matchStartTime.plusHours(8))) {
+                            try {
+                                List<WebElement> gameElements = driver.findElements(By.className("tbl-type06"));
+                                for (WebElement element : gameElements) {
+                                    if (element.getText().contains(homeTeam) && element.getText().contains(awayTeam)) {
+                                        String score = awayScore + "-" + homeScore; // 예: "7-5" 형식으로 저장
+                                        System.out.println("score: " + score);
 
-                                            gameschedule.setScore(score);
-                                            gameschedule.setMatchStatus(!gameStatus.contains("리뷰") || !rowData.get(8).isEmpty()); // 리뷰가 있거나, 비고가 차있으면 게임 종료
+                                        String gameStatus=rowData.get(3);
+                                        System.out.println("gameStatus: " + gameStatus);
 
-                                            // 데이터베이스에 업데이트
-                                            gameScheduleRepository.save(gameschedule);
+                                        gameschedule.setScore(score);
+                                        gameschedule.setMatchStatus(!gameStatus.contains("리뷰") || !rowData.get(8).isEmpty()); // 리뷰가 있거나, 비고가 차있으면 게임 종료
 
-                                            System.out.println("경기 업데이트 완료: " + homeTeam + " vs " + awayTeam);
-                                            System.out.println("현재 스코어: " + score);
-                                            System.out.println("경기 상태: " + gameStatus);
-                                        }
+                                        // 데이터베이스에 업데이트
+                                        gameScheduleRepository.save(gameschedule);
+
+                                        System.out.println("경기 업데이트 완료: " + homeTeam + " vs " + awayTeam);
+                                        System.out.println("현재 스코어: " + score);
+                                        System.out.println("경기 상태: " + gameStatus);
                                     }
-                                } catch (Exception e) {
-                                    System.err.println("경기 업데이트 실패: " + homeTeam + " vs " + awayTeam);
-                                    e.printStackTrace();
                                 }
+                            } catch (Exception e) {
+                                System.err.println("경기 업데이트 실패: " + homeTeam + " vs " + awayTeam);
+                                e.printStackTrace();
                             }
+
                         }
                     }
-                } else {
-                    System.err.println("팀과 점수를 파싱할 수 없습니다: " + teams);
                 }
             }
         } catch (Exception e) {

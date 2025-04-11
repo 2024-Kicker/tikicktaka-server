@@ -7,6 +7,8 @@ import com.example.tikicktaka.repository.companionPost.CompanionPostRepository;
 import com.example.tikicktaka.repository.companionPost.CompanionPostImageRepository;
 import com.example.tikicktaka.repository.member.MemberRepository;
 import com.example.tikicktaka.service.UtilService;
+import com.example.tikicktaka.service.chatService.ChatRoomService;
+import com.example.tikicktaka.service.chatService.InviteCodeGeneratorService;
 import com.example.tikicktaka.web.dto.companionPost.CompanionPostListResponseDTO;
 import com.example.tikicktaka.web.dto.companionPost.CompanionPostResponseDTO;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.data.domain.Pageable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,10 +39,17 @@ public class CompanionPostServiceImpl implements CompanionPostService {
     private MemberRepository memberRepository;
 
     @Autowired
+    private final ChatRoomService chatRoomService;
+
+    @Autowired
     private UtilService utilService;
 
     @Autowired
     private CompanionPostImageRepository  companionPostImageRepository;
+
+    @Autowired
+    private InviteCodeGeneratorService InviteCodeGenerator;
+
 
     @Override
     @Transactional
@@ -59,6 +69,16 @@ public class CompanionPostServiceImpl implements CompanionPostService {
 
         // 게시글 저장 (우선 저장 후 ID 생성됨)
         companionPostRepository.save(post);
+
+        // 초대 코드 생성 (초대 코드 생성 방식은 예시로 "INVITE1234"로 넣음, 실제 코드에 맞게 생성해야 함)
+        //String inviteCode = InviteCodeGenerator.generateInviteCode(); // 8자리 랜덤 초대 코드 생성
+
+        // 단체 채팅방 생성
+        //ChatRoomDTO chatRoomDto = chatRoomService.createGroupChatRoomWithInvite(post.getId(), memberId, inviteCode);
+
+        // 게시글에 생성된 채팅방 ID 및 초대 코드 설정
+        //post.setChatRoomId(chatRoomDto.getRoomId()); // chatRoomId 업데이트
+       // post.setInviteCode(inviteCode); // 초대 코드 설정
 
         // 이미지 업로드 및 저장
         if (imageFiles != null && !imageFiles.isEmpty()) {
@@ -112,6 +132,10 @@ public class CompanionPostServiceImpl implements CompanionPostService {
             companionPostImageRepository.deleteAll(images);
         }
 
+        //게시글 삭제하면 채팅방도 삭제되게
+        chatRoomService.deleteRoomsByPostId(postId);  //
+
+
         //DB에서 게시글 삭제
         companionPostRepository.delete(post);
 
@@ -137,6 +161,14 @@ public class CompanionPostServiceImpl implements CompanionPostService {
     public Page<CompanionPostListResponseDTO> getPostList(Pageable pageable) {
         return companionPostRepository.findAllByOrderByCreatedAtDesc(pageable)
                 .map(CompanionPostListResponseDTO::new);
+    }
+
+    // 게시글 ID로 조회하는 메서드 추가
+    @Override
+    @Transactional(readOnly = true)
+    public CompanionPost findById(Long postId) {
+        return companionPostRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다. ID: " + postId));
     }
 
 }

@@ -59,9 +59,10 @@ dependencies {
     implementation 'net.nurigo:sdk:4.3.0'
 
     //redis
-    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'\
 
-
+    //socket.io
+    implementation 'io.github.opensabe-tech:netty-socketio:2.0.3'
 }
 
 tasks.named('test') {
