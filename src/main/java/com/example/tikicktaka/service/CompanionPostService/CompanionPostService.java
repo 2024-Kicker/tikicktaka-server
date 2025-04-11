@@ -11,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import org.springframework.data.domain.Pageable;
 import java.util.List;
+import java.util.Optional;
 
 public interface CompanionPostService {
 
@@ -24,5 +25,7 @@ public interface CompanionPostService {
     Page<CompanionPostListResponseDTO> getPostList(Pageable pageable); //게시글 목록 조회
 
     CompanionPostResponseDTO getPostDetail(Long postId); //게시글 상세 조회
+    CompanionPost findById(Long postId); // 게시글 ID로 조회
+
 }
 
