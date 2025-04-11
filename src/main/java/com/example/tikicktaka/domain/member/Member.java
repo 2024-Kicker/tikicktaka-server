@@ -160,6 +160,9 @@ public class Member extends BaseDateTimeEntity {
         this.introduceMessage = message;
     }
 
+    public void setId(Long ownerId) {
+    }
+
 
 //    // Method to update additional information after social login
 //    public void updateAdditionalInfo(String name, Date birthday, Gender gender, String phone, List<MemberTerm> memberTermList) {

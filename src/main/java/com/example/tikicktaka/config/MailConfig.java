@@ -15,9 +15,8 @@ public class MailConfig {
     public boolean sendMail(String ToEmail, String code) {
         try {
             MimeMessage message = javaMailSender.createMimeMessage();
-            message.setFrom(new InternetAddress("tikicktaka@gmail.com", "Tikicktaka", "UTF-8"));
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-
+            message.setFrom(new InternetAddress("tikicktaka@gmail.com", "Tikicktaka", "UTF-8"));
             helper.setSubject("Tikicktaka 인증번호 "); // 제목
             helper.setTo(ToEmail); // 받는사람
 
