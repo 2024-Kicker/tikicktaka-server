@@ -33,6 +33,7 @@ public enum ErrorStatus implements BaseErrorCode {
     MEMBER_NOT_ENOUGH_COIN(HttpStatus.BAD_REQUEST, "MEMBER4014", "잔액이 부족합니다."),
     MEMBER_TRAVEL_STYLE_NOT_SET(HttpStatus.BAD_REQUEST, "MEMBER4015", "선호 여행 스타일을 설정해주세요."),
 
+    BLOCKED_POST_FORBIDDEN(HttpStatus.FORBIDDEN, "POST403", "차단된 게시글입니다."),
 
     // Term
     TERM_NOT_FOUND(HttpStatus.NOT_FOUND, "TERM4001", "해당 약관이 존재하지 않습니다."),

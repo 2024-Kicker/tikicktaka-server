@@ -1,8 +1,10 @@
 package com.example.tikicktaka.service.CompanionPostService;
 
+import com.example.tikicktaka.domain.companionPost.BlockedPost;
 import com.example.tikicktaka.domain.companionPost.CompanionPost;
 import com.example.tikicktaka.domain.images.CompanionPostImg;
 import com.example.tikicktaka.domain.member.Member;
+import com.example.tikicktaka.repository.companionPost.BlockedPostRepository;
 import com.example.tikicktaka.repository.companionPost.CompanionPostRepository;
 import com.example.tikicktaka.repository.companionPost.CompanionPostImageRepository;
 import com.example.tikicktaka.repository.member.MemberRepository;
@@ -49,6 +51,9 @@ public class CompanionPostServiceImpl implements CompanionPostService {
 
     @Autowired
     private InviteCodeGeneratorService InviteCodeGenerator;
+
+    @Autowired
+    private BlockedPostRepository blockedPostRepository;
 
 
     @Override
@@ -155,13 +160,91 @@ public class CompanionPostServiceImpl implements CompanionPostService {
         return new CompanionPostResponseDTO(post, imageUrls);
     }
 
-    //@Transactional(readOnly = true)
+//    //@Transactional(readOnly = true)
+//    @Override
+//    @Transactional(readOnly = true)
+//    public Page<CompanionPostListResponseDTO> getPostList(Pageable pageable) {
+//        return companionPostRepository.findAllByOrderByCreatedAtDesc(pageable)
+//                .map(CompanionPostListResponseDTO::new);
+//    }
+
+
     @Override
     @Transactional(readOnly = true)
-    public Page<CompanionPostListResponseDTO> getPostList(Pageable pageable) {
-        return companionPostRepository.findAllByOrderByCreatedAtDesc(pageable)
-                .map(CompanionPostListResponseDTO::new);
+    public CompanionPostResponseDTO getPostDetail(Long postId, Long memberId) {
+        CompanionPost post = companionPostRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 게시글을 찾을 수 없습니다."));
+
+        if (memberId != null && blockedPostRepository.existsByMemberIdAndPostId(memberId, postId)) {
+            throw new IllegalStateException("차단된 게시글입니다.");
+        }
+
+        List<String> imageUrls = companionPostImageRepository.findByCompanionPost(post).stream()
+                .map(CompanionPostImg::getImageUrl)
+                .collect(Collectors.toList());
+
+        return new CompanionPostResponseDTO(post, imageUrls);
     }
+
+
+//    @Override
+//    @Transactional(readOnly = true)
+//    public Page<CompanionPostListResponseDTO> getPostList(Long memberId, Pageable pageable) {
+//        if (memberId == null) {
+//            // 비로그인 사용자는 전체 게시글 반환
+//            return companionPostRepository.findAllByOrderByCreatedAtDesc(pageable)
+//                    .map(CompanionPostListResponseDTO::new);
+//        }
+//
+//        List<Long> blockedPostIds = blockedPostRepository.findPostIdsByMemberId(memberId);
+//
+//        if (blockedPostIds == null || blockedPostIds.isEmpty()) {
+//            return companionPostRepository.findAllByOrderByCreatedAtDesc(pageable)
+//                    .map(CompanionPostListResponseDTO::new);
+//        }
+//
+//        return companionPostRepository.findByIdNotInOrderByCreatedAtDesc(blockedPostIds, pageable)
+//                .map(CompanionPostListResponseDTO::new);
+//    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<CompanionPostListResponseDTO> getPostList(Long memberId, Pageable pageable) {
+        List<Long> blockedPostIds = blockedPostRepository.findPostIdsByMemberId(memberId);
+
+        Page<CompanionPost> posts;
+        if (blockedPostIds.isEmpty()) {
+            // 차단한 게시글이 없으면 전체 조회
+            posts = companionPostRepository.findAllByOrderByCreatedAtDesc(pageable);
+        } else {
+            // 차단한 게시글이 있으면 제외하고 조회
+            posts = companionPostRepository.findAllByIdNotInOrderByCreatedAtDesc(blockedPostIds, pageable);
+        }
+
+        return posts.map(CompanionPostListResponseDTO::new);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<CompanionPostListResponseDTO> getBlockedPostList(Long memberId) {
+        // memberId에 해당하는 차단된 게시글 목록을 조회
+        List<Long> blockedPostIds = blockedPostRepository.findPostIdsByMemberId(memberId);
+
+        if (blockedPostIds.isEmpty()) {
+            return new ArrayList<>();  // 차단된 게시글이 없으면 빈 리스트 반환
+        }
+
+        // 차단된 게시글 IDs를 기반으로 게시글들을 조회
+        List<CompanionPost> blockedPosts = companionPostRepository.findAllByIdIn(blockedPostIds);
+
+        // CompanionPost를 CompanionPostListResponseDTO로 변환하여 반환
+        return blockedPosts.stream()
+                .map(CompanionPostListResponseDTO::new)
+                .collect(Collectors.toList());
+    }
+
+
+
 
     // 게시글 ID로 조회하는 메서드 추가
     @Override
@@ -170,6 +253,28 @@ public class CompanionPostServiceImpl implements CompanionPostService {
         return companionPostRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다. ID: " + postId));
     }
+
+    @Override
+    @Transactional
+    public void blockPost(Long memberId, Long postId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
+        CompanionPost post = companionPostRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
+
+        // 이미 차단했는지 확인
+        if (blockedPostRepository.existsByMemberAndBlockedPost(member, post)) {
+            throw new IllegalStateException("이미 차단한 게시글입니다.");
+        }
+
+        // 차단 저장
+        BlockedPost blockedPost = BlockedPost.builder()
+                .member(member)
+                .blockedPost(post)
+                .build();
+        blockedPostRepository.save(blockedPost);
+    }
+
 
 }
 
