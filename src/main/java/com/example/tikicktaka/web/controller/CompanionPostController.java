@@ -105,20 +105,60 @@ public class CompanionPostController {
         return ApiResponse.onSuccess(new CompanionPostResponseDTO(deletedPost, imageUrls));
     }
 
+//    @GetMapping("/list")
+//    @Operation(summary = "게시글 목록 조회", description = "모든 게시글 목록을 조회합니다.")
+//    public ApiResponse<Page<CompanionPostListResponseDTO>> getPostList(
+//            @ParameterObject
+//            @PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+//        Page<CompanionPostListResponseDTO> postList = postService.getPostList(pageable);
+//        return ApiResponse.onSuccess(postList);
+//    }
+
     @GetMapping("/list")
-    @Operation(summary = "게시글 목록 조회", description = "모든 게시글 목록을 조회합니다.")
+    @Operation(summary = "게시글 목록 조회", description = "로그인한 사용자가 차단한 게시글을 제외한 목록을 조회합니다.")
     public ApiResponse<Page<CompanionPostListResponseDTO>> getPostList(
             @ParameterObject
-            @PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-        Page<CompanionPostListResponseDTO> postList = postService.getPostList(pageable);
+            @PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
+            Authentication authentication) {
+
+        if (authentication == null || authentication.getName() == null) {
+            return ApiResponse.onFailure(ErrorStatus._UNAUTHORIZED.getCode(),
+                    ErrorStatus._UNAUTHORIZED.getMessage(),
+                    null);
+        }
+
+        Long memberId = Long.valueOf(authentication.getName());
+        Page<CompanionPostListResponseDTO> postList = postService.getPostList(memberId, pageable);
+
         return ApiResponse.onSuccess(postList);
     }
 
+//    @GetMapping("/{postId}")
+//    @Operation(summary = "동행찾기 게시글 상세 조회 API", description = "게시글 ID를 기반으로 상세 내용을 조회합니다.")
+//    public ApiResponse<CompanionPostResponseDTO> getPostDetail(@PathVariable Long postId) {
+//        CompanionPostResponseDTO responseDTO = postService.getPostDetail(postId);
+//        return ApiResponse.onSuccess(responseDTO);
+//    }
+
     @GetMapping("/{postId}")
     @Operation(summary = "동행찾기 게시글 상세 조회 API", description = "게시글 ID를 기반으로 상세 내용을 조회합니다.")
-    public ApiResponse<CompanionPostResponseDTO> getPostDetail(@PathVariable Long postId) {
-        CompanionPostResponseDTO responseDTO = postService.getPostDetail(postId);
-        return ApiResponse.onSuccess(responseDTO);
+    public ApiResponse<CompanionPostResponseDTO> getPostDetail(@PathVariable Long postId, Authentication authentication) {
+        if (authentication == null || authentication.getName() == null) {
+            return ApiResponse.onFailure(ErrorStatus._UNAUTHORIZED.getCode(),
+                    ErrorStatus._UNAUTHORIZED.getMessage(),
+                    null);
+        }
+
+        Long memberId = Long.valueOf(authentication.getName());
+
+        try {
+            CompanionPostResponseDTO postDetail = postService.getPostDetail(postId, memberId);
+            return ApiResponse.onSuccess(postDetail);
+        } catch (IllegalStateException e) {
+            return ApiResponse.onFailure(ErrorStatus.BLOCKED_POST_FORBIDDEN.getCode(),
+                    "차단된 게시글입니다.",
+                    null);
+        }
     }
 
     //공유 게시글 조회
@@ -128,4 +168,25 @@ public class CompanionPostController {
         CompanionPostResponseDTO responseDTO = postService.getPostDetail(postId);
         return ApiResponse.onSuccess(responseDTO);
     }
+
+    @PostMapping("/{postId}/block")
+    @Operation(summary = "게시글 차단", description = "사용자가 특정 게시글을 차단합니다.")
+    public ApiResponse<String> blockPost(@PathVariable Long postId, Authentication authentication) {
+        if (authentication == null || authentication.getName() == null) {
+            return ApiResponse.onFailure(ErrorStatus._UNAUTHORIZED.getCode(),
+                    ErrorStatus._UNAUTHORIZED.getMessage(),
+                    null);
+        }
+
+        Long memberId = Long.valueOf(authentication.getName());
+        try {
+            postService.blockPost(memberId, postId);
+            return ApiResponse.onSuccess("게시글이 차단되었습니다.");
+        } catch (Exception e) {
+            return ApiResponse.onFailure(ErrorStatus._BAD_REQUEST.getCode(),
+                    "차단 처리에 실패했습니다.",
+                    null);
+        }
+    }
+
 }

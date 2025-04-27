@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface CompanionPostRepository extends JpaRepository<CompanionPost, Long> {
     // 특정 회원이 작성한 게시글 조회
@@ -22,6 +23,15 @@ public interface CompanionPostRepository extends JpaRepository<CompanionPost, Lo
     List<CompanionPost> searchByTitle(@Param("keyword") String keyword);
 
     //게시글 목록을 페이징해서 가져오기 (최신순)
+    //Page<CompanionPost> findAllByOrderByCreatedAtDesc(Pageable pageable);
+
+    @Query("SELECT p FROM CompanionPost p WHERE p.id NOT IN :blockedPostIds ORDER BY p.createdAt DESC")
+    Page<CompanionPost> findAllByIdNotInOrderByCreatedAtDesc(@Param("blockedPostIds") List<Long> blockedPostIds, Pageable pageable);
+
+    @Query("SELECT p FROM CompanionPost p ORDER BY p.createdAt DESC")
     Page<CompanionPost> findAllByOrderByCreatedAtDesc(Pageable pageable);
+
+    @Query("SELECT p FROM CompanionPost p WHERE p.id IN :postIds")
+    List<CompanionPost> findAllByIdIn(@Param("postIds") List<Long> postIds);
 
 }
