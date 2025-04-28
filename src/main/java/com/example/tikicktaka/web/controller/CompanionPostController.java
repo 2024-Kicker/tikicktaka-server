@@ -12,6 +12,7 @@ import com.example.tikicktaka.service.memberService.MemberQueryService;
 import com.example.tikicktaka.web.dto.companionPost.CompanionPostListResponseDTO;
 import com.example.tikicktaka.repository.companionPost.CompanionPostImageRepository;
 import com.example.tikicktaka.web.dto.companionPost.CompanionPostResponseDTO;
+import com.example.tikicktaka.web.dto.companionPost.UpdatePostStatusRequestDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -47,8 +48,12 @@ public class CompanionPostController {
     @Autowired
     private CompanionPostImageRepository companionPostImageRepository;
 
+    @Autowired
+    private  CompanionPostService companionPostService;
 
-    @PostMapping(value="/create", consumes = "multipart/form-data")
+
+
+    @PostMapping(value = "/create", consumes = "multipart/form-data")
     @Operation(summary = "동행찾기 게시판 게시글 작성", description = "request: 날짜, 홈팀, 어웨이팀")
     public ApiResponse<CompanionPostResponseDTO> createPost(@RequestParam String title,
                                                             @RequestParam String content,
@@ -188,5 +193,20 @@ public class CompanionPostController {
                     null);
         }
     }
+    @PatchMapping("/{postId}/status")
+    @Operation(summary = "게시글 상태 변경", description = "게시글 상태를 변경합니다.(FOUND, FINDING)")
+    public ApiResponse<Void> updatePostStatus(@PathVariable Long postId,
+                                              @RequestBody UpdatePostStatusRequestDTO request,
+                                              Authentication authentication) {
+        if (authentication == null || authentication.getName() == null) {
+            return ApiResponse.onFailure(ErrorStatus._UNAUTHORIZED.getCode(),
+                    ErrorStatus._UNAUTHORIZED.getMessage(),
+                    null);
+        }
 
+        Long memberId = Long.valueOf(authentication.getName());
+        companionPostService.updatePostStatus(postId, request.getStatus(), memberId);
+
+        return ApiResponse.onSuccess(null);
+    }
 }

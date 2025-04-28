@@ -275,6 +275,21 @@ public class CompanionPostServiceImpl implements CompanionPostService {
         blockedPostRepository.save(blockedPost);
     }
 
+    @Override
+    @Transactional
+    public void updatePostStatus(Long postId, CompanionPost.PostStatus status, Long memberId) {
+        CompanionPost post = companionPostRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
+
+        if (!post.getAuthor().getId().equals(memberId)) {
+            throw new IllegalStateException("본인이 작성한 게시글만 수정할 수 있습니다.");
+        }
+
+        post.setStatus(status);
+        post.preUpdate(); // updatedAt을 갱신해주기
+    }
+
+
 
 }
 
