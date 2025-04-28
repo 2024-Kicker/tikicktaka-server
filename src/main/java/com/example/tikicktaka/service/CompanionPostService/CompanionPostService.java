@@ -38,5 +38,8 @@ CompanionPostResponseDTO getPostDetail(Long postId); //게시글 상세 조회
 
     List<CompanionPostListResponseDTO> getBlockedPostList(Long memberId);
 
+    void updatePostStatus(Long postId, CompanionPost.PostStatus status, Long memberId);
+
+
 }
 

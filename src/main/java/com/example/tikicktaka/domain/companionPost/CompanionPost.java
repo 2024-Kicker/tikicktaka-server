@@ -83,8 +83,8 @@ public class CompanionPost {
     }
 
     public enum TravelStatus {
-        Baseball, // 동행 구하는 중
-        Travel    // 동행 구했음
+        Baseball, // 야구 동행 구하는 중
+        Travel    // 여행 동행 구하는 중
     }
 
     public List<CompanionPostImg> getImages() {
@@ -99,6 +99,11 @@ public class CompanionPost {
         if (thumbnailUrl == null) {
             this.thumbnailUrl = image.getImageUrl();
         }
+    }
+
+
+    public void setStatus(PostStatus status) {
+        this.status = status;
     }
 
     public void setInviteCode(String inviteCode) {
