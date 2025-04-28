@@ -2,11 +2,13 @@ package com.example.tikicktaka.service.CompanionPostService;
 
 import com.example.tikicktaka.domain.companionPost.BlockedPost;
 import com.example.tikicktaka.domain.companionPost.CompanionPost;
+import com.example.tikicktaka.domain.companionPost.ScrapedPost;
 import com.example.tikicktaka.domain.images.CompanionPostImg;
 import com.example.tikicktaka.domain.member.Member;
 import com.example.tikicktaka.repository.companionPost.BlockedPostRepository;
 import com.example.tikicktaka.repository.companionPost.CompanionPostRepository;
 import com.example.tikicktaka.repository.companionPost.CompanionPostImageRepository;
+import com.example.tikicktaka.repository.companionPost.ScrapedPostRepository;
 import com.example.tikicktaka.repository.member.MemberRepository;
 import com.example.tikicktaka.service.UtilService;
 import com.example.tikicktaka.service.chatService.ChatRoomService;
@@ -54,6 +56,8 @@ public class CompanionPostServiceImpl implements CompanionPostService {
 
     @Autowired
     private BlockedPostRepository blockedPostRepository;
+    @Autowired
+    private ScrapedPostRepository scrapedPostRepository;
 
 
     @Override
@@ -221,7 +225,12 @@ public class CompanionPostServiceImpl implements CompanionPostService {
             posts = companionPostRepository.findAllByIdNotInOrderByCreatedAtDesc(blockedPostIds, pageable);
         }
 
-        return posts.map(CompanionPostListResponseDTO::new);
+        //return posts.map(CompanionPostListResponseDTO::new);
+        // DTO 변환 (isScraped 값을 추가하여 변환)
+        return posts.map(post -> {
+            boolean isScraped = scrapedPostRepository.existsByMemberIdAndCompanionPostId(memberId, post.getId());
+            return new CompanionPostListResponseDTO(post, isScraped);
+        });
     }
 
     @Override
@@ -237,10 +246,18 @@ public class CompanionPostServiceImpl implements CompanionPostService {
         // 차단된 게시글 IDs를 기반으로 게시글들을 조회
         List<CompanionPost> blockedPosts = companionPostRepository.findAllByIdIn(blockedPostIds);
 
+//        // CompanionPost를 CompanionPostListResponseDTO로 변환하여 반환
+//        return blockedPosts.stream()
+//                .map(CompanionPostListResponseDTO::new)
+//                .collect(Collectors.toList());
         // CompanionPost를 CompanionPostListResponseDTO로 변환하여 반환
         return blockedPosts.stream()
-                .map(CompanionPostListResponseDTO::new)
+                .map(post -> {
+                    boolean isScraped = scrapedPostRepository.existsByMemberIdAndCompanionPostId(memberId, post.getId());
+                    return new CompanionPostListResponseDTO(post, isScraped);
+                })
                 .collect(Collectors.toList());
+
     }
 
 
@@ -287,6 +304,32 @@ public class CompanionPostServiceImpl implements CompanionPostService {
 
         post.setStatus(status);
         post.preUpdate(); // updatedAt을 갱신해주기
+    }
+
+    @Transactional
+    public void scrapPost(Long memberId, Long postId) {
+        // 이미 스크랩한 게시글인지 확인
+        if (scrapedPostRepository.existsByMemberIdAndCompanionPostId(memberId, postId)) {
+            throw new IllegalStateException("이미 스크랩한 게시글입니다.");
+        }
+
+        // 스크랩 저장
+        CompanionPost post = companionPostRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
+
+        ScrapedPost scrap = ScrapedPost.builder()
+                .member(member)
+                .companionPost(post)
+                .build();
+        scrapedPostRepository.save(scrap);
+    }
+
+    @Transactional
+    public void unsaveScrapPost(Long memberId, Long postId) {
+        // 스크랩 취소
+        scrapedPostRepository.deleteByMemberIdAndCompanionPostId(memberId, postId);
     }
 
 

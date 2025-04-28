@@ -23,7 +23,7 @@ public interface CompanionPostService {
 
 //    Page<CompanionPostListResponseDTO> getPostList(Pageable pageable); //게시글 목록 조회
 //
-CompanionPostResponseDTO getPostDetail(Long postId); //게시글 상세 조회
+    CompanionPostResponseDTO getPostDetail(Long postId); //게시글 상세 조회
 
     @org.springframework.transaction.annotation.Transactional(readOnly = true)
     CompanionPostResponseDTO getPostDetail(Long postId, Long memberId);
@@ -41,5 +41,8 @@ CompanionPostResponseDTO getPostDetail(Long postId); //게시글 상세 조회
     void updatePostStatus(Long postId, CompanionPost.PostStatus status, Long memberId);
 
 
+    void scrapPost(Long memberId, Long postId);
+
+    void unsaveScrapPost(Long memberId, Long postId);
 }
 

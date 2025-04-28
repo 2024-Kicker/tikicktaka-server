@@ -209,4 +209,36 @@ public class CompanionPostController {
 
         return ApiResponse.onSuccess(null);
     }
+
+    // 스크랩 추가
+    @PostMapping("/scrap/{postId}")
+    @Operation(summary = "게시글 스크랩", description = "게시글을 스크랩합니다.")
+    public ApiResponse<Void> scrapPost(@PathVariable Long postId, Authentication authentication) {
+        if (authentication == null || authentication.getName() == null) {
+            return ApiResponse.onFailure(ErrorStatus._UNAUTHORIZED.getCode(),
+                    ErrorStatus._UNAUTHORIZED.getMessage(),
+                    null);
+        }
+
+        Long memberId = Long.valueOf(authentication.getName());
+
+        postService.scrapPost(memberId, postId);
+        return ApiResponse.onSuccess(null);
+    }
+
+    // 스크랩 취소
+    @DeleteMapping("/scrap/{postId}")
+    @Operation(summary = "게시글 스크랩 취소", description = "스크랩한 게시글을 취소합니다.")
+    public ApiResponse<Void> unsaveScrapPost(@PathVariable Long postId, Authentication authentication) {
+        if (authentication == null || authentication.getName() == null) {
+            return ApiResponse.onFailure(ErrorStatus._UNAUTHORIZED.getCode(),
+                    ErrorStatus._UNAUTHORIZED.getMessage(),
+                    null);
+        }
+
+        Long memberId = Long.valueOf(authentication.getName());
+
+        postService.unsaveScrapPost(memberId, postId);
+        return ApiResponse.onSuccess(null);
+    }
 }
