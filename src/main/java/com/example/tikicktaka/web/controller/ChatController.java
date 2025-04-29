@@ -1,6 +1,8 @@
 package com.example.tikicktaka.web.controller;
 
 
+import com.example.tikicktaka.apiPayload.ApiResponse;
+import com.example.tikicktaka.apiPayload.code.status.ErrorStatus;
 import com.example.tikicktaka.service.chatService.ChatMessageService;
 import com.example.tikicktaka.service.chatService.ChatRoomService;
 import com.example.tikicktaka.web.dto.chat.ChatMessageDTO;
@@ -22,30 +24,30 @@ public class ChatController {
     //특정 채팅방의 메시지 불러오기
     @GetMapping("/{roomId}")
     @Operation(summary = "특정 채팅방의 메시지 불러오기")
-    public ResponseEntity<List<ChatMessageDTO>> getChatMessages(@PathVariable String roomId) {
+    public ApiResponse<List<ChatMessageDTO>> getChatMessages(@PathVariable String roomId) {
         List<ChatMessageDTO> messages = chatMessageService.getMessages(roomId);
-        return ResponseEntity.ok(messages);
+        return ApiResponse.onSuccess(messages);
     }
 
     //특정 채팅방에 메시지 전송하기
-    @PostMapping("/{roomId}")
-    @Operation(summary = "특정 채팅방에 메시지 전송하기")
-    public ResponseEntity<Void> sendMessage(@PathVariable String roomId, @RequestParam Long senderId, @RequestParam String message) {
-        chatMessageService.saveMessage(roomId, senderId, message);
-        return ResponseEntity.ok().build();
-    }
+//    @PostMapping("/{roomId}")
+//    @Operation(summary = "특정 채팅방에 메시지 전송하기")
+//    public ResponseEntity<Void> sendMessage(@PathVariable String roomId, @RequestParam Long senderId, @RequestParam String message) {
+//        chatMessageService.saveMessage(roomId, senderId, message);
+//        return ResponseEntity.ok().build();
+//    }
 
     // 초대 코드로 채팅방 입장 API
     @PostMapping("/joinByInviteCode")
     @Operation(summary = "초대 코드로 채팅방 입장 API")
-    public ResponseEntity<String> joinRoomByInviteCode(@RequestParam String inviteCode, @RequestParam Long userId) {
+    public ApiResponse<String> joinRoomByInviteCode(@RequestParam String inviteCode, @RequestParam Long userId) {
         try {
             //chatRoomService.joinRoomByInviteCode(inviteCode, userId);
             //return ResponseEntity.ok("채팅방에 성공적으로 입장했습니다.");
             String roomId = chatRoomService.joinRoomByInviteCode(inviteCode, userId);
-            return ResponseEntity.ok(roomId); // roomId 반환
+            return ApiResponse.onSuccess(roomId); // roomId 반환
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ApiResponse.onFailure(ErrorStatus._BAD_REQUEST.getCode(), e.getMessage(), null);
         }
     }
 }
