@@ -15,6 +15,7 @@ import com.example.tikicktaka.service.chatService.ChatRoomService;
 import com.example.tikicktaka.service.chatService.InviteCodeGeneratorService;
 import com.example.tikicktaka.web.dto.companionPost.CompanionPostListResponseDTO;
 import com.example.tikicktaka.web.dto.companionPost.CompanionPostResponseDTO;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +28,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.data.domain.Pageable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -175,27 +175,6 @@ public class CompanionPostServiceImpl implements CompanionPostService {
     }
 
 
-//    @Override
-//    @Transactional(readOnly = true)
-//    public Page<CompanionPostListResponseDTO> getPostList(Long memberId, Pageable pageable) {
-//        if (memberId == null) {
-//            // 비로그인 사용자는 전체 게시글 반환
-//            return companionPostRepository.findAllByOrderByCreatedAtDesc(pageable)
-//                    .map(CompanionPostListResponseDTO::new);
-//        }
-//
-//        List<Long> blockedPostIds = blockedPostRepository.findPostIdsByMemberId(memberId);
-//
-//        if (blockedPostIds == null || blockedPostIds.isEmpty()) {
-//            return companionPostRepository.findAllByOrderByCreatedAtDesc(pageable)
-//                    .map(CompanionPostListResponseDTO::new);
-//        }
-//
-//        return companionPostRepository.findByIdNotInOrderByCreatedAtDesc(blockedPostIds, pageable)
-//                .map(CompanionPostListResponseDTO::new);
-//    }
-
-
     //차단한 게시글 제외하고 게시글 목록 조회
     @Override
     @Transactional(readOnly = true)
@@ -234,11 +213,6 @@ public class CompanionPostServiceImpl implements CompanionPostService {
         // 차단된 게시글 IDs를 기반으로 게시글들을 조회
         List<CompanionPost> blockedPosts = companionPostRepository.findAllByIdIn(blockedPostIds);
 
-//        // CompanionPost를 CompanionPostListResponseDTO로 변환하여 반환
-//        return blockedPosts.stream()
-//                .map(CompanionPostListResponseDTO::new)
-//                .collect(Collectors.toList());
-        // CompanionPost를 CompanionPostListResponseDTO로 변환하여 반환
         return blockedPosts.stream()
                 .map(post -> {
                     boolean isScraped = scrapedPostRepository.existsByMemberIdAndCompanionPostId(memberId, post.getId());
@@ -315,9 +289,18 @@ public class CompanionPostServiceImpl implements CompanionPostService {
     }
 
     @Transactional
-    public void unsaveScrapPost(Long memberId, Long postId) {
-        // 스크랩 취소
-        scrapedPostRepository.deleteByMemberIdAndCompanionPostId(memberId, postId);
+    public void unScrapPost(Long memberId, Long postId) {
+
+        // 게시글 존재 여부 확인
+        if (!companionPostRepository.existsById(postId)) {
+            throw new EntityNotFoundException("해당 게시글을 찾을 수 없습니다.");
+        }
+
+        // 스크랩 정보 조회 및 삭제
+        ScrapedPost scrap = (ScrapedPost) scrapedPostRepository.findByMemberIdAndCompanionPostId(memberId, postId)
+                .orElseThrow(() -> new EntityNotFoundException("해당 스크랩 정보를 찾을 수 없습니다."));
+
+        scrapedPostRepository.delete(scrap);
     }
 
 

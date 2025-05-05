@@ -33,4 +33,6 @@ public interface StoryRoomService {
     void scrap(Long memberId, Long postId);
 
     List<StoryRoomPostResponseDTO> getFilteredStoryRoomPosts(StoryRoomStatus status, StoryRoomPostSortType sortType, Topic topic, Long memberId);
+
+    ApiResponse<String> blockStoryRoomPost(Long memberId, Long postId);
 }

@@ -55,7 +55,8 @@ public enum ErrorStatus implements BaseErrorCode {
 
     //StoryRoom Post Errors
     STORYROOMPOST_NOT_FOUND(HttpStatus.NOT_FOUND, "STORYROOMPOST4001", "해당 포스트를 찾을 수 없습니다."),
-    STORYROOMPOST_NOT_OWNER(HttpStatus.BAD_REQUEST, "STORYROOMPOST4002","본인이 작성한 게시글만 삭제할 수 있습니다.");
+    STORYROOMPOST_NOT_OWNER(HttpStatus.BAD_REQUEST, "STORYROOMPOST4002","본인이 작성한 게시글만 삭제할 수 있습니다."),
+    STORYROOMPOST_ALREADY_BLOCKED(HttpStatus.BAD_REQUEST, "STORYROOMPOST4003","이미 차단한 게시글입니다.");
 
 
 

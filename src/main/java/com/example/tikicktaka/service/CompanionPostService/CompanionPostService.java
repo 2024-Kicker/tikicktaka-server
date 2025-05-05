@@ -43,6 +43,6 @@ public interface CompanionPostService {
 
     void scrapPost(Long memberId, Long postId);
 
-    void unsaveScrapPost(Long memberId, Long postId);
+    void unScrapPost(Long memberId, Long postId);
 }
 

@@ -1,6 +1,5 @@
 package com.example.tikicktaka.domain.storyRoom;
 
-import com.example.tikicktaka.domain.companionPost.CompanionPost;
 import com.example.tikicktaka.domain.member.Member;
 import jakarta.persistence.*;
 import lombok.*;
@@ -13,7 +12,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class StoryRoomScrapedPost {
+public class ScrapedStoryRoomPost {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,7 +28,7 @@ public class StoryRoomScrapedPost {
 
     private LocalDateTime createdAt;
 
-    public StoryRoomScrapedPost(Member member, StoryRoomPost post) {
+    public ScrapedStoryRoomPost(Member member, StoryRoomPost post) {
         this.member = member;
         this.storyRoomPost = post;
     }
