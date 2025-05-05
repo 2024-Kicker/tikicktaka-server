@@ -1,12 +1,12 @@
-package com.example.tikicktaka.repository.chat;
+package com.example.tikicktaka.repository.companionPostChat;
 
-import com.example.tikicktaka.domain.chat.ChatRoom;
+import com.example.tikicktaka.domain.companionPostChat.ChatRoom;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
+public interface CompanionPostChatRoomRepository extends JpaRepository<ChatRoom, Long> {
     Optional<ChatRoom> findByRoomId(String roomId);  // roomId로 채팅방 찾기
 
     Optional<ChatRoom> findByInviteCode(String inviteCode);

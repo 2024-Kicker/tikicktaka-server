@@ -51,7 +51,12 @@ public enum ErrorStatus implements BaseErrorCode {
 
     // Game Schedule Errors
     GAME_SCHEDULE_REQUIRED_FIELDS_MISSING(HttpStatus.BAD_REQUEST, "GAMESCHEDULE4001", "정보를 모두 입력해야 합니다."),
-    GAME_SCHEDULE_NOT_FOUND(HttpStatus.NOT_FOUND, "GAMESCHEDULE4002", "해당 경기 정보를 찾을 수 없습니다.");
+    GAME_SCHEDULE_NOT_FOUND(HttpStatus.NOT_FOUND, "GAMESCHEDULE4002", "해당 경기 정보를 찾을 수 없습니다."),
+
+    //StoryRoom Post Errors
+    STORYROOMPOST_NOT_FOUND(HttpStatus.NOT_FOUND, "STORYROOMPOST4001", "해당 포스트를 찾을 수 없습니다."),
+    STORYROOMPOST_NOT_OWNER(HttpStatus.BAD_REQUEST, "STORYROOMPOST4002","본인이 작성한 게시글만 삭제할 수 있습니다.");
+
 
 
 
@@ -77,4 +82,14 @@ public enum ErrorStatus implements BaseErrorCode {
                 .httpStatus(httpStatus)
                 .build();
     }
+
+    public static ErrorStatus fromCode(String code) {
+        for (ErrorStatus status : ErrorStatus.values()) {
+            if (status.getCode().equals(code)) {
+                return status;
+            }
+        }
+        return _INTERNAL_SERVER_ERROR; // 기본값 혹은 null 처리
+    }
+
 }

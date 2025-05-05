@@ -1,8 +1,8 @@
 package com.example.tikicktaka.service.chatService;
 
 import com.corundumstudio.socketio.SocketIOServer;
-import com.example.tikicktaka.domain.chat.ChatRoom;
-import com.example.tikicktaka.repository.chat.ChatRoomRepository;
+import com.example.tikicktaka.domain.companionPostChat.ChatRoom;
+import com.example.tikicktaka.repository.companionPostChat.CompanionPostChatRoomRepository;
 import com.example.tikicktaka.web.dto.chat.ChatMessageDTO;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,7 +20,7 @@ public class ChatMessageServiceImpl implements ChatMessageService {
 
     private final StringRedisTemplate redisTemplate;
     private final SocketIOServer socketIOServer;
-    private final ChatRoomRepository chatRoomRepository;
+    private final CompanionPostChatRoomRepository companionPostChatRoomRepository;
 
     // 메시지 저장
     @Override
@@ -34,10 +34,10 @@ public class ChatMessageServiceImpl implements ChatMessageService {
             String jsonMessage = objectMapper.writeValueAsString(chatMessageDTO);
 
             // Redis에 메시지 저장 (TTL 2주일 설정)
-            redisTemplate.opsForList().rightPush("chat:" + roomId, jsonMessage);
+            redisTemplate.opsForList().rightPush("companionPostChat:" + roomId, jsonMessage);
 
             // Redis에 TTL 설정 (2주일 후 자동 삭제)
-            redisTemplate.expire("chat:" + roomId, 14, TimeUnit.DAYS);
+            redisTemplate.expire("companionPostChat:" + roomId, 14, TimeUnit.DAYS);
         } catch (JsonProcessingException e) {
             throw new RuntimeException("메시지 변환 오류", e);
         }
@@ -46,7 +46,7 @@ public class ChatMessageServiceImpl implements ChatMessageService {
     // 메시지 조회
     @Override
     public List<ChatMessageDTO> getMessages(String roomId) {
-        List<String> messages = redisTemplate.opsForList().range("chat:" + roomId, 0, -1);
+        List<String> messages = redisTemplate.opsForList().range("companionPostChat:" + roomId, 0, -1);
 
         return messages.stream().map(msg -> {
             try {
@@ -62,7 +62,7 @@ public class ChatMessageServiceImpl implements ChatMessageService {
     @Override
     public void sendGroupMessage(String roomId, Long senderId, String message) {
         // 채팅방 존재 여부 확인
-        ChatRoom chatRoom = chatRoomRepository.findByRoomId(roomId)
+        ChatRoom chatRoom = companionPostChatRoomRepository.findByRoomId(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("채팅방을 찾을 수 없습니다."));
 
         // 메시지 저장 (Redis에 저장)

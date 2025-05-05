@@ -1,14 +1,13 @@
-package com.example.tikicktaka.repository.chat;
+package com.example.tikicktaka.repository.companionPostChat;
 
-import com.example.tikicktaka.domain.chat.ChatParticipant;
-import com.example.tikicktaka.domain.chat.ChatRoom;
+import com.example.tikicktaka.domain.companionPostChat.ChatParticipant;
+import com.example.tikicktaka.domain.companionPostChat.ChatRoom;
 import com.example.tikicktaka.domain.member.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
-import java.util.Optional;
 
-public interface ChatParticipantRepository extends JpaRepository<ChatParticipant, Long> {
+public interface CompanionPostChatParticipantRepository extends JpaRepository<ChatParticipant, Long> {
 
     // 특정 채팅방의 모든 참여자 조회
     List<ChatParticipant> findByChatRoom(ChatRoom chatRoom);

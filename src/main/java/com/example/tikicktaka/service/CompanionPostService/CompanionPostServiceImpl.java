@@ -60,6 +60,7 @@ public class CompanionPostServiceImpl implements CompanionPostService {
     private ScrapedPostRepository scrapedPostRepository;
 
 
+    //게시글 작성
     @Override
     @Transactional
     public CompanionPost createPostWithImages(String title, String content, Long memberId, List<MultipartFile> imageFiles, CompanionPost.PostStatus status, CompanionPost.TravelStatus travelStatus) {
@@ -78,16 +79,6 @@ public class CompanionPostServiceImpl implements CompanionPostService {
 
         // 게시글 저장 (우선 저장 후 ID 생성됨)
         companionPostRepository.save(post);
-
-        // 초대 코드 생성 (초대 코드 생성 방식은 예시로 "INVITE1234"로 넣음, 실제 코드에 맞게 생성해야 함)
-        //String inviteCode = InviteCodeGenerator.generateInviteCode(); // 8자리 랜덤 초대 코드 생성
-
-        // 단체 채팅방 생성
-        //ChatRoomDTO chatRoomDto = chatRoomService.createGroupChatRoomWithInvite(post.getId(), memberId, inviteCode);
-
-        // 게시글에 생성된 채팅방 ID 및 초대 코드 설정
-        //post.setChatRoomId(chatRoomDto.getRoomId()); // chatRoomId 업데이트
-       // post.setInviteCode(inviteCode); // 초대 코드 설정
 
         // 이미지 업로드 및 저장
         if (imageFiles != null && !imageFiles.isEmpty()) {
@@ -142,15 +133,15 @@ public class CompanionPostServiceImpl implements CompanionPostService {
         }
 
         //게시글 삭제하면 채팅방도 삭제되게
-        chatRoomService.deleteRoomsByPostId(postId);  //
-
-
+        chatRoomService.deleteRoomsByPostId(postId);
         //DB에서 게시글 삭제
         companionPostRepository.delete(post);
 
         return post;
     }
 
+
+    //공유용 게시글 조회
     @Override
     @Transactional(readOnly = true)
     public CompanionPostResponseDTO getPostDetail(Long postId){
@@ -164,15 +155,8 @@ public class CompanionPostServiceImpl implements CompanionPostService {
         return new CompanionPostResponseDTO(post, imageUrls);
     }
 
-//    //@Transactional(readOnly = true)
-//    @Override
-//    @Transactional(readOnly = true)
-//    public Page<CompanionPostListResponseDTO> getPostList(Pageable pageable) {
-//        return companionPostRepository.findAllByOrderByCreatedAtDesc(pageable)
-//                .map(CompanionPostListResponseDTO::new);
-//    }
 
-
+    //게시글 상세 조회
     @Override
     @Transactional(readOnly = true)
     public CompanionPostResponseDTO getPostDetail(Long postId, Long memberId) {
@@ -211,6 +195,8 @@ public class CompanionPostServiceImpl implements CompanionPostService {
 //                .map(CompanionPostListResponseDTO::new);
 //    }
 
+
+    //차단한 게시글 제외하고 게시글 목록 조회
     @Override
     @Transactional(readOnly = true)
     public Page<CompanionPostListResponseDTO> getPostList(Long memberId, Pageable pageable) {
@@ -233,6 +219,8 @@ public class CompanionPostServiceImpl implements CompanionPostService {
         });
     }
 
+
+    //사용자가 차단한 게시글 목록 조회
     @Override
     @Transactional(readOnly = true)
     public List<CompanionPostListResponseDTO> getBlockedPostList(Long memberId) {
