@@ -60,6 +60,7 @@ public class CompanionPostServiceImpl implements CompanionPostService {
     private ScrapedPostRepository scrapedPostRepository;
 
 
+    //게시글 작성
     @Override
     @Transactional
     public CompanionPost createPostWithImages(String title, String content, Long memberId, List<MultipartFile> imageFiles, CompanionPost.PostStatus status, CompanionPost.TravelStatus travelStatus) {
@@ -132,9 +133,7 @@ public class CompanionPostServiceImpl implements CompanionPostService {
         }
 
         //게시글 삭제하면 채팅방도 삭제되게
-        chatRoomService.deleteRoomsByPostId(postId);  //
-
-
+        chatRoomService.deleteRoomsByPostId(postId);
         //DB에서 게시글 삭제
         companionPostRepository.delete(post);
 
@@ -155,14 +154,6 @@ public class CompanionPostServiceImpl implements CompanionPostService {
 
         return new CompanionPostResponseDTO(post, imageUrls);
     }
-
-//    //@Transactional(readOnly = true)
-//    @Override
-//    @Transactional(readOnly = true)
-//    public Page<CompanionPostListResponseDTO> getPostList(Pageable pageable) {
-//        return companionPostRepository.findAllByOrderByCreatedAtDesc(pageable)
-//                .map(CompanionPostListResponseDTO::new);
-//    }
 
 
     //게시글 상세 조회

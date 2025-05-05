@@ -8,16 +8,14 @@ import com.example.tikicktaka.domain.images.StoryRoomImg;
 import com.example.tikicktaka.domain.member.Member;
 import com.example.tikicktaka.domain.storyRoom.*;
 import com.example.tikicktaka.repository.member.MemberRepository;
-import com.example.tikicktaka.repository.storyRoom.StoryRoomImageRepository;
-import com.example.tikicktaka.repository.storyRoom.StoryRoomParticipantRepository;
-import com.example.tikicktaka.repository.storyRoom.StoryRoomPostRepository;
-import com.example.tikicktaka.repository.storyRoom.StoryRoomRepository;
+import com.example.tikicktaka.repository.storyRoom.*;
 import com.example.tikicktaka.web.dto.storyRoom.StoryRoomCreateRequestDTO;
 import com.example.tikicktaka.web.dto.storyRoom.StoryRoomDetailResponseDTO;
 import com.example.tikicktaka.web.dto.storyRoom.StoryRoomListResponseDTO;
 import com.example.tikicktaka.service.UtilService;
 import com.example.tikicktaka.apiPayload.code.status.ErrorStatus;
 import com.example.tikicktaka.web.dto.storyRoom.StoryRoomPostResponseDTO;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -39,6 +37,7 @@ public class StoryRoomServiceImpl implements StoryRoomService {
     private final StoryRoomPostRepository storyRoomPostRepository;
     private final UtilService utilService;
     private final StoryRoomImageRepository storyRoomImageRepository;
+    private final StoryRoomScrapRepository storyRoomScrapRepository;
 
 
     /**
@@ -69,8 +68,9 @@ public class StoryRoomServiceImpl implements StoryRoomService {
 
         // 3. 참가자 등록
         StoryRoomParticipant participant = new StoryRoomParticipant();
-        participant.setStoryRoomId(room.getId());
-        participant.setMemberId(author.getId());
+        participant.setStoryRoom(room);
+        participant.setStoryRoomPost(post);
+        participant.setMember(author);
         participant.setRole(StoryRoomParticipant.Role.OWNER);
         storyRoomParticipantRepository.save(participant);
 
@@ -139,7 +139,7 @@ public class StoryRoomServiceImpl implements StoryRoomService {
     @Transactional
     public ApiResponse<?> deleteStoryRoomPost(Long storyRoomPostId, Long memberId) {
         Optional<StoryRoomPost> optionalPost = storyRoomPostRepository.findById(storyRoomPostId);
-
+        //게시글이 있는지 확인
         if (optionalPost.isEmpty()) {
             return ApiResponse.onFailure(
                     ErrorStatus.STORYROOMPOST_NOT_FOUND.getCode(),
@@ -149,14 +149,24 @@ public class StoryRoomServiceImpl implements StoryRoomService {
         }
 
         StoryRoomPost post = optionalPost.get();
-
+        //작성자 본인인지 확인
         if (!post.getAuthor() .getId().equals(memberId)) {
             return ApiResponse.onFailure(
                     ErrorStatus.STORYROOMPOST_NOT_OWNER.getCode(),
                     ErrorStatus.STORYROOMPOST_NOT_OWNER.getMessage(),
                     null
             );
-            }
+        }
+        // 게시글에 연결된 이미지 리스트 조회
+        List<StoryRoomImg> images = storyRoomImageRepository.findByStoryRoomPost(post);
+
+        if (images != null && !images.isEmpty()) {
+            //S3에서 이미지 삭제
+            images.forEach(image -> utilService.deleteS3Img(image.getImageUrl()));
+
+            //DB에서 이미지 삭제
+            storyRoomImageRepository.deleteAll(images);
+        }
 
         storyRoomRepository.deleteByPost(post);
         storyRoomPostRepository.delete(post);
@@ -165,6 +175,7 @@ public class StoryRoomServiceImpl implements StoryRoomService {
     }
 
 
+    //게시글 상세 조회
     @Override
     public StoryRoomPostResponseDTO getStoryRoomPostDetail(Long postId) {
         StoryRoomPost post = storyRoomPostRepository.findById(postId)
@@ -182,9 +193,7 @@ public class StoryRoomServiceImpl implements StoryRoomService {
         return new StoryRoomPostResponseDTO(post, imageUrls, participantCount);
     }
 
-
-
-
+    //이야기 방 상세조회
     @Override
     public StoryRoomDetailResponseDTO getStoryRoomDetail(Long id) {
         StoryRoom room = storyRoomRepository.findById(id)
@@ -192,10 +201,78 @@ public class StoryRoomServiceImpl implements StoryRoomService {
         return new StoryRoomDetailResponseDTO(room);
     }
 
+    //이야기방 목록 조회
     @Override
     public List<StoryRoomListResponseDTO> getAllStoryRooms() {
         return storyRoomRepository.findAll().stream()
                 .map(StoryRoomListResponseDTO::new)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public void scrap(Long memberId, Long postId) {
+        if (storyRoomScrapRepository.existsByMemberIdAndStoryRoomPostId(memberId, postId)) {
+            return; // 이미 스크랩된 경우 중복 저장 방지
+        }
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new EntityNotFoundException("해당 사용자를 찾을 수 없습니다."));
+        StoryRoomPost post = storyRoomPostRepository.findById(postId)
+                .orElseThrow(() -> new EntityNotFoundException("해당 게시글을 찾을 수 없습니다."));
+
+        StoryRoomScrapedPost scrap = new StoryRoomScrapedPost();
+        scrap.setMember(member);
+        scrap.setStoryRoomPost(post);
+        scrap.setCreatedAt(LocalDateTime.now());
+
+        storyRoomScrapRepository.save(scrap);
+    }
+
+    @Override
+    public void unscrap(Long memberId, Long postId) {
+        // 게시글 존재 여부 확인
+        if (!storyRoomPostRepository.existsById(postId)) {
+            throw new EntityNotFoundException("해당 게시글을 찾을 수 없습니다.");
+        }
+
+        // 스크랩 정보 조회 및 삭제
+        StoryRoomScrapedPost scrap = storyRoomScrapRepository.findByMemberIdAndStoryRoomPostId(memberId, postId)
+                .orElseThrow(() -> new EntityNotFoundException("해당 스크랩 정보를 찾을 수 없습니다."));
+
+        storyRoomScrapRepository.delete(scrap);
+    }
+
+
+
+    @Override
+    public boolean isScrapped(Long memberId, Long postId) {
+        if (!memberRepository.existsById(memberId)) {
+            throw new EntityNotFoundException("해당 사용자를 찾을 수 없습니다.");
+        }
+        if (!storyRoomPostRepository.existsById(postId)) {
+            throw new EntityNotFoundException("해당 게시글을 찾을 수 없습니다.");
+        }
+        return storyRoomScrapRepository.existsByMemberIdAndStoryRoomPostId(memberId, postId);
+    }
+
+
+    @Override
+    public List<StoryRoomPostResponseDTO> getScrappedPosts(Long memberId) {
+        List<StoryRoomScrapedPost> scraps = storyRoomScrapRepository.findAllByMemberId(memberId);
+
+        return scraps.stream()
+                .map(scrap -> {
+                    StoryRoomPost post = scrap.getStoryRoomPost();
+                    return StoryRoomPostResponseDTO.builder()
+                            .id(post.getId())
+                            .title(post.getTitle())
+                            .content(post.getContent())
+                            .createdAt(post.getCreatedAt())
+                            .isScrapped(true)
+                            .participantCount(post.getParticipants().size())
+                            .build();
+                })
+                .collect(Collectors.toList());
+
     }
 }

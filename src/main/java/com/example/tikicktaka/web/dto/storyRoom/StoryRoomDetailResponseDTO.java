@@ -18,6 +18,5 @@ public class StoryRoomDetailResponseDTO {
         this.title = room.getTitle();
         this.content = room.getContent();
         this.creatorId = room.getCreator().getId();
-        this.createdAt = room.getCreatedAt();
-    }
+        this.createdAt = room.getCreatedAt();}
 }

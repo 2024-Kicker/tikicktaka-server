@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
+import java.util.*;
 
 @Getter
 @Setter
@@ -40,6 +40,9 @@ public class StoryRoom {
 
     private LocalDateTime createdAt;
     private LocalDateTime expiredAt;
+
+    @OneToMany(mappedBy = "storyRoom", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<StoryRoomParticipant> participants = new ArrayList<>();
 
 
     public StoryRoom(String title, String content, Member creator, StoryRoomPost post, String roomId) {

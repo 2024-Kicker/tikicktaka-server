@@ -6,6 +6,7 @@ import com.example.tikicktaka.domain.enums.StoryRoomStatus;
 import com.example.tikicktaka.domain.images.StoryRoomImg;
 import com.example.tikicktaka.domain.storyRoom.StoryRoomPost;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
@@ -15,6 +16,7 @@ import java.util.stream.Collectors;
 
 @Getter
 @AllArgsConstructor
+@Builder
 public class StoryRoomPostResponseDTO {
 
     private Long id;
@@ -29,6 +31,8 @@ public class StoryRoomPostResponseDTO {
     private LocalDateTime enterableUntil;
     private List<String> imageUrls;
     private int participantCount;
+    private boolean isScrapped;
+
 
 
     public StoryRoomPostResponseDTO(StoryRoomPost post, List<String> imageUrls, int participantCount) {

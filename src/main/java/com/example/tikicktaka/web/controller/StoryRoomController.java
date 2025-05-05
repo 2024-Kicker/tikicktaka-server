@@ -9,6 +9,7 @@ import com.example.tikicktaka.web.dto.storyRoom.StoryRoomDetailResponseDTO;
 import com.example.tikicktaka.web.dto.storyRoom.StoryRoomPostResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -26,6 +27,7 @@ import java.util.List;
 public class StoryRoomController {
 
     private final StoryRoomService storyRoomService;
+
 
 
 //    @GetMapping("/list")
@@ -91,11 +93,50 @@ public class StoryRoomController {
     }
 
     // 공개용 이야기방 게시글 조회
+    @Transactional
     @GetMapping("/public/{postId}")
     @Operation(summary = "공개용 이야기방 게시글 상세 조회", description = "비회원도 접근 가능한 이야기방 게시글 상세 조회 API입니다.")
     public ApiResponse<StoryRoomPostResponseDTO> getPublicStoryRoomPostDetail(@PathVariable Long postId) {
         StoryRoomPostResponseDTO responseDTO = storyRoomService.getStoryRoomPostDetail(postId);
         return ApiResponse.onSuccess(responseDTO);
     }
+
+    //이야기방 게시글 스크랩
+    @Transactional
+    @PostMapping("/scrap/{postId}")
+    @Operation(summary = "게시글 스크랩", description = "이야기방 게시글을 스크랩합니다.")
+    public ApiResponse<String> scrapStoryRoom(@PathVariable Long postId, Authentication authentication) {
+        if (authentication == null || authentication.getName() == null)
+            return ApiResponse.onFailure(ErrorStatus._UNAUTHORIZED.getCode(), "로그인이 필요합니다.", null);
+
+        Long memberId = Long.valueOf(authentication.getName());
+        storyRoomService.scrap(memberId, postId);
+        return ApiResponse.onSuccess("스크랩 완료");
+    }
+
+    @Transactional
+    @DeleteMapping("/scrap/{postId}")
+    @Operation(summary = "게시글 스크랩 해제", description = "이야기방 게시글 스크랩을 해제합니다.")
+    public ApiResponse<String> unscrapStoryRoom(@PathVariable Long postId, Authentication authentication) {
+        if (authentication == null || authentication.getName() == null)
+            return ApiResponse.onFailure(ErrorStatus._UNAUTHORIZED.getCode(), "로그인이 필요합니다.", null);
+
+        Long memberId = Long.valueOf(authentication.getName());
+        storyRoomService.unscrap(memberId, postId);
+        return ApiResponse.onSuccess("스크랩 해제 완료");
+    }
+
+    @Transactional
+    @GetMapping("/scraps")
+    @Operation(summary = "스크랩한 이야기방 게시글 목록 조회", description = "로그인한 사용자가 스크랩한 이야기방 게시글 목록을 조회합니다.")
+    public ApiResponse<List<StoryRoomPostResponseDTO>> getScrappedPosts(Authentication authentication) {
+        if (authentication == null || authentication.getName() == null)
+            return ApiResponse.onFailure(ErrorStatus._UNAUTHORIZED.getCode(), "로그인이 필요합니다.", null);
+
+        Long memberId = Long.valueOf(authentication.getName());
+        List<StoryRoomPostResponseDTO> scraps = storyRoomService.getScrappedPosts(memberId);
+        return ApiResponse.onSuccess(scraps);
+    }
+
 }
 

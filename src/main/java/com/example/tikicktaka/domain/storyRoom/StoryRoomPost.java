@@ -47,6 +47,8 @@ public class StoryRoomPost {
 
     private String thumbnailUrl;
 
+    @OneToMany(mappedBy = "storyRoomPost", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<StoryRoomParticipant> participants = new ArrayList<>();
 
     // StoryRoomImage와 연관관계 설정
     @OneToMany(mappedBy = "storyRoomPost", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -57,5 +59,6 @@ public class StoryRoomPost {
         images.add(image);
         image.setStoryRoomPost(this);
     }
+
 }
 
