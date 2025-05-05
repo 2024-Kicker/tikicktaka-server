@@ -1,6 +1,5 @@
 package com.example.tikicktaka.web.controller;
 
-import com.example.tikicktaka.domain.chat.ChatRoom;
 import com.example.tikicktaka.domain.companionPost.CompanionPost;
 import com.example.tikicktaka.service.CompanionPostService.CompanionPostService;
 import com.example.tikicktaka.service.RedisService;

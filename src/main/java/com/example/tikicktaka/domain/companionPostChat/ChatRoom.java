@@ -1,4 +1,4 @@
-package com.example.tikicktaka.domain.chat;
+package com.example.tikicktaka.domain.companionPostChat;
 
 import com.example.tikicktaka.domain.companionPost.CompanionPost;
 import com.example.tikicktaka.domain.member.Member;

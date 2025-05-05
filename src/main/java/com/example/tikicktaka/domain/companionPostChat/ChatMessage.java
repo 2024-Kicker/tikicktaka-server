@@ -1,4 +1,4 @@
-package com.example.tikicktaka.domain.chat;
+package com.example.tikicktaka.domain.companionPostChat;
 
 import jakarta.persistence.*;
 import lombok.*;

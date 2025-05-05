@@ -1,13 +1,11 @@
 package com.example.tikicktaka.web.dto.chat;
 
-import com.example.tikicktaka.domain.chat.ChatRoom;
+import com.example.tikicktaka.domain.companionPostChat.ChatRoom;
 import com.example.tikicktaka.domain.companionPost.CompanionPost;
 import com.example.tikicktaka.domain.member.Member;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.UUID;
 
 @Data
 @AllArgsConstructor

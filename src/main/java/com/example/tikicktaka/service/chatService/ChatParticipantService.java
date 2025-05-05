@@ -1,10 +1,7 @@
 package com.example.tikicktaka.service.chatService;
 
-import com.example.tikicktaka.domain.chat.ChatParticipant;
-import com.example.tikicktaka.domain.chat.ChatRoom;
+import com.example.tikicktaka.domain.companionPostChat.ChatParticipant;
 import com.example.tikicktaka.domain.member.Member;
-import com.example.tikicktaka.repository.chat.ChatRoomRepository;
-import com.example.tikicktaka.repository.chat.ChatParticipantRepository;
 
 import java.util.List;
 
