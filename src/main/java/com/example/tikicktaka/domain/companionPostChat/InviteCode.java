@@ -1,4 +1,4 @@
-package com.example.tikicktaka.domain.chat;
+package com.example.tikicktaka.domain.companionPostChat;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChatInviteCode {
+public class InviteCode {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
