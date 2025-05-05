@@ -179,7 +179,18 @@ public class StoryRoomController {
         return ApiResponse.onSuccess(filteredPosts);
     }
 
+    //이여기방 게시글 신고하기 = 차단하기
+    @PostMapping("/post/block/{postId}")
+    @Operation(summary = "게시글 차단", description = "사용자가 특정 이야기방 게시글을 차단합니다.")
+    public ApiResponse<String> blockStoryRoomPost(@PathVariable Long postId, Authentication authentication) {
+        if (authentication == null || authentication.getName() == null) {
+            return ApiResponse.onFailure(ErrorStatus._UNAUTHORIZED.getCode(), "로그인이 필요합니다.", null);
+        }
 
+        Long memberId = Long.valueOf(authentication.getName());
 
+        storyRoomService.blockStoryRoomPost(memberId, postId);
+        return ApiResponse.onSuccess("게시글이 차단되었습니다.");
+    }
 }
 
