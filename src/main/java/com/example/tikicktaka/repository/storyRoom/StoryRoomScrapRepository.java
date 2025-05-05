@@ -12,5 +12,7 @@ public interface StoryRoomScrapRepository extends JpaRepository<StoryRoomScraped
     boolean existsByMemberIdAndStoryRoomPostId(Long memberId, Long postId);
     void deleteByMemberIdAndStoryRoomPostId(Long memberId, Long postId);
     List<StoryRoomScrapedPost> findAllByMemberId(Long memberId);
+
+    boolean existsByStoryRoomPostId(Long id);
 }
 

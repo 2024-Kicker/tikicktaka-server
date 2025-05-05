@@ -2,6 +2,8 @@ package com.example.tikicktaka.service.storyRoom;
 
 import com.example.tikicktaka.apiPayload.ApiResponse;
 import com.example.tikicktaka.domain.enums.LimitTime;
+import com.example.tikicktaka.domain.enums.StoryRoomPostSortType;
+import com.example.tikicktaka.domain.enums.StoryRoomStatus;
 import com.example.tikicktaka.domain.enums.Topic;
 import com.example.tikicktaka.web.dto.storyRoom.StoryRoomCreateRequestDTO;
 import com.example.tikicktaka.web.dto.storyRoom.StoryRoomDetailResponseDTO;
@@ -14,12 +16,12 @@ import java.util.List;
 
 @Service
 public interface StoryRoomService {
-    Long createStoryRoom(StoryRoomCreateRequestDTO request, Long creatorId);
+//    Long createStoryRoom(StoryRoomCreateRequestDTO request, Long creatorId);
 
     StoryRoomPostResponseDTO getStoryRoomPostDetail(Long postId);
 
-    StoryRoomDetailResponseDTO getStoryRoomDetail(Long id);
-    List<StoryRoomListResponseDTO> getAllStoryRooms();
+//    StoryRoomDetailResponseDTO getStoryRoomDetail(Long id);
+//    List<StoryRoomListResponseDTO> getAllStoryRooms();
 
     StoryRoomPostResponseDTO createStoryRoomPost(String title, String content, Topic topic, LimitTime limitTime, List<MultipartFile> imageFiles, Long memberId);
     ApiResponse<?> deleteStoryRoomPost(Long storyRoomPostId, Long memberId); //
@@ -31,4 +33,6 @@ public interface StoryRoomService {
     void unscrap(Long memberId, Long postId);
 
     void scrap(Long memberId, Long postId);
+
+    List<StoryRoomPostResponseDTO> getFilteredStoryRoomPosts(StoryRoomStatus status, StoryRoomPostSortType sortType, Topic topic);
 }

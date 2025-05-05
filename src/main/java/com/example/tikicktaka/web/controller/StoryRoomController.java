@@ -3,6 +3,8 @@ package com.example.tikicktaka.web.controller;
 import com.example.tikicktaka.apiPayload.ApiResponse;
 import com.example.tikicktaka.apiPayload.code.status.ErrorStatus;
 import com.example.tikicktaka.domain.enums.LimitTime;
+import com.example.tikicktaka.domain.enums.StoryRoomPostSortType;
+import com.example.tikicktaka.domain.enums.StoryRoomStatus;
 import com.example.tikicktaka.domain.enums.Topic;
 import com.example.tikicktaka.service.storyRoom.StoryRoomService;
 import com.example.tikicktaka.web.dto.storyRoom.StoryRoomDetailResponseDTO;
@@ -69,6 +71,7 @@ public class StoryRoomController {
         }
     }
 
+    //게시글 삭제
     @DeleteMapping("/post/{postId}")
     @Operation(summary = "이야기방 게시글 삭제", description = "게시글을 삭제하며, 해당 게시글과 연결된 채팅방도 함께 삭제됩니다.")
     public ResponseEntity<ApiResponse<?>> deleteStoryRoomPost(@PathVariable Long postId,
@@ -114,6 +117,7 @@ public class StoryRoomController {
         return ApiResponse.onSuccess("스크랩 완료");
     }
 
+    //이야기방 게시글 스크랩 해제
     @Transactional
     @DeleteMapping("/scrap/{postId}")
     @Operation(summary = "게시글 스크랩 해제", description = "이야기방 게시글 스크랩을 해제합니다.")
@@ -126,6 +130,7 @@ public class StoryRoomController {
         return ApiResponse.onSuccess("스크랩 해제 완료");
     }
 
+    //스크랩 한 이야기방 게시글 목록 조회
     @Transactional
     @GetMapping("/scraps")
     @Operation(summary = "스크랩한 이야기방 게시글 목록 조회", description = "로그인한 사용자가 스크랩한 이야기방 게시글 목록을 조회합니다.")
@@ -137,6 +142,19 @@ public class StoryRoomController {
         List<StoryRoomPostResponseDTO> scraps = storyRoomService.getScrappedPosts(memberId);
         return ApiResponse.onSuccess(scraps);
     }
+
+    //이야기방 게시글 필터 조회
+    @GetMapping("/list")
+    @Operation(summary = "이야기방 게시글 목록 조회", description = "이야기방 게시글을 필터링하여 조회합니다.")
+    public ApiResponse<List<StoryRoomPostResponseDTO>> getFilteredStoryRoomPosts(
+            @RequestParam(required = false) StoryRoomStatus status,
+            @RequestParam(required = false) StoryRoomPostSortType sortType,
+            @RequestParam(required = false) Topic topic) {
+
+        List<StoryRoomPostResponseDTO> filteredPosts = storyRoomService.getFilteredStoryRoomPosts(status, sortType, topic);
+        return ApiResponse.onSuccess(filteredPosts);
+    }
+
 
 }
 
