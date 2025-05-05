@@ -16,13 +16,10 @@ import java.util.List;
 
 @Service
 public interface StoryRoomService {
-//    Long createStoryRoom(StoryRoomCreateRequestDTO request, Long creatorId);
 
     StoryRoomPostResponseDTO getStoryRoomPostDetail(Long postId);
     StoryRoomPostResponseDTO getStoryRoomPostDetail(Long postId, Long memberId);
 
-//    StoryRoomDetailResponseDTO getStoryRoomDetail(Long id);
-//    List<StoryRoomListResponseDTO> getAllStoryRooms();
 
     StoryRoomPostResponseDTO createStoryRoomPost(String title, String content, Topic topic, LimitTime limitTime, List<MultipartFile> imageFiles, Long memberId);
     ApiResponse<?> deleteStoryRoomPost(Long storyRoomPostId, Long memberId); //
@@ -35,5 +32,5 @@ public interface StoryRoomService {
 
     void scrap(Long memberId, Long postId);
 
-    List<StoryRoomPostResponseDTO> getFilteredStoryRoomPosts(StoryRoomStatus status, StoryRoomPostSortType sortType, Topic topic);
+    List<StoryRoomPostResponseDTO> getFilteredStoryRoomPosts(StoryRoomStatus status, StoryRoomPostSortType sortType, Topic topic, Long memberId);
 }

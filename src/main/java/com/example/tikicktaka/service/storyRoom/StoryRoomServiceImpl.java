@@ -179,7 +179,7 @@ public class StoryRoomServiceImpl implements StoryRoomService {
     }
 
 
-    //게시글 상세 조회
+    //비로그인한 사용자 용 게시글 상세 조회
     @Override
     public StoryRoomPostResponseDTO getStoryRoomPostDetail(Long postId) {
         StoryRoomPost post = storyRoomPostRepository.findById(postId)
@@ -278,7 +278,7 @@ public class StoryRoomServiceImpl implements StoryRoomService {
     }
 
 
-    //스크랩된 게시글 목록 확인
+    //특정 사용자가 특정 게시글을 스크랩했는지?
     @Override
     public boolean isScrapped(Long memberId, Long postId) {
         if (!memberRepository.existsById(memberId)) {
@@ -311,46 +311,38 @@ public class StoryRoomServiceImpl implements StoryRoomService {
 
     }
 
-    //필터 게시글 목록 반환
-    public List<StoryRoomPostResponseDTO> getFilteredStoryRoomPosts(StoryRoomStatus status, StoryRoomPostSortType sortType, Topic topic) {
-        // 상태 필터링
+    // 필터 게시글 목록 반환 (로그인 사용자 기반 스크랩 포함)
+    public List<StoryRoomPostResponseDTO> getFilteredStoryRoomPosts(StoryRoomStatus status, StoryRoomPostSortType sortType, Topic topic, Long memberId) {
         List<StoryRoomPost> posts = storyRoomPostRepository.findAll();
 
         if (status != null) {
-            if (status == StoryRoomStatus.ENDED) {
-                // 끝난 이야기 필터링
-                posts = posts.stream()
-                        .filter(post -> post.getStatus() == StoryRoomStatus.ENDED)
-                        .collect(Collectors.toList());
-            } else if (status == StoryRoomStatus.IN_PROGRESS) {
-                // 진행 중 이야기 필터링
-                posts = posts.stream()
-                        .filter(post -> post.getStatus() == StoryRoomStatus.IN_PROGRESS)
-                        .collect(Collectors.toList());
-            }
+            posts = posts.stream()
+                    .filter(post -> post.getStatus() == status)
+                    .collect(Collectors.toList());
         }
 
-        // 주제 필터링
         if (topic != null) {
             posts = posts.stream()
                     .filter(post -> post.getTopic() == topic)
                     .collect(Collectors.toList());
         }
 
-        // 정렬 필터링
         if (sortType != null) {
             if (sortType == StoryRoomPostSortType.LATEST) {
-                posts.sort(Comparator.comparing(StoryRoomPost::getCreatedAt).reversed());  // 최신순
+                posts.sort(Comparator.comparing(StoryRoomPost::getCreatedAt).reversed());
             } else if (sortType == StoryRoomPostSortType.SCRAP) {
-                // 스크랩한 게시글만 필터링
                 posts = posts.stream()
-                        .filter(post -> storyRoomScrapRepository.existsByStoryRoomPostId(post.getId()))
+                        .filter(post -> storyRoomScrapRepository.existsByMemberIdAndStoryRoomPostId(memberId, post.getId()))
                         .collect(Collectors.toList());
             }
         }
 
         return posts.stream()
-                .map(post -> new StoryRoomPostResponseDTO(post, null, post.getParticipants().size()))
+                .map(post -> {
+                    boolean isScrapped = storyRoomScrapRepository.existsByMemberIdAndStoryRoomPostId(memberId, post.getId());
+                    int participantCount = post.getParticipants().size();
+                    return new StoryRoomPostResponseDTO(post, null, participantCount, isScrapped);
+                })
                 .collect(Collectors.toList());
     }
 
