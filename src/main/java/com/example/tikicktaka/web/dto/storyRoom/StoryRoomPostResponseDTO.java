@@ -34,7 +34,6 @@ public class StoryRoomPostResponseDTO {
     private boolean isScrapped;
 
 
-
     public StoryRoomPostResponseDTO(StoryRoomPost post, List<String> imageUrls, int participantCount) {
         this.id = post.getId();
         this.title = post.getTitle();
@@ -52,4 +51,23 @@ public class StoryRoomPostResponseDTO {
         this.participantCount= participantCount;
 
     }
+
+    //로그인한 사용자 게시글 상세 조회
+    public StoryRoomPostResponseDTO(StoryRoomPost post, List<String> imageUrls, int participantCount, boolean isScrapped) {
+        this.id = post.getId();
+        this.title = post.getTitle();
+        this.content = post.getContent();
+        this.authorName = (post.getAuthor() != null) ? post.getAuthor().getName() : "Unknown";
+        this.topic = post.getTopic();
+        this.limitTime = post.getLimitTime();
+        this.status = post.getStatus();
+        this.thumbnailUrl = post.getThumbnailUrl();
+        this.createdAt = post.getCreatedAt();
+        this.enterableUntil = post.getEnterableUntil();
+
+        this.imageUrls = imageUrls;
+        this.participantCount = participantCount;
+        this.isScrapped = isScrapped;
+    }
+
 }
