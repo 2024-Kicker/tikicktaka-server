@@ -47,7 +47,7 @@ public class ChatEventListener {
 
     @PostConstruct
     public void init() {
-        logger.info("🚀 ChatEventListener 빈이 생성되었습니다!");
+        logger.info("ChatEventListener 빈이 생성되었습니다!");
         server.addListeners(this);  // 현재 클래스(ChatEventListener)를 리스너로 등록
     }
 
@@ -58,7 +58,7 @@ public class ChatEventListener {
 
         try {
             if (rawData == null) {
-                logger.error("❌ rawData is NULL! WebSocket 요청을 확인하세요.");
+                logger.error("rawData is NULL! WebSocket 요청을 확인하세요.");
                 return;
             }
 
@@ -72,7 +72,7 @@ public class ChatEventListener {
 
             logger.info("Extracted data - roomId: {}, userId: {}", roomId, userId);
             if (roomId == null || userId == null) {
-                logger.error("❌ Missing required fields! roomId: {}, userId: {}", roomId, userId);
+                logger.error("Missing required fields! roomId: {}, userId: {}", roomId, userId);
                 return;
             }
 
@@ -91,7 +91,7 @@ public class ChatEventListener {
             logger.info("User {} joined room {}", userId, roomId);
 
         } catch (Exception e) {
-            logger.error("🚨 Error parsing joinRoom event data", e);
+            logger.error("Error parsing joinRoom event data", e);
         }
     }
 
@@ -102,7 +102,7 @@ public class ChatEventListener {
 
         try {
             if (rawData == null) {
-                logger.error("❌ rawData is NULL! WebSocket 요청을 확인하세요.");
+                logger.error("rawData is NULL! WebSocket 요청을 확인하세요.");
                 return;
             }
 
@@ -118,7 +118,7 @@ public class ChatEventListener {
             logger.info("Extracted data - userId: {}, targetUserId: {}", userId, targetUserId);
 
             if (userId == null || targetUserId == null) {
-                logger.error("❌ Missing required fields! userId: {}, targetUserId: {}", userId, targetUserId);
+                logger.error("Missing required fields! userId: {}, targetUserId: {}", userId, targetUserId);
                 return;
             }
 
@@ -130,10 +130,10 @@ public class ChatEventListener {
             chatParticipantService.addParticipant(roomId, userId);
             chatParticipantService.addParticipant(roomId, targetUserId);
 
-            logger.info("User {} created 1:1 chat with user {} in room {}", userId, targetUserId, roomId);
+            logger.info("User {} created 1:1 companionPostChat with user {} in room {}", userId, targetUserId, roomId);
 
         } catch (Exception e) {
-            logger.error("🚨 Error parsing createOneOnOneChat event data", e);
+            logger.error("Error parsing createOneOnOneChat event data", e);
         }
     }
 
@@ -144,7 +144,7 @@ public class ChatEventListener {
 
         try {
             if (rawData == null) {
-                logger.error("❌ rawData is NULL! WebSocket 요청을 확인하세요.");
+                logger.error("rawData is NULL! WebSocket 요청을 확인하세요.");
                 return;
             }
 
@@ -159,7 +159,7 @@ public class ChatEventListener {
             logger.info("Extracted data - roomId: {}, userId: {}", roomId, userId);
 
             if (roomId == null || userId == null) {
-                logger.error("❌ Missing required fields! roomId: {}, userId: {}", roomId, userId);
+                logger.error("Missing required fields! roomId: {}, userId: {}", roomId, userId);
                 return;
             }
 
@@ -176,10 +176,10 @@ public class ChatEventListener {
                 logger.info("Chat room {} has been deleted as there are no participants left.", roomId);
             }
 
-            logger.info("User {} left the 1:1 chat in room {}", userId, roomId);
+            logger.info("User {} left the 1:1 companionPostChat in room {}", userId, roomId);
 
         } catch (Exception e) {
-            logger.error("🚨 Error parsing leaveOneOnOneChat event data", e);
+            logger.error("Error parsing leaveOneOnOneChat event data", e);
         }
     }
 
@@ -204,7 +204,7 @@ public class ChatEventListener {
             chatMessageService.saveMessage(roomId, senderId, message); // Redis에 메시지 저장
 
             // 메시지 만료 시간 설정 (예: 14일 후 자동 삭제)
-            redisTemplate.expire("chat:" + roomId, 14, TimeUnit.DAYS);  // 14일 후 메시지 삭제
+            redisTemplate.expire("companionPostChat:" + roomId, 14, TimeUnit.DAYS);  // 14일 후 메시지 삭제
 
             logger.info("Message saved successfully: roomId={}, senderId={}, message={}", roomId, senderId, message);
 
