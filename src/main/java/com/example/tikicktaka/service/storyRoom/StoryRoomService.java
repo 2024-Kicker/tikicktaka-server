@@ -19,6 +19,7 @@ public interface StoryRoomService {
 //    Long createStoryRoom(StoryRoomCreateRequestDTO request, Long creatorId);
 
     StoryRoomPostResponseDTO getStoryRoomPostDetail(Long postId);
+    StoryRoomPostResponseDTO getStoryRoomPostDetail(Long postId, Long memberId);
 
 //    StoryRoomDetailResponseDTO getStoryRoomDetail(Long id);
 //    List<StoryRoomListResponseDTO> getAllStoryRooms();

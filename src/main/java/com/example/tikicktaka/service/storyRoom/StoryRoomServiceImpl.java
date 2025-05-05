@@ -197,6 +197,35 @@ public class StoryRoomServiceImpl implements StoryRoomService {
         return new StoryRoomPostResponseDTO(post, imageUrls, participantCount);
     }
 
+    //로그인한 사용자용 게시글 상세 조회
+    @Override
+    public StoryRoomPostResponseDTO getStoryRoomPostDetail(Long postId, Long memberId) {
+        // 로그인된 사용자 확인
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("로그인된 사용자를 찾을 수 없습니다."));
+
+        // 게시글 조회
+        StoryRoomPost post = storyRoomPostRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 게시글을 찾을 수 없습니다."));
+
+        // 이미지 리스트 조회
+        List<String> imageUrls = storyRoomImageRepository.findByStoryRoomPost(post).stream()
+                .map(StoryRoomImg::getImageUrl)
+                .collect(Collectors.toList());
+
+        // 이야기방 조회 및 참여 인원 수 확인
+        StoryRoom room = (StoryRoom) storyRoomRepository.findByPost(post)
+                .orElseThrow(() -> new IllegalArgumentException("해당 게시글과 연결된 이야기방이 없습니다."));
+
+        int participantCount = storyRoomParticipantRepository.countByStoryRoomId(room.getId());
+        boolean isScrapped = storyRoomScrapRepository.existsByMemberIdAndStoryRoomPostId(memberId, postId);
+        System.out.println("Member ID: " + memberId + ", Post ID: " + postId + ", Is Scrapped: " + isScrapped);
+
+        // 응답 DTO 생성
+        return new StoryRoomPostResponseDTO(post, imageUrls, participantCount, isScrapped);
+    }
+
+
 //    //이야기 방 상세조회
 //    @Override
 //    public StoryRoomDetailResponseDTO getStoryRoomDetail(Long id) {
