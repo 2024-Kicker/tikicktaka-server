@@ -35,6 +35,7 @@ public interface CompanionPostService {
 
     @org.springframework.transaction.annotation.Transactional
     void blockPost(Long memberId, Long postId);
+    void unblockPost(Long memberId, Long postId);
 
     List<CompanionPostListResponseDTO> getBlockedPostList(Long memberId);
 
