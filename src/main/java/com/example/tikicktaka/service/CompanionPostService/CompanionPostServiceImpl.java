@@ -233,6 +233,7 @@ public class CompanionPostServiceImpl implements CompanionPostService {
                 .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다. ID: " + postId));
     }
 
+    //게시글 차단
     @Override
     @Transactional
     public void blockPost(Long memberId, Long postId) {
@@ -252,6 +253,24 @@ public class CompanionPostServiceImpl implements CompanionPostService {
                 .blockedPost(post)
                 .build();
         blockedPostRepository.save(blockedPost);
+    }
+
+
+    //게시글 차단 해제
+    @Override
+    @Transactional
+    public void unblockPost(Long memberId, Long postId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
+        CompanionPost post = companionPostRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
+
+        // 차단 이력 조회
+        BlockedPost blockedPost = blockedPostRepository.findByMemberAndBlockedPost(member, post)
+                .orElseThrow(() -> new IllegalStateException("차단된 게시글이 아닙니다."));
+
+        // 차단 해제
+        blockedPostRepository.delete(blockedPost);
     }
 
     @Override

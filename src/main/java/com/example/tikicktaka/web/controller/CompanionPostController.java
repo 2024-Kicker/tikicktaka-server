@@ -174,6 +174,7 @@ public class CompanionPostController {
         return ApiResponse.onSuccess(responseDTO);
     }
 
+    //게시글 차단
     @PostMapping("/{postId}/block")
     @Operation(summary = "게시글 차단", description = "사용자가 특정 게시글을 차단합니다.")
     public ApiResponse<String> blockPost(@PathVariable Long postId, Authentication authentication) {
@@ -193,6 +194,31 @@ public class CompanionPostController {
                     null);
         }
     }
+
+    //게시글 차단해제
+    @DeleteMapping("/{postId}/block")
+    @Operation(summary = "게시글 차단 해제", description = "사용자가 차단한 게시글을 차단 해제합니다.")
+    public ApiResponse<String> unblockPost(@PathVariable Long postId, Authentication authentication) {
+        if (authentication == null || authentication.getName() == null) {
+            return ApiResponse.onFailure(ErrorStatus._UNAUTHORIZED.getCode(),
+                    ErrorStatus._UNAUTHORIZED.getMessage(),
+                    null);
+        }
+
+        Long memberId = Long.valueOf(authentication.getName());
+
+        try {
+            postService.unblockPost(memberId, postId);
+            return ApiResponse.onSuccess("게시글 차단이 해제되었습니다.");
+        } catch (Exception e) {
+            return ApiResponse.onFailure(ErrorStatus._BAD_REQUEST.getCode(),
+                    "차단 해제 처리에 실패했습니다.",
+                    null);
+        }
+    }
+
+
+
     @PatchMapping("/{postId}/status")
     @Operation(summary = "게시글 상태 변경", description = "게시글 상태를 변경합니다.(FOUND, FINDING)")
     public ApiResponse<Void> updatePostStatus(@PathVariable Long postId,
