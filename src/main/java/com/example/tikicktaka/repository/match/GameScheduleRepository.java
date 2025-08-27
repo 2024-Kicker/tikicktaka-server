@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,4 +26,15 @@ public interface  GameScheduleRepository extends JpaRepository<GameSchedule, Lon
 
     Optional<GameSchedule> findFirstByHomeTeamOrAwayTeamAndMatchDateGreaterThanEqualOrderByMatchDateAsc(
             String homeTeam, String awayTeam, LocalDate matchDate
-    );}
+    );
+    // 기준팀이 "홈"인 가장 가까운 경기 1건
+    Optional<GameSchedule> findFirstByHomeTeamAndMatchDateTimeGreaterThanEqualOrderByMatchDateTimeAsc(
+            String homeTeam, LocalDateTime from
+    );
+
+    // 기준팀이 "원정"인 가장 가까운 경기 1건
+    Optional<GameSchedule> findFirstByAwayTeamAndMatchDateTimeGreaterThanEqualOrderByMatchDateTimeAsc(
+            String awayTeam, LocalDateTime from
+    );
+}
+
