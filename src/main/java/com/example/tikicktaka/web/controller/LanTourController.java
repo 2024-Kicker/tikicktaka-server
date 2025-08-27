@@ -50,8 +50,7 @@ public class LanTourController {
         return ApiResponse.onSuccess(LanTourConverter.toLanTourDetailDTO(lanTour));
     }
 
-    @GetMapping(value = "/list")
-    @Operation(summary = "랜선투어 상품 전체 조회 API", description = "랜선투어 상품 전체 조회를 위한 API이며, request parameter로 입력 값을 받습니다. \n\n" +
+    @GetMapping(value = "/list")   @Operation(summary = "랜선투어 상품 전체 조회 API ", description = "랜선투어 상품 전체 조회를 위한 API이며, request parameter로 입력 값을 받습니다. \n\n" +
             "page : 상품 조회 페이지 번호 \n\n region : 지역 이름(String) \n\n orderType : 조회 타입(String)")
     @Parameters(value = {
             @Parameter(name = "page", description = "페이지 번호, 1 이상의 숫자를 입력해주세요."),

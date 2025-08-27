@@ -1,6 +1,7 @@
 package com.example.tikicktaka.domain.travel;
 
 import com.example.tikicktaka.domain.common.BaseDateTimeEntity;
+import com.example.tikicktaka.domain.teams.Team;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
@@ -21,8 +22,8 @@ public class TravelRegion extends BaseDateTimeEntity {
     @Column(columnDefinition = "TEXT")
     private String addr1;
 
-    @Column(columnDefinition = "TEXT")
-    private String addr2;
+   // @Column(columnDefinition = "TEXT")
+    //private String addr2;
 
     private Long areaCode;
 
@@ -65,4 +66,7 @@ public class TravelRegion extends BaseDateTimeEntity {
     private String title;
 
     private String zipCode;
-}
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "team_id") // travel_region.team_id → team.team_id
+    private Team team;}
