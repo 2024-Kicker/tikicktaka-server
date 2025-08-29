@@ -2,10 +2,8 @@ package com.example.tikicktaka.web.controller;
 
 import com.example.tikicktaka.apiPayload.ApiResponse;
 import com.example.tikicktaka.apiPayload.code.status.ErrorStatus;
-import com.example.tikicktaka.domain.enums.LimitTime;
-import com.example.tikicktaka.domain.enums.StoryRoomPostSortType;
-import com.example.tikicktaka.domain.enums.StoryRoomStatus;
-import com.example.tikicktaka.domain.enums.Topic;
+import com.example.tikicktaka.domain.enums.*;
+import com.example.tikicktaka.service.scrap.ScrapCommandService;
 import com.example.tikicktaka.service.storyRoom.StoryRoomService;
 import com.example.tikicktaka.web.dto.storyRoom.StoryRoomDetailResponseDTO;
 import com.example.tikicktaka.web.dto.storyRoom.StoryRoomPostResponseDTO;
@@ -30,6 +28,8 @@ import java.util.List;
 public class StoryRoomController {
 
     private final StoryRoomService storyRoomService;
+    private final ScrapCommandService scrapCommandService;
+
 
 
 
@@ -131,7 +131,7 @@ public class StoryRoomController {
             return ApiResponse.onFailure(ErrorStatus._UNAUTHORIZED.getCode(), "로그인이 필요합니다.", null);
 
         Long memberId = Long.valueOf(authentication.getName());
-        storyRoomService.scrap(memberId, postId);
+        scrapCommandService.addStoryPost(memberId, postId);
         return ApiResponse.onSuccess("스크랩 완료");
     }
 
@@ -144,7 +144,14 @@ public class StoryRoomController {
             return ApiResponse.onFailure(ErrorStatus._UNAUTHORIZED.getCode(), "로그인이 필요합니다.", null);
 
         Long memberId = Long.valueOf(authentication.getName());
-        storyRoomService.unscrap(memberId, postId);
+        boolean removed = scrapCommandService.removeIfOwned(memberId, ScrapTargetType.STORY_POST, postId);
+        if (!removed) {
+            return ApiResponse.onFailure(
+                    ErrorStatus._BAD_REQUEST.getCode(),
+                    "해당 게시글을 스크랩한 이력이 없습니다.",
+                    null
+            );
+        }
         return ApiResponse.onSuccess("스크랩 해제 완료");
     }
 
@@ -157,7 +164,7 @@ public class StoryRoomController {
             return ApiResponse.onFailure(ErrorStatus._UNAUTHORIZED.getCode(), "로그인이 필요합니다.", null);
 
         Long memberId = Long.valueOf(authentication.getName());
-        List<StoryRoomPostResponseDTO> scraps = storyRoomService.getScrappedPosts(memberId);
+        List<StoryRoomPostResponseDTO> scraps = storyRoomService.getScrappedPosts(memberId); // 아래 서비스 구현 교체!
         return ApiResponse.onSuccess(scraps);
     }
 

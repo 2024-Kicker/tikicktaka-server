@@ -6,6 +6,7 @@ import com.example.tikicktaka.apiPayload.code.status.ErrorStatus;
 import com.example.tikicktaka.domain.companionPost.CompanionPost;
 import com.example.tikicktaka.service.CompanionPostService.CompanionPostService;
 import com.example.tikicktaka.service.memberService.MemberCommandService;
+import com.example.tikicktaka.service.scrap.ScrapCommandService;
 import com.example.tikicktaka.domain.images.CompanionPostImg;
 
 import com.example.tikicktaka.service.memberService.MemberQueryService;
@@ -50,6 +51,9 @@ public class CompanionPostController {
 
     @Autowired
     private  CompanionPostService companionPostService;
+
+    @Autowired
+    private ScrapCommandService scrapCommandService;
 
 
 
@@ -242,13 +246,11 @@ public class CompanionPostController {
     public ApiResponse<Void> scrapPost(@PathVariable Long postId, Authentication authentication) {
         if (authentication == null || authentication.getName() == null) {
             return ApiResponse.onFailure(ErrorStatus._UNAUTHORIZED.getCode(),
-                    ErrorStatus._UNAUTHORIZED.getMessage(),
-                    null);
+                    ErrorStatus._UNAUTHORIZED.getMessage(), null);
         }
-
         Long memberId = Long.valueOf(authentication.getName());
-
-        postService.scrapPost(memberId, postId);
+        // 통합 scrap 로직 사용
+        scrapCommandService.addCompanionPost(memberId, postId);
         return ApiResponse.onSuccess(null);
     }
 
@@ -258,13 +260,11 @@ public class CompanionPostController {
     public ApiResponse<Void> unScrapPost(@PathVariable Long postId, Authentication authentication) {
         if (authentication == null || authentication.getName() == null) {
             return ApiResponse.onFailure(ErrorStatus._UNAUTHORIZED.getCode(),
-                    ErrorStatus._UNAUTHORIZED.getMessage(),
-                    null);
+                    ErrorStatus._UNAUTHORIZED.getMessage(), null);
         }
-
         Long memberId = Long.valueOf(authentication.getName());
-
-        postService.unScrapPost(memberId, postId);
+        // 통합 scrap 로직 사용
+        scrapCommandService.removeCompanionPost(memberId, postId);
         return ApiResponse.onSuccess(null);
     }
 }

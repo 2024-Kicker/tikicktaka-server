@@ -1,19 +1,20 @@
 // src/main/java/com/example/tikicktaka/service/stadiumAttractionService/StadiumAttractionQueryServiceImpl.java
 package com.example.tikicktaka.service.stadiumAttractionService;
 
-import com.example.tikicktaka.domain.mapping.scrap.TravelRegionScrap;
+import com.example.tikicktaka.domain.enums.ScrapTargetType;
+import com.example.tikicktaka.domain.mapping.scrap.Scrap;
 import com.example.tikicktaka.domain.teams.Team;
 import com.example.tikicktaka.domain.travel.TravelRegion;
+import com.example.tikicktaka.repository.scrap.ScrapRepository;
 import com.example.tikicktaka.repository.team.TeamRepository;
 import com.example.tikicktaka.repository.travelRegion.TravelRegionRepository;
-import com.example.tikicktaka.repository.travelRegion.TravelRegionScrapRepository;
 import com.example.tikicktaka.web.dto.stadiumAttraction.StadiumAttractionResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -21,7 +22,9 @@ public class StadiumAttractionQueryServiceImpl implements StadiumAttractionQuery
 
     private final TeamRepository teamRepository;
     private final TravelRegionRepository travelRegionRepository;
-    private final TravelRegionScrapRepository scrapRepository; // ✅ 추가
+
+    // ✅ 통합 scrap 테이블 사용
+    private final ScrapRepository scrapRepository;
 
     @Override
     public Page<StadiumAttractionResponseDTO.Item> findItems(
@@ -46,7 +49,7 @@ public class StadiumAttractionQueryServiceImpl implements StadiumAttractionQuery
 
         // 2) 정렬 옵션
         Sort s = switch (sort) {
-            case "rating" -> Sort.by(Sort.Direction.DESC, "contentTypeId"); // 임시: 별도 평점 필드 생기면 교체
+            case "rating" -> Sort.by(Sort.Direction.DESC, "contentTypeId"); // 임시: 평점 필드 생기면 교체
             default -> Sort.by(Sort.Direction.DESC, "id");
         };
         Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), s);
@@ -54,23 +57,50 @@ public class StadiumAttractionQueryServiceImpl implements StadiumAttractionQuery
         // 3) 조회 분기
         Page<TravelRegion> entityPage;
         if (myScrapOnly) {
-            // 스크랩 전용 경로는 ScrapRepository 네이밍 메서드만 사용 (JPQL 없음)
-            Page<TravelRegionScrap> scrapPage;
-            boolean hasTeam = teamId != null;
-            boolean hasCategory = !categoryIds.isEmpty();
+            // ✅ 통합 scrap에서 내가 스크랩한 TRAVEL_REGION ID들을 최신순으로 구함
+            List<Long> scrappedIds = scrapRepository
+                    .findByMemberIdAndTargetTypeOrderByCreatedAtDesc(memberId, ScrapTargetType.TRAVEL_REGION)
+                    .stream().map(Scrap::getTargetId).toList();
 
-            if (hasTeam && hasCategory) {
-                scrapPage = scrapRepository.findByMemberIdAndTravelRegion_Team_IdAndTravelRegion_ContentTypeIdIn(
-                        memberId, teamId, categoryIds, sortedPageable);
-            } else if (hasTeam) {
-                scrapPage = scrapRepository.findByMemberIdAndTravelRegion_Team_Id(memberId, teamId, sortedPageable);
-            } else if (hasCategory) {
-                scrapPage = scrapRepository.findByMemberIdAndTravelRegion_ContentTypeIdIn(memberId, categoryIds, sortedPageable);
-            } else {
-                scrapPage = scrapRepository.findByMemberId(memberId, sortedPageable);
+            if (scrappedIds.isEmpty()) {
+                return Page.empty(sortedPageable);
             }
 
-            entityPage = scrapPage.map(TravelRegionScrap::getTravelRegion);
+            // 대상 엔티티 일괄 로드 + 스크랩 순서 보존
+            Map<Long, TravelRegion> idToRegion = new HashMap<>();
+            for (TravelRegion r : travelRegionRepository.findAllById(scrappedIds)) {
+                idToRegion.put(r.getId(), r);
+            }
+            List<TravelRegion> list = scrappedIds.stream()
+                    .map(idToRegion::get)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+
+            // 필터링 (팀, 카테고리)
+            boolean hasCategory = !categoryIds.isEmpty();
+            list = list.stream()
+                    .filter(r -> Objects.equals(r.getTeam().getId(), teamId))
+                    .filter(r -> !hasCategory || (r.getContentTypeId() != null && categoryIds.contains(r.getContentTypeId())))
+                    .collect(Collectors.toList());
+
+            // 정렬 (in-memory; 평소 스크랩 수가 많지 않으므로 허용)
+            Comparator<TravelRegion> comparator;
+            if ("rating".equals(sort)) {
+                comparator = Comparator.comparing(
+                        (TravelRegion r) -> Optional.ofNullable(r.getContentTypeId()).orElse(0L) // 임시
+                ).reversed().thenComparing(TravelRegion::getId, Comparator.reverseOrder());
+            } else {
+                comparator = Comparator.comparing(TravelRegion::getId, Comparator.reverseOrder());
+            }
+            list.sort(comparator);
+
+            // 페이지네이션
+            int total = list.size();
+            int start = (int) sortedPageable.getOffset();
+            int end = Math.min(start + sortedPageable.getPageSize(), total);
+            List<TravelRegion> slice = (start >= end) ? List.of() : list.subList(start, end);
+
+            entityPage = new PageImpl<>(slice, sortedPageable, total);
         } else {
             // 일반 목록: TravelRegionRepository 네이밍 메서드만 사용
             boolean hasCategory = !categoryIds.isEmpty();

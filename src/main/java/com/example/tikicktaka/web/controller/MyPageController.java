@@ -19,11 +19,15 @@ import com.example.tikicktaka.domain.member.RegisterSeller;
 import com.example.tikicktaka.service.memberService.MemberCommandService;
 import com.example.tikicktaka.service.memberService.MemberQueryService;
 import com.example.tikicktaka.service.myPageService.MyPageService;
+import com.example.tikicktaka.service.myPageService.MyScrapQueryService;
 import com.example.tikicktaka.web.dto.lanTour.LanTourRequestDTO;
 import com.example.tikicktaka.web.dto.lanTour.LanTourResponseDTO;
 import com.example.tikicktaka.web.dto.member.MemberRequestDTO;
 import com.example.tikicktaka.web.dto.member.MemberResponseDTO;
 import com.example.tikicktaka.web.dto.myPage.MyPostItemDTO;
+import com.example.tikicktaka.web.dto.myPage.ScrapCompanionPostDTO;
+import com.example.tikicktaka.web.dto.myPage.ScrapStoryRoomPostDTO;
+import com.example.tikicktaka.web.dto.myPage.ScrapTravelRegionDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -51,6 +55,8 @@ public class MyPageController {
     private final MemberCommandService memberCommandService;
     private final MemberQueryService memberQueryService;
     private final MyPageService myPageService;
+    private final MyScrapQueryService myScrapQueryService;
+
 
 
     @GetMapping("/my/profile")
@@ -118,6 +124,7 @@ public class MyPageController {
 
     // 작성글 모아보기 - 동행
     @GetMapping("/companion-posts")
+    @Operation(summary = "사용자가 작성한 동행 찾기 게시글 목록 api ")
     public ApiResponse<List<MyPostItemDTO>> myCompanionPosts(Authentication authentication) {
         if (authentication == null || authentication.getName() == null) {
             return ApiResponse.onFailure(
@@ -132,6 +139,7 @@ public class MyPageController {
 
     // 작성글 모아보기 - 이야기
     @GetMapping("/story-posts")
+    @Operation(summary = "사용자가 작성한 이야기방 게시글 목록 api ")
     public ApiResponse<List<MyPostItemDTO>> myStoryPosts(Authentication authentication) {
         if (authentication == null || authentication.getName() == null) {
             return ApiResponse.onFailure(
@@ -151,6 +159,29 @@ public class MyPageController {
         Member member = memberQueryService.findMemberById(Long.valueOf(authentication.getName().toString())).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
         memberCommandService.deleteMember(member.getId());
         return ApiResponse.of(SuccessStatus.MEMBER_DELETE_SUCCESS, null);
+    }
+
+
+    @GetMapping("scraps/companion-posts")
+    @Operation(summary = "사용자가 작성한 이야기방 게시글 목록 api ")
+
+    public ApiResponse<List<ScrapCompanionPostDTO>> getCompanionPostScraps(Authentication auth) {
+        Long memberId = (Long) auth.getPrincipal(); // 또는 SecurityContext에서 memberId 꺼내는 프로젝트 방식 사용
+        return ApiResponse.onSuccess(myScrapQueryService.getCompanionPostScraps(memberId));
+    }
+
+    @GetMapping("scraps/story-posts")
+    @Operation(summary = "사용자가 작성한 이야기방 게시글 목록 api ")
+    public ApiResponse<List<ScrapStoryRoomPostDTO>> getStoryPostScraps(Authentication auth) {
+        Long memberId = (Long) auth.getPrincipal();
+        return ApiResponse.onSuccess(myScrapQueryService.getStoryPostScraps(memberId));
+    }
+
+    @GetMapping("scraps/travel-regions")
+    @Operation(summary = "사용자가 작성한 이야기방 게시글 목록 api ")
+    public ApiResponse<List<ScrapTravelRegionDTO>> getTravelRegionScraps(Authentication auth) {
+        Long memberId = (Long) auth.getPrincipal();
+        return ApiResponse.onSuccess(myScrapQueryService.getTravelRegionScraps(memberId));
     }
 
 //    @PutMapping(value = "/modify/role/seller/{memberId}")
