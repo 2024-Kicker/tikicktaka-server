@@ -2,6 +2,8 @@
 package com.example.tikicktaka.service.CompanionPostService;
 
 import com.example.tikicktaka.domain.companionPost.CompanionPost;
+import com.example.tikicktaka.domain.enums.CompanionPostSortType;
+import com.example.tikicktaka.domain.enums.CompanionPostStatus;
 import com.example.tikicktaka.web.dto.companionPost.CompanionPostListResponseDTO;
 import com.example.tikicktaka.web.dto.companionPost.CompanionPostResponseDTO;
 import jakarta.transaction.Transactional;
@@ -25,15 +27,21 @@ public interface CompanionPostService {
 //
     CompanionPostResponseDTO getPostDetail(Long postId); //게시글 상세 조회
 
-    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    @Transactional
     CompanionPostResponseDTO getPostDetail(Long postId, Long memberId);
 
-    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    @Transactional
     Page<CompanionPostListResponseDTO> getPostList(Long memberId, Pageable pageable);
+    Page<CompanionPostListResponseDTO> getPostList(
+            Long memberId,
+            Pageable pageable,
+            CompanionPostSortType sortType,
+            CompanionPostStatus statusFilter
+    );
 
     CompanionPost findById(Long postId); // 게시글 ID로 조회
 
-    @org.springframework.transaction.annotation.Transactional
+    @Transactional
     void blockPost(Long memberId, Long postId);
     void unblockPost(Long memberId, Long postId);
 

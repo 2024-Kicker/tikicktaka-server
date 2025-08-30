@@ -4,6 +4,8 @@ package com.example.tikicktaka.web.controller;
 import com.example.tikicktaka.apiPayload.ApiResponse;
 import com.example.tikicktaka.apiPayload.code.status.ErrorStatus;
 import com.example.tikicktaka.domain.companionPost.CompanionPost;
+import com.example.tikicktaka.domain.enums.CompanionPostSortType;
+import com.example.tikicktaka.domain.enums.CompanionPostStatus;
 import com.example.tikicktaka.service.CompanionPostService.CompanionPostService;
 import com.example.tikicktaka.service.memberService.MemberCommandService;
 import com.example.tikicktaka.service.scrap.ScrapCommandService;
@@ -126,8 +128,10 @@ public class CompanionPostController {
     @GetMapping("/list")
     @Operation(summary = "게시글 목록 조회", description = "로그인한 사용자가 차단한 게시글을 제외한 목록을 조회합니다.")
     public ApiResponse<Page<CompanionPostListResponseDTO>> getPostList(
-            @ParameterObject
-            @PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
+            @ParameterObject @PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Sort.Direction.DESC)
+            Pageable pageable,
+            @RequestParam(defaultValue = "LATEST") CompanionPostSortType sortType,
+            @RequestParam(defaultValue = "ALL") CompanionPostStatus statusFilter,
             Authentication authentication) {
 
         if (authentication == null || authentication.getName() == null) {
@@ -137,8 +141,8 @@ public class CompanionPostController {
         }
 
         Long memberId = Long.valueOf(authentication.getName());
-        Page<CompanionPostListResponseDTO> postList = postService.getPostList(memberId, pageable);
-
+        Page<CompanionPostListResponseDTO> postList =
+                postService.getPostList(memberId, pageable, sortType, statusFilter);
         return ApiResponse.onSuccess(postList);
     }
 

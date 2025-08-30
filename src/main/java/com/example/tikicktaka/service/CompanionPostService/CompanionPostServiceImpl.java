@@ -1,6 +1,8 @@
 package com.example.tikicktaka.service.CompanionPostService;
 
 import com.example.tikicktaka.domain.companionPost.CompanionPost;
+import com.example.tikicktaka.domain.enums.CompanionPostSortType;
+import com.example.tikicktaka.domain.enums.CompanionPostStatus;
 import com.example.tikicktaka.domain.enums.TargetType;
 import com.example.tikicktaka.domain.images.CompanionPostImg;
 import com.example.tikicktaka.domain.member.Member;
@@ -161,6 +163,7 @@ public class CompanionPostServiceImpl implements CompanionPostService {
         return new CompanionPostResponseDTO(post, imageUrls);
     }
 
+
     //차단한 게시글 제외하고 게시글 목록 조회 (통합 scrap 기반 isScraped 계산)
     @Override
     @Transactional(readOnly = true)
@@ -190,6 +193,69 @@ public class CompanionPostServiceImpl implements CompanionPostService {
                 new CompanionPostListResponseDTO(post, scrapedIdSet.contains(post.getId()))
         );
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<CompanionPostListResponseDTO> getPostList(
+            Long memberId,
+            Pageable pageable,
+            CompanionPostSortType sortType,
+            CompanionPostStatus statusFilter
+    ) {
+        // 1) 차단 ID
+        List<Long> blockedIds = blockedService.blockedIds(memberId, TargetType.COMPANION_POST);
+        boolean hasBlocked = blockedIds != null && !blockedIds.isEmpty();
+
+        // 2) 상태 필터 매핑
+        List<CompanionPost.PostStatus> statuses = switch (statusFilter) {
+            case FINDING -> List.of(CompanionPost.PostStatus.FINDING);
+            case FOUND   -> List.of(CompanionPost.PostStatus.FOUND);
+            case ALL     -> List.of(CompanionPost.PostStatus.values());
+        };
+
+        // 3) page를 먼저 빈 페이지로 초기화 ★
+        Page<CompanionPost> page = Page.empty(pageable);
+
+        // 4) 스크랩 분기
+        if (sortType == CompanionPostSortType.SCRAP) {
+            List<Long> scrappedIds = scrapRepository
+                    .findByMemberIdAndTargetTypeOrderByCreatedAtDesc(memberId, TargetType.COMPANION_POST)
+                    .stream()
+                    .map(s -> s.getTargetId())
+                    .distinct()
+                    .toList();
+
+            if (!scrappedIds.isEmpty()) {
+                page = hasBlocked
+                        ? companionPostRepository.findByIdInAndStatusInAndIdNotIn(scrappedIds, statuses, blockedIds, pageable)
+                        : companionPostRepository.findByIdInAndStatusIn(scrappedIds, statuses, pageable);
+            }
+        } else {
+            // LATEST, ALL → 동일: pageable 정렬 사용
+            page = hasBlocked
+                    ? companionPostRepository.findByStatusInAndIdNotIn(statuses, blockedIds, pageable)
+                    : companionPostRepository.findByStatusIn(statuses, pageable);
+        }
+
+        // 5) 현재 페이지 게시글 id들
+        List<Long> pagePostIds = page.getContent().stream()
+                .map(CompanionPost::getId)
+                .toList();
+
+        // 6) 페이지가 비면 스크랩 재조회 생략
+        Set<Long> scrapedIdSet = pagePostIds.isEmpty()
+                ? java.util.Collections.emptySet()
+                : scrapRepository
+                .findByMemberIdAndTargetTypeOrderByCreatedAtDesc(memberId, TargetType.COMPANION_POST)
+                .stream()
+                .map(s -> s.getTargetId())
+                .filter(pagePostIds::contains)
+                .collect(Collectors.toSet());
+
+        return page.map(post -> new CompanionPostListResponseDTO(post, scrapedIdSet.contains(post.getId())));
+    }
+
+
 
     //사용자가 차단한 게시글 목록 조회 (통합 scrap 기반 isScraped 계산)
     @Override
