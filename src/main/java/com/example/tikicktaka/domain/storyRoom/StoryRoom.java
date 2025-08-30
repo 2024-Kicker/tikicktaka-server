@@ -69,4 +69,6 @@ public class StoryRoom {
             this.createdAt = LocalDateTime.now();
         }
     }
+
+
 }

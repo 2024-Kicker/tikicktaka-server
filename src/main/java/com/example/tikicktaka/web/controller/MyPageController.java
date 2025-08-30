@@ -5,38 +5,28 @@ import com.example.tikicktaka.apiPayload.code.status.ErrorStatus;
 import com.example.tikicktaka.apiPayload.code.status.SuccessStatus;
 import com.example.tikicktaka.apiPayload.exception.handler.MemberHandler;
 import com.example.tikicktaka.converter.member.MemberConverter;
-import com.example.tikicktaka.domain.enums.LanTourCategory;
-import com.example.tikicktaka.domain.lanTour.Inquiry;
-import com.example.tikicktaka.domain.lanTour.InquiryAnswer;
-import com.example.tikicktaka.domain.lanTour.Review;
-import com.example.tikicktaka.domain.mapping.lanTour.LanTourPurchase;
-import com.example.tikicktaka.domain.mapping.member.ChargeCoin;
-import com.example.tikicktaka.domain.mapping.member.Dibs;
+import com.example.tikicktaka.domain.companionPost.CompanionPost;
 import com.example.tikicktaka.domain.mapping.member.MemberTeam;
-import com.example.tikicktaka.domain.mapping.member.MemberTravelStyle;
 import com.example.tikicktaka.domain.member.Member;
-import com.example.tikicktaka.domain.member.RegisterSeller;
+import com.example.tikicktaka.domain.storyRoom.StoryRoomPost;
+import com.example.tikicktaka.domain.travel.TravelRegion;
+import com.example.tikicktaka.repository.companionPost.CompanionPostRepository;
+import com.example.tikicktaka.repository.storyRoom.StoryRoomPostRepository;
+import com.example.tikicktaka.repository.travelRegion.TravelRegionRepository;
+import com.example.tikicktaka.service.blocked.BlockedService;
 import com.example.tikicktaka.service.memberService.MemberCommandService;
 import com.example.tikicktaka.service.memberService.MemberQueryService;
+import com.example.tikicktaka.domain.enums.TargetType;
 import com.example.tikicktaka.service.myPageService.MyPageService;
 import com.example.tikicktaka.service.myPageService.MyScrapQueryService;
-import com.example.tikicktaka.web.dto.lanTour.LanTourRequestDTO;
-import com.example.tikicktaka.web.dto.lanTour.LanTourResponseDTO;
 import com.example.tikicktaka.web.dto.member.MemberRequestDTO;
 import com.example.tikicktaka.web.dto.member.MemberResponseDTO;
-import com.example.tikicktaka.web.dto.myPage.MyPostItemDTO;
-import com.example.tikicktaka.web.dto.myPage.ScrapCompanionPostDTO;
-import com.example.tikicktaka.web.dto.myPage.ScrapStoryRoomPostDTO;
-import com.example.tikicktaka.web.dto.myPage.ScrapTravelRegionDTO;
+import com.example.tikicktaka.web.dto.myPage.*;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -56,6 +46,15 @@ public class MyPageController {
     private final MemberQueryService memberQueryService;
     private final MyPageService myPageService;
     private final MyScrapQueryService myScrapQueryService;
+    private final BlockedService blockedService;
+    private final CompanionPostRepository companionPostRepository;
+    private final StoryRoomPostRepository storyRoomPostRepository;
+    private final TravelRegionRepository travelRegionRepository;
+
+    private Long currentMemberId(Authentication auth) {
+        // 너희 프로젝트 표준 방식으로 유지
+        return (Long) auth.getPrincipal();
+    }
 
 
 
@@ -163,211 +162,94 @@ public class MyPageController {
 
 
     @GetMapping("scraps/companion-posts")
-    @Operation(summary = "사용자가 작성한 이야기방 게시글 목록 api ")
-
+    @Operation(summary = "사용자가 스크랩한 동행찾기 게시글 목록 api ")
     public ApiResponse<List<ScrapCompanionPostDTO>> getCompanionPostScraps(Authentication auth) {
         Long memberId = (Long) auth.getPrincipal(); // 또는 SecurityContext에서 memberId 꺼내는 프로젝트 방식 사용
         return ApiResponse.onSuccess(myScrapQueryService.getCompanionPostScraps(memberId));
     }
 
     @GetMapping("scraps/story-posts")
-    @Operation(summary = "사용자가 작성한 이야기방 게시글 목록 api ")
+    @Operation(summary = "사용자가 스크랩한 이야기방 게시글 목록 api ")
     public ApiResponse<List<ScrapStoryRoomPostDTO>> getStoryPostScraps(Authentication auth) {
         Long memberId = (Long) auth.getPrincipal();
         return ApiResponse.onSuccess(myScrapQueryService.getStoryPostScraps(memberId));
     }
 
     @GetMapping("scraps/travel-regions")
-    @Operation(summary = "사용자가 작성한 이야기방 게시글 목록 api ")
+    @Operation(summary = "사용자가 스크랩한 여행지 목록 api ")
     public ApiResponse<List<ScrapTravelRegionDTO>> getTravelRegionScraps(Authentication auth) {
         Long memberId = (Long) auth.getPrincipal();
         return ApiResponse.onSuccess(myScrapQueryService.getTravelRegionScraps(memberId));
     }
 
-//    @PutMapping(value = "/modify/role/seller/{memberId}")
-//    @Operation(summary = "판매자 변경 api", description = "request: 판매자로 변경할 멤버의 id를 입력하면 됩니다.")
-//    public ApiResponse<MemberResponseDTO.ModifySellerResultDTO> modifySeller(@PathVariable Long memberId){
-//        Member member = memberQueryService.findMemberById(memberId).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
-//        Member modifySellerMember = memberCommandService.modifySeller(member.getId());
-//        return ApiResponse.onSuccess(MemberConverter.toModifySellerResultDTO(modifySellerMember));
-//    }
-//
-//    @PostMapping(value = "/register/seller")
-//    @Operation(summary = "판매자 신청 api", description = "request: 등록 정보를 입력해주시면 됩니다.")
-//    public ApiResponse<MemberResponseDTO.RegisterSellerResultDTO> registerSeller(@RequestBody MemberRequestDTO.RegisterSellerDTO request,
-//                                                                                 Authentication authentication){
-//        Member member = memberQueryService.findMemberById(Long.valueOf(authentication.getName().toString())).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
-//        RegisterSeller registerSeller = memberCommandService.registerSeller(request,member);
-//        return ApiResponse.onSuccess(MemberConverter.toRegisterSellerResultDTO(registerSeller));
-//    }
-//
-//    @PostMapping(value = "/charge/coin")
-//    @Operation(summary = "코인 충전 api", description = "request: 충전 정보를 입력해주시면 됩니다.")
-//    public ApiResponse<MemberResponseDTO.ChargeCoinResultDTO> chargeCoin(@RequestBody MemberRequestDTO.ChargeCoinRequestDTO request,
-//                                                                         Authentication authentication){
-//        Member member = memberQueryService.findMemberById(Long.valueOf(authentication.getName().toString())).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
-//        Member chargeCoinMember = memberCommandService.chargeCoin(member, request);
-//        return ApiResponse.onSuccess(MemberConverter.toChargeCoinResultDTO(chargeCoinMember));
-//    }
-//
-//    @GetMapping(value = "/purchase/lan-tour/{purchaseLanId}")
-//    @Operation(summary = "랜선투어 구매내역 상세조회 api", description = "request: 조회하고자 하는 랜선 투어 구매내역 아이디를 입력해주시면 됩니다.")
-//    public ApiResponse<MemberResponseDTO.PurchaseLanTourDetailDTO> getPurchaseLanTourDetail(@PathVariable Long purchaseLanId){
-//        LanTourPurchase lanTourPurchase = memberCommandService.getPurchaseLanTourDetail(purchaseLanId);
-//        return ApiResponse.onSuccess(MemberConverter.toPurchaseLanTourDetailDTO(lanTourPurchase));
-//    }
-//
-//    @GetMapping(value = "/purchase/lan-tour/list")
-//    @Operation(summary = "랜선투어 구매내역 전체조회 api", description = "판매중인 상품 조회를 위한 API이며, request parameter로 입력 값을 받습니다." +
-//        "page : 상품 조회 페이지 번호")
-//    @Parameters(value = {
-//            @Parameter(name = "page", description = "페이지 번호, 1 이상의 숫자를 입력해주세요.")
-//    })
-//    @ApiResponses({
-//            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
-//    })
-//    public ApiResponse<MemberResponseDTO.PurchaseLanTourPreviewListDTO> getPurchaseLanTourList(@RequestParam(name = "page") Integer page,
-//                                                                                               Authentication authentication){
-//        Member member = memberQueryService.findMemberById(Long.valueOf(authentication.getName().toString())).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
-//        Page<LanTourPurchase> lanTourPurchasePage = memberQueryService.getMyLanTourPurchaseList(member, page - 1);
-//        return ApiResponse.onSuccess(MemberConverter.purchaseLanTourPreviewListDTO(lanTourPurchasePage));
-//    }
-//
-//    @GetMapping(value = "/purchase/lan-tour/soccer")
-//    @Operation(summary = "랜선투어 구매내역 축구 카테고리 전체조회 api", description = "판매중인 상품 조회를 위한 API이며, request parameter로 입력 값을 받습니다." +
-//            "page : 상품 조회 페이지 번호")
-//    @Parameters(value = {
-//            @Parameter(name = "page", description = "페이지 번호, 1 이상의 숫자를 입력해주세요.")
-//    })
-//    @ApiResponses({
-//            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
-//    })
-//    public ApiResponse<MemberResponseDTO.PurchaseLanTourPreviewListDTO> getPurchaseSoccerLanTourList(@RequestParam(name = "page") Integer page,
-//                                                                                               Authentication authentication){
-//        Member member = memberQueryService.findMemberById(Long.valueOf(authentication.getName().toString())).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
-//        Page<LanTourPurchase> lanTourPurchasePage = memberQueryService.getMyCategoryLanTourPurchaseList(member, LanTourCategory.SOCCER, page - 1);
-//        return ApiResponse.onSuccess(MemberConverter.purchaseLanTourPreviewListDTO(lanTourPurchasePage));
-//    }
-//
-//    @GetMapping(value = "/purchase/lan-tour/audio")
-//    @Operation(summary = "랜선투어 구매내역 오디오 카테고리 전체조회 api", description = "판매중인 상품 조회를 위한 API이며, request parameter로 입력 값을 받습니다." +
-//            "page : 상품 조회 페이지 번호")
-//    @Parameters(value = {
-//            @Parameter(name = "page", description = "페이지 번호, 1 이상의 숫자를 입력해주세요.")
-//    })
-//    @ApiResponses({
-//            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
-//    })
-//    public ApiResponse<MemberResponseDTO.PurchaseLanTourPreviewListDTO> getPurchaseAudioLanTourList(@RequestParam(name = "page") Integer page,
-//                                                                                                     Authentication authentication){
-//        Member member = memberQueryService.findMemberById(Long.valueOf(authentication.getName().toString())).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
-//        Page<LanTourPurchase> lanTourPurchasePage = memberQueryService.getMyCategoryLanTourPurchaseList(member, LanTourCategory.AUDIO, page - 1);
-//        return ApiResponse.onSuccess(MemberConverter.purchaseLanTourPreviewListDTO(lanTourPurchasePage));
-//    }
-//
-//    @PostMapping(value = "/dibs/lan-tour/{lanTourId}")
-//    @Operation(summary = "랜선투어 상품 찜하기 api", description = "랜선투어 상품 찜하기를 위한 API이며, path variable로 입력 값을 받습니다." +
-//            "lanTourId : 랜선투어 상품 id")
-//    @ApiResponses({
-//            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
-//    })
-//    public ApiResponse<MemberResponseDTO.LanTourDibsResultDTO> dibsLanTour(@PathVariable(name = "lanTourId") Long lanTourId,
-//                                                                           Authentication authentication){
-//        Member member = memberQueryService.findMemberById(Long.valueOf(authentication.getName().toString())).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
-//        Dibs dibs = memberCommandService.dibsLanTour(lanTourId, member);
-//        return ApiResponse.onSuccess(MemberConverter.lanTourDibsResultDTO(dibs));
-//    }
-//
-//    @DeleteMapping(value = "/dibs/lan-tour/delete/{lanTourId}")
-//    @Operation(summary = "랜선투어 상품 찜해제 api", description = "랜선투어 상품 찜해제를 위한 API이며, path variable로 입력 값을 받습니다." +
-//            "lanTourId : 랜선투어 상품 id")
-//    @ApiResponses({
-//            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
-//    })
-//    public ApiResponse<MemberResponseDTO.LanTourDibsDeleteDTO> deleteDibsLanTour(@PathVariable(name = "lanTourId") Long lanTourId,
-//                                                                                 Authentication authentication){
-//        Member member = memberQueryService.findMemberById(Long.valueOf(authentication.getName().toString())).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
-//        Dibs dibs = memberCommandService.deleteDibsLanTour(lanTourId, member);
-//        return ApiResponse.onSuccess(MemberConverter.lanTourDibsDeleteDTO(dibs));
-//    }
-//
-//    @GetMapping(value = "/dibs/lan-tour/")
-//    @Operation(summary = "내가 찜한 랜선투어 상품 전체조회 api", description = "내가 찜한 랜선투어 상품 조회를 위한 API이며, request parameter로 입력 값을 받습니다." +
-//            "page : 상품 조회 페이지 번호")
-//    @Parameters(value = {
-//            @Parameter(name = "page", description = "페이지 번호, 1 이상의 숫자를 입력해주세요.")
-//    })
-//    @ApiResponses({
-//            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
-//    })
-//    public ApiResponse<MemberResponseDTO.DibsLanTourPreviewListDTO> getMyDibsLanTourList(@RequestParam(name = "page") Integer page,
-//                                                                                                    Authentication authentication){
-//        Member member = memberQueryService.findMemberById(Long.valueOf(authentication.getName().toString())).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
-//        Page<Dibs> dibsPage = memberQueryService.getMyDibsLanTourList(member, page - 1);
-//        return ApiResponse.onSuccess(MemberConverter.dibsLanTourPreviewListDTO(dibsPage));
-//    }
-//
-//    @GetMapping(value = "/charge/coin/list")
-//    @Operation(summary = "코인 충전 내역 조회 api", description = "코인 충전 내역 조회를 위한 API이며, request parameter로 입력 값을 받습니다." +
-//            "page : 상품 조회 페이지 번호")
-//    @Parameters(value = {
-//            @Parameter(name = "page", description = "페이지 번호, 1 이상의 숫자를 입력해주세요.")
-//    })
-//    @ApiResponses({
-//            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
-//    })
-//    public ApiResponse<MemberResponseDTO.ChargeCoinPreviewListDTO> getMyChargeCoinList(@RequestParam(name = "page") Integer page,
-//                                                                                       Authentication authentication){
-//        Member member = memberQueryService.findMemberById(Long.valueOf(authentication.getName().toString())).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
-//        Page<ChargeCoin> chargeCoinPage = memberQueryService.getMyChargeCoinList(member, page - 1);
-//        return ApiResponse.onSuccess(MemberConverter.chargeCoinPreviewListDTO(member, chargeCoinPage));
-//    }
-//
-//    @GetMapping(value = "/spend/coin/list")
-//    @Operation(summary = "코인 사용 내역 조회 api", description = "코인 사용 내역 조회를 위한 API이며, request parameter로 입력 값을 받습니다." +
-//            "page : 상품 조회 페이지 번호")
-//    @Parameters(value = {
-//            @Parameter(name = "page", description = "페이지 번호, 1 이상의 숫자를 입력해주세요.")
-//    })
-//    @ApiResponses({
-//            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
-//    })
-//    public ApiResponse<MemberResponseDTO.SpendCoinPreviewListDTO> getMySpendCoinList(@RequestParam(name = "page") Integer page,
-//                                                                                      Authentication authentication){
-//        Member member = memberQueryService.findMemberById(Long.valueOf(authentication.getName().toString())).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
-//        Page<LanTourPurchase> spendCoinList = memberQueryService.getMySpendCoinList(member, page - 1);
-//        return ApiResponse.onSuccess(MemberConverter.spendCoinPreviewListDTO(member, spendCoinList));
-//    }
-//
-//    @GetMapping(value = "/reviews")
-//    @Operation(summary = "내가 작성한 리뷰 조회 api", description = "내가 작성한 리뷰 조회를 위한 API이며, request parameter로 입력 값을 받습니다." +
-//            "page : 상품 조회 페이지 번호")
-//    @Parameters(value = {
-//            @Parameter(name = "page", description = "페이지 번호, 1 이상의 숫자를 입력해주세요.")
-//    })
-//    @ApiResponses({
-//            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
-//    })
-//    public ApiResponse<MemberResponseDTO.MyReviewPreviewListDTO> getMyReviewList(@RequestParam(name = "page") Integer page,
-//                                                                                 Authentication authentication){
-//        Member member = memberQueryService.findMemberById(Long.valueOf(authentication.getName().toString())).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
-//        Page<Review> reviewList = memberQueryService.getMyReviewList(member, page - 1);
-//        return ApiResponse.onSuccess(MemberConverter.myReviewPreviewListDTO(reviewList));
-//    }
-//
-//    @GetMapping(value = "/inquiry")
-//    @Operation(summary = "내가 작성한 문의 조회 api", description = "내가 작성한 문의 조회를 위한 API이며, request parameter로 입력 값을 받습니다." +
-//            "page : 상품 조회 페이지 번호")
-//    @Parameters(value = {
-//            @Parameter(name = "page", description = "페이지 번호, 1 이상의 숫자를 입력해주세요.")
-//    })
-//    @ApiResponses({
-//            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
-//    })
-//    public ApiResponse<MemberResponseDTO.MyInquiryPreviewListDTO> getMyInquiryList(@RequestParam(name = "page") Integer page,
-//                                                                                   Authentication authentication){
-//        Member member = memberQueryService.findMemberById(Long.valueOf(authentication.getName().toString())).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
-//        Page<Inquiry> inquiryList = memberQueryService.getMyInquiryList(member, page - 1);
-//        return ApiResponse.onSuccess(MemberConverter.myInquiryPreviewListDTO(inquiryList));
-//    }
+    // ===== 동행찾기 차단 목록 =====
+    @GetMapping("/blocked/companion-posts")
+    @Operation(summary = "차단한 동행찾기 게시글 목록")
+    public ApiResponse<List<BlockedCompanionPostDTO>> getBlockedCompanionPosts(Authentication auth) {
+        Long memberId = currentMemberId(auth);
+
+        var blockedIds = blockedService.blockedIds(memberId, TargetType.COMPANION_POST);
+        var posts = blockedIds.isEmpty() ? List.<CompanionPost>of()
+                : companionPostRepository.findAllByIdIn(blockedIds);
+
+        var dtos = posts.stream().map(p ->
+                new BlockedCompanionPostDTO(
+                        p.getId(),
+                        p.getTitle(),
+                        p.getAuthor() != null ? p.getAuthor().getName() : null,
+                        p.getStatus() != null ? p.getStatus().name() : null,  // 필요 없으면 null 유지
+                        p.getCreatedAt(),
+                        true
+                )
+        ).toList();
+
+        return ApiResponse.onSuccess(dtos);
+    }
+
+    // ===== 이야기방 차단 목록 =====
+    @GetMapping("/blocked/story-posts")
+    @Operation(summary = "차단한 이야기방 게시글 목록")
+    public ApiResponse<List<BlockedStoryRoomPostDTO>> getBlockedStoryPosts(Authentication auth) {
+        Long memberId = currentMemberId(auth);
+
+        var blockedIds = blockedService.blockedIds(memberId, TargetType.STORY_POST);
+        var posts = blockedIds.isEmpty() ? List.<StoryRoomPost>of()
+                : storyRoomPostRepository.findAllById(blockedIds); // 네 레포에 맞는 메서드 사용
+
+        var dtos = posts.stream().map(p ->
+                new BlockedStoryRoomPostDTO(
+                        p.getId(),
+                        p.getTitle(),
+                        p.getTopic() != null ? p.getTopic().name() : null,
+                        p.getThumbnailUrl(),
+                        p.getCreatedAt(),
+                        true
+                )
+        ).toList();
+
+        return ApiResponse.onSuccess(dtos);
+    }
+
+    // ===== 여행지 차단(숨김) 목록 =====
+    @GetMapping("/blocked/travel-regions")
+    @Operation(summary = "차단(숨김)한 여행지 목록")
+    public ApiResponse<List<BlockedTravelRegionDTO>> getBlockedTravelRegions(Authentication auth) {
+        Long memberId = currentMemberId(auth);
+
+        var blockedIds = blockedService.blockedIds(memberId, TargetType.TRAVEL_REGION);
+        var regions = blockedIds.isEmpty() ? List.<TravelRegion>of()
+                : travelRegionRepository.findAllById(blockedIds);
+
+        var dtos = regions.stream().map(r ->
+                new BlockedTravelRegionDTO(
+                        r.getId(),
+                        r.getTitle(),
+                        r.getAddr1(),
+                        r.getFirstImage() != null ? r.getFirstImage() : r.getFirstImage2(),
+                        true
+                )
+        ).toList();
+
+        return ApiResponse.onSuccess(dtos);
+    }
 }
