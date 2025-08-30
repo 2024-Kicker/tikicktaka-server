@@ -23,4 +23,6 @@ public interface BlockedService {
 
     /** 특정 대상이 차단 상태인지 여부 */
     boolean isBlocked(Long memberId, TargetType type, Long targetId);
+
+    boolean removeIfOwned(Long memberId, TargetType targetType, Long travelRegionId);
 }
