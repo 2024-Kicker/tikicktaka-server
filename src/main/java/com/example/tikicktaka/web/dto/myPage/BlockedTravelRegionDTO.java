@@ -1,4 +1,8 @@
 package com.example.tikicktaka.web.dto.myPage;
+import lombok.Builder;
+
+
+@Builder
 public record BlockedTravelRegionDTO(
         Long id,
         String name,

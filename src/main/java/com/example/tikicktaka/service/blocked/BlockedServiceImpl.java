@@ -59,4 +59,13 @@ public class BlockedServiceImpl implements BlockedService {
     public boolean isBlocked(Long memberId, TargetType type, Long targetId) {
         return repo.existsByMemberIdAndTargetTypeAndTargetId(memberId, type, targetId);
     }
+
+    @Override
+    public boolean removeIfOwned(Long memberId, TargetType type, Long targetId) {
+        if (!repo.existsByMemberIdAndTargetTypeAndTargetId(memberId, type, targetId)) {
+            return false;
+        }
+        repo.deleteByMemberIdAndTargetTypeAndTargetId(memberId, type, targetId);
+        return true;
+    }
 }
