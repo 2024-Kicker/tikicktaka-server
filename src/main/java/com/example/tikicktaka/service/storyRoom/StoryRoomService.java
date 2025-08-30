@@ -35,4 +35,6 @@ public interface StoryRoomService {
     List<StoryRoomPostResponseDTO> getFilteredStoryRoomPosts(StoryRoomStatus status, StoryRoomPostSortType sortType, Topic topic, Long memberId);
 
     ApiResponse<String> blockStoryRoomPost(Long memberId, Long postId);
+    boolean unblockStoryRoomPost(Long memberId, Long postId);
+
 }
