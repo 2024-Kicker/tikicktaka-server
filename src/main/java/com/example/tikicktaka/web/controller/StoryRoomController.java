@@ -199,5 +199,29 @@ public class StoryRoomController {
         storyRoomService.blockStoryRoomPost(memberId, postId);
         return ApiResponse.onSuccess("게시글이 차단되었습니다.");
     }
+
+    @Transactional
+    @DeleteMapping("/post/block/{postId}")
+    @Operation(summary = "게시글 차단 해제", description = "사용자가 차단했던 이야기방 게시글의 차단을 해제합니다.")
+    public ApiResponse<String> unblockStoryRoomPost(
+            @PathVariable Long postId,
+            Authentication authentication
+    ) {
+        if (authentication == null || authentication.getName() == null) {
+            return ApiResponse.onFailure(ErrorStatus._UNAUTHORIZED.getCode(), "로그인이 필요합니다.", null);
+        }
+
+        Long memberId = Long.valueOf(authentication.getName());
+
+        boolean removed = storyRoomService.unblockStoryRoomPost(memberId, postId);
+        if (!removed) {
+            return ApiResponse.onFailure(
+                    ErrorStatus._BAD_REQUEST.getCode(),
+                    "해당 게시글을 차단한 이력이 없습니다.",
+                    null
+            );
+        }
+        return ApiResponse.onSuccess("차단 해제 완료");
+    }
 }
 

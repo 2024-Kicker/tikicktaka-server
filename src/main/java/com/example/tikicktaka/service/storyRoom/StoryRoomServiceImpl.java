@@ -157,7 +157,7 @@ public class StoryRoomServiceImpl implements StoryRoomService {
         StoryRoomPost post = storyRoomPostRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글을 찾을 수 없습니다."));
 
-        // ✅ 통합 차단(신고) 체크
+        // 통합 차단(신고) 체크
         if (blockedService.isBlocked(memberId, TargetType.STORY_POST, postId)) {
             throw new IllegalStateException("신고한 게시글입니다.");
         }
@@ -252,7 +252,7 @@ public class StoryRoomServiceImpl implements StoryRoomService {
                                                                     Topic topic,
                                                                     Long memberId) {
 
-        // ✅ 통합 차단 id
+        // 통합 차단 id
         List<Long> blockedIds = (memberId == null)
                 ? List.of()
                 : blockedService.blockedIds(memberId, TargetType.STORY_POST);
@@ -332,5 +332,10 @@ public class StoryRoomServiceImpl implements StoryRoomService {
 
         blockedService.ensureOn(memberId, TargetType.STORY_POST, postId);
         return ApiResponse.onSuccess("게시글이 신고되었습니다.");
+    }
+
+    @Override
+    public boolean unblockStoryRoomPost(Long memberId, Long postId) {
+        return blockedService.removeIfOwned(memberId, TargetType.STORY_POST, postId);
     }
 }
