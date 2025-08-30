@@ -34,4 +34,11 @@ public interface CompanionPostRepository extends JpaRepository<CompanionPost, Lo
     @Query("SELECT p FROM CompanionPost p WHERE p.id IN :postIds")
     List<CompanionPost> findAllByIdIn(@Param("postIds") List<Long> postIds);
 
+    // ✅ 파생 쿼리만으로 필터 조합
+    Page<CompanionPost> findByStatusIn(List<CompanionPost.PostStatus> statuses, Pageable pageable);
+    Page<CompanionPost> findByStatusInAndIdNotIn(List<CompanionPost.PostStatus> statuses, List<Long> excludedIds, Pageable pageable);
+
+    Page<CompanionPost> findByIdInAndStatusIn(List<Long> ids, List<CompanionPost.PostStatus> statuses, Pageable pageable);
+    Page<CompanionPost> findByIdInAndStatusInAndIdNotIn(List<Long> ids, List<CompanionPost.PostStatus> statuses, List<Long> excludedIds, Pageable pageable);
+
 }
