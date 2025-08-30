@@ -220,7 +220,7 @@ public class StoryRoomServiceImpl implements StoryRoomService {
 //        boolean isScrapped = scrapedStoryRoomRepository.existsByMemberIdAndStoryRoomPostId(memberId, postId);
         // ✅ 통합 scrap 테이블로 스크랩 여부 확인
         boolean isScrapped = scrapRepository.existsByMemberIdAndTargetTypeAndTargetId(
-                memberId, ScrapTargetType.STORY_POST, postId);
+                memberId, TargetType.STORY_POST, postId);
         System.out.println("Member ID: " + memberId + ", Post ID: " + postId + ", Is Scrapped: " + isScrapped);
 
         // 응답 DTO 생성
@@ -367,11 +367,11 @@ public class StoryRoomServiceImpl implements StoryRoomService {
             throw new EntityNotFoundException("해당 게시글을 찾을 수 없습니다.");
         }
         // 이미 있으면 멱등 처리
-        if (scrapRepository.existsByMemberIdAndTargetTypeAndTargetId(memberId, ScrapTargetType.STORY_POST, postId)) {
+        if (scrapRepository.existsByMemberIdAndTargetTypeAndTargetId(memberId, TargetType.STORY_POST, postId)) {
             return;
         }
         scrapRepository.save(com.example.tikicktaka.domain.mapping.scrap.Scrap.of(
-                memberId, ScrapTargetType.STORY_POST, postId
+                memberId, TargetType.STORY_POST, postId
         ));
     }
 
@@ -383,7 +383,7 @@ public class StoryRoomServiceImpl implements StoryRoomService {
             throw new EntityNotFoundException("해당 게시글을 찾을 수 없습니다.");
         }
         scrapRepository.deleteByMemberIdAndTargetTypeAndTargetId(
-                memberId, ScrapTargetType.STORY_POST, postId
+                memberId, TargetType.STORY_POST, postId
         );
     }
 
@@ -397,7 +397,7 @@ public class StoryRoomServiceImpl implements StoryRoomService {
             throw new EntityNotFoundException("해당 게시글을 찾을 수 없습니다.");
         }
         return scrapRepository.existsByMemberIdAndTargetTypeAndTargetId(
-                memberId, ScrapTargetType.STORY_POST, postId
+                memberId, TargetType.STORY_POST, postId
         );
     }
 
@@ -407,7 +407,7 @@ public class StoryRoomServiceImpl implements StoryRoomService {
     public List<StoryRoomPostResponseDTO> getScrappedPosts(Long memberId) {
         // 1) 통합 scrap에서 내가 스크랩한 STORY_POST id들을 최신순으로
         List<Long> ids = scrapRepository
-                .findByMemberIdAndTargetTypeOrderByCreatedAtDesc(memberId, ScrapTargetType.STORY_POST)
+                .findByMemberIdAndTargetTypeOrderByCreatedAtDesc(memberId, TargetType.STORY_POST)
                 .stream().map(com.example.tikicktaka.domain.mapping.scrap.Scrap::getTargetId)
                 .toList();
 
@@ -466,7 +466,7 @@ public class StoryRoomServiceImpl implements StoryRoomService {
                 posts = posts.stream()
                         .filter(post -> memberId != null &&
                                 scrapRepository.existsByMemberIdAndTargetTypeAndTargetId(
-                                        memberId, ScrapTargetType.STORY_POST, post.getId()))
+                                        memberId, TargetType.STORY_POST, post.getId()))
                         .collect(Collectors.toList());
             }
         }
@@ -475,7 +475,7 @@ public class StoryRoomServiceImpl implements StoryRoomService {
                 .map(post -> {
                     boolean isScrapped = memberId != null &&
                             scrapRepository.existsByMemberIdAndTargetTypeAndTargetId(
-                                    memberId, ScrapTargetType.STORY_POST, post.getId());
+                                    memberId, TargetType.STORY_POST, post.getId());
                     int participantCount = post.getParticipants().size();
                     return new StoryRoomPostResponseDTO(post, null, participantCount, isScrapped);
                 })

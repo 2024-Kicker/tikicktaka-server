@@ -2,7 +2,7 @@ package com.example.tikicktaka.service.CompanionPostService;
 
 import com.example.tikicktaka.domain.companionPost.BlockedPost;
 import com.example.tikicktaka.domain.companionPost.CompanionPost;
-import com.example.tikicktaka.domain.enums.ScrapTargetType;
+import com.example.tikicktaka.domain.enums.TargetType;
 import com.example.tikicktaka.domain.images.CompanionPostImg;
 import com.example.tikicktaka.domain.member.Member;
 import com.example.tikicktaka.repository.companionPost.BlockedPostRepository;
@@ -182,7 +182,7 @@ public class CompanionPostServiceImpl implements CompanionPostService {
                 .toList();
 
         Set<Long> scrapedIdSet = scrapRepository
-                .findByMemberIdAndTargetTypeOrderByCreatedAtDesc(memberId, ScrapTargetType.COMPANION_POST)
+                .findByMemberIdAndTargetTypeOrderByCreatedAtDesc(memberId, TargetType.COMPANION_POST)
                 .stream()
                 .map(scrap -> scrap.getTargetId())
                 .filter(pagePostIds::contains) // 현재 페이지 것만 남김
@@ -206,7 +206,7 @@ public class CompanionPostServiceImpl implements CompanionPostService {
 
         // 차단 목록의 게시글들에 대해 스크랩 여부 set 생성
         Set<Long> scrapedIdSet = scrapRepository
-                .findByMemberIdAndTargetTypeOrderByCreatedAtDesc(memberId, ScrapTargetType.COMPANION_POST)
+                .findByMemberIdAndTargetTypeOrderByCreatedAtDesc(memberId, TargetType.COMPANION_POST)
                 .stream()
                 .map(scrap -> scrap.getTargetId())
                 .collect(Collectors.toSet());

@@ -144,7 +144,7 @@ public class StoryRoomController {
             return ApiResponse.onFailure(ErrorStatus._UNAUTHORIZED.getCode(), "로그인이 필요합니다.", null);
 
         Long memberId = Long.valueOf(authentication.getName());
-        boolean removed = scrapCommandService.removeIfOwned(memberId, ScrapTargetType.STORY_POST, postId);
+        boolean removed = scrapCommandService.removeIfOwned(memberId, TargetType.STORY_POST, postId);
         if (!removed) {
             return ApiResponse.onFailure(
                     ErrorStatus._BAD_REQUEST.getCode(),

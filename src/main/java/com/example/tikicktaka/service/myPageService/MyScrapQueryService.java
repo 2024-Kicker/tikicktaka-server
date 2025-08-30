@@ -1,6 +1,6 @@
 package com.example.tikicktaka.service.myPageService;
 
-import com.example.tikicktaka.domain.enums.ScrapTargetType;
+import com.example.tikicktaka.domain.enums.TargetType;
 import com.example.tikicktaka.domain.mapping.scrap.Scrap;
 import com.example.tikicktaka.repository.scrap.ScrapRepository;
 
@@ -38,7 +38,7 @@ public class MyScrapQueryService {
 
     public List<ScrapCompanionPostDTO> getCompanionPostScraps(Long memberId) {
         List<Long> ids = scrapRepository
-                .findByMemberIdAndTargetTypeOrderByCreatedAtDesc(memberId, ScrapTargetType.COMPANION_POST)
+                .findByMemberIdAndTargetTypeOrderByCreatedAtDesc(memberId, TargetType.COMPANION_POST)
                 .stream().map(Scrap::getTargetId).toList();
 
         if (ids.isEmpty()) return List.of();
@@ -60,7 +60,7 @@ public class MyScrapQueryService {
 
     public List<ScrapStoryRoomPostDTO> getStoryPostScraps(Long memberId) {
         List<Long> ids = scrapRepository
-                .findByMemberIdAndTargetTypeOrderByCreatedAtDesc(memberId, ScrapTargetType.STORY_POST)
+                .findByMemberIdAndTargetTypeOrderByCreatedAtDesc(memberId, TargetType.STORY_POST)
                 .stream().map(Scrap::getTargetId).toList();
 
         if (ids.isEmpty()) return List.of();
@@ -82,7 +82,7 @@ public class MyScrapQueryService {
 
     public List<ScrapTravelRegionDTO> getTravelRegionScraps(Long memberId) {
         List<Long> ids = scrapRepository
-                .findByMemberIdAndTargetTypeOrderByCreatedAtDesc(memberId, ScrapTargetType.TRAVEL_REGION)
+                .findByMemberIdAndTargetTypeOrderByCreatedAtDesc(memberId, TargetType.TRAVEL_REGION)
                 .stream().map(Scrap::getTargetId).toList();
 
         if (ids.isEmpty()) return List.of();

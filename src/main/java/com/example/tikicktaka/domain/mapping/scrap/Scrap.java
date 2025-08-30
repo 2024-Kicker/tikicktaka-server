@@ -1,6 +1,6 @@
 package com.example.tikicktaka.domain.mapping.scrap;
 
-import com.example.tikicktaka.domain.enums.ScrapTargetType;
+import com.example.tikicktaka.domain.enums.TargetType;
 import com.example.tikicktaka.domain.common.BaseDateTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -33,12 +33,12 @@ public class Scrap extends BaseDateTimeEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "target_type", nullable = false, length = 32)
-    private ScrapTargetType targetType;
+    private TargetType targetType;
 
     @Column(name = "target_id", nullable = false)
     private Long targetId;
 
-    public static Scrap of(Long memberId, ScrapTargetType type, Long targetId) {
+    public static Scrap of(Long memberId, TargetType type, Long targetId) {
         return Scrap.builder()
                 .memberId(memberId)
                 .targetType(type)

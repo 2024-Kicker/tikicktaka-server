@@ -1,7 +1,7 @@
 // src/main/java/com/example/tikicktaka/service/stadiumAttractionService/StadiumAttractionQueryServiceImpl.java
 package com.example.tikicktaka.service.stadiumAttractionService;
 
-import com.example.tikicktaka.domain.enums.ScrapTargetType;
+import com.example.tikicktaka.domain.enums.TargetType;
 import com.example.tikicktaka.domain.mapping.scrap.Scrap;
 import com.example.tikicktaka.domain.teams.Team;
 import com.example.tikicktaka.domain.travel.TravelRegion;
@@ -59,7 +59,7 @@ public class StadiumAttractionQueryServiceImpl implements StadiumAttractionQuery
         if (myScrapOnly) {
             // ✅ 통합 scrap에서 내가 스크랩한 TRAVEL_REGION ID들을 최신순으로 구함
             List<Long> scrappedIds = scrapRepository
-                    .findByMemberIdAndTargetTypeOrderByCreatedAtDesc(memberId, ScrapTargetType.TRAVEL_REGION)
+                    .findByMemberIdAndTargetTypeOrderByCreatedAtDesc(memberId, TargetType.TRAVEL_REGION)
                     .stream().map(Scrap::getTargetId).toList();
 
             if (scrappedIds.isEmpty()) {
