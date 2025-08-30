@@ -4,7 +4,7 @@ import com.example.tikicktaka.apiPayload.ApiResponse;
 import com.example.tikicktaka.apiPayload.code.status.ErrorStatus;
 import com.example.tikicktaka.apiPayload.exception.handler.MemberHandler;
 
-import com.example.tikicktaka.domain.enums.ScrapTargetType;
+import com.example.tikicktaka.domain.enums.TargetType;
 import com.example.tikicktaka.domain.mapping.scrap.Scrap;
 import com.example.tikicktaka.domain.travel.TravelRegion;
 
@@ -22,7 +22,6 @@ import jakarta.transaction.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import com.example.tikicktaka.domain.enums.ScrapTargetType;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -54,11 +53,11 @@ public class TravelRegionScrapController {
         }
 
         // 멱등 처리
-        if (scrapRepository.existsByMemberIdAndTargetTypeAndTargetId(memberId, ScrapTargetType.TRAVEL_REGION, travelRegionId)) {
+        if (scrapRepository.existsByMemberIdAndTargetTypeAndTargetId(memberId, TargetType.TRAVEL_REGION, travelRegionId)) {
             return ApiResponse.onSuccess(null);
         }
 
-        scrapRepository.save(Scrap.of(memberId, ScrapTargetType.TRAVEL_REGION, travelRegionId));
+        scrapRepository.save(Scrap.of(memberId, TargetType.TRAVEL_REGION, travelRegionId));
         return ApiResponse.onSuccess(null);
     }
 
@@ -69,7 +68,7 @@ public class TravelRegionScrapController {
     public ApiResponse<Void> unScrap(@PathVariable Long travelRegionId, Authentication auth) {
         Long memberId = requireMemberId(auth);
 
-        boolean removed = scrapCommandService.removeIfOwned(memberId, ScrapTargetType.TRAVEL_REGION, travelRegionId);
+        boolean removed = scrapCommandService.removeIfOwned(memberId, TargetType.TRAVEL_REGION, travelRegionId);
         if (!removed) {
             return ApiResponse.onFailure(
                     ErrorStatus._BAD_REQUEST.getCode(),
@@ -86,7 +85,7 @@ public class TravelRegionScrapController {
     public ApiResponse<Boolean> isScrapped(@PathVariable Long travelRegionId, Authentication auth) {
         Long memberId = requireMemberId(auth);
         boolean exists = scrapRepository.existsByMemberIdAndTargetTypeAndTargetId(
-                memberId, ScrapTargetType.TRAVEL_REGION, travelRegionId
+                memberId, TargetType.TRAVEL_REGION, travelRegionId
         );
         return ApiResponse.onSuccess(exists);
     }
@@ -104,7 +103,7 @@ public class TravelRegionScrapController {
 
         // 통합 scrap에서 내가 스크랩한 여행지 ID 최신순
         List<Long> ids = scrapRepository
-                .findByMemberIdAndTargetTypeOrderByCreatedAtDesc(memberId, ScrapTargetType.TRAVEL_REGION)
+                .findByMemberIdAndTargetTypeOrderByCreatedAtDesc(memberId, TargetType.TRAVEL_REGION)
                 .stream().map(Scrap::getTargetId).toList();
 
         if (ids.isEmpty()) {

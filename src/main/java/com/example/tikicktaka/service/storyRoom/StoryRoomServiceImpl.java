@@ -1,6 +1,7 @@
 package com.example.tikicktaka.service.storyRoom;
 
 import com.example.tikicktaka.apiPayload.ApiResponse;
+import com.example.tikicktaka.apiPayload.code.status.ErrorStatus;
 import com.example.tikicktaka.domain.enums.*;
 import com.example.tikicktaka.domain.images.StoryRoomImg;
 import com.example.tikicktaka.domain.member.Member;
@@ -9,7 +10,7 @@ import com.example.tikicktaka.repository.member.MemberRepository;
 import com.example.tikicktaka.repository.scrap.ScrapRepository;
 import com.example.tikicktaka.repository.storyRoom.*;
 import com.example.tikicktaka.service.UtilService;
-import com.example.tikicktaka.apiPayload.code.status.ErrorStatus;
+import com.example.tikicktaka.service.blocked.BlockedService;
 import com.example.tikicktaka.web.dto.storyRoom.StoryRoomPostResponseDTO;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -31,17 +32,16 @@ public class StoryRoomServiceImpl implements StoryRoomService {
     private final StoryRoomPostRepository storyRoomPostRepository;
     private final UtilService utilService;
     private final StoryRoomImageRepository storyRoomImageRepository;
-    //private final ScrapedStoryRoomRepository scrapedStoryRoomRepository;
     private final ScrapRepository scrapRepository;
-    private final BlockedStoryRoomPostRepository blockedStoryRoomPostRepository;
 
+    /** ✅ 통합 차단 서비스 */
+    private final BlockedService blockedService;
 
-
-
-     //이야기방 게시글 생성 및 이야기방 + 참가자 생성
+    // 이야기방 게시글 생성 및 이야기방 + 참가자 생성
     @Override
     @Transactional
-    public StoryRoomPostResponseDTO createStoryRoomPost(String title, String content, Topic topic, LimitTime limitTime, List<MultipartFile> imageFiles, Long authorId) {
+    public StoryRoomPostResponseDTO createStoryRoomPost(String title, String content, Topic topic, LimitTime limitTime,
+                                                        List<MultipartFile> imageFiles, Long authorId) {
 
         Member author = memberRepository.findById(authorId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
@@ -62,7 +62,7 @@ public class StoryRoomServiceImpl implements StoryRoomService {
         StoryRoom room = new StoryRoom(post, author);
         storyRoomRepository.save(room);
 
-        // 3. 참가자 등록
+        // 3. 참가자 등록(방장)
         StoryRoomParticipant participant = new StoryRoomParticipant();
         participant.setStoryRoom(room);
         participant.setStoryRoomPost(post);
@@ -94,51 +94,13 @@ public class StoryRoomServiceImpl implements StoryRoomService {
             }
         }
 
-        // StoryRoomPostResponseDTO 반환
-        return new StoryRoomPostResponseDTO(post, imageUrls,1);
+        return new StoryRoomPostResponseDTO(post, imageUrls, 1);
     }
 
-
-//    //이야기방 채팅방 만들기
-//    @Override
-//    @Transactional
-//    public Long createStoryRoom(StoryRoomCreateRequestDTO request, Long creatorId) {
-//        Member creator = memberRepository.findById(creatorId)
-//                .orElseThrow(() -> new IllegalArgumentException("작성자를 찾을 수 없습니다."));
-//
-//        StoryRoomPost post = new StoryRoomPost();
-//        post.setTitle(request.getTitle());
-//        post.setContent(request.getContent());
-//        post.setTopic(request.getTopic());
-//        post.setLimitTime(request.getLimitTime());
-//        post.setAuthor(creator);
-//        post.setCreatedAt(LocalDateTime.now());
-//        post.setEnterableUntil(LocalDateTime.now().plusMinutes(20));
-//        post.setStatus(StoryRoomStatus.IN_PROGRESS);
-//
-//        storyRoomPostRepository.saveAndFlush(post);  // post ID 확보
-//
-//        String roomId = "room-" + java.util.UUID.randomUUID();  // 고유 채팅방 ID 생성
-//
-//        StoryRoom room = new StoryRoom(
-//                request.getTitle(),
-//                request.getContent(),
-//                creator,
-//                post,
-//                roomId
-//        );
-//
-//        storyRoomRepository.save(room);
-//
-//        return room.getId();
-//    }
-
-
-    //채팅방 게시글 삭제
+    // 채팅방 게시글 삭제
     @Transactional
     public ApiResponse<?> deleteStoryRoomPost(Long storyRoomPostId, Long memberId) {
         Optional<StoryRoomPost> optionalPost = storyRoomPostRepository.findById(storyRoomPostId);
-        //게시글이 있는지 확인
         if (optionalPost.isEmpty()) {
             return ApiResponse.onFailure(
                     ErrorStatus.STORYROOMPOST_NOT_FOUND.getCode(),
@@ -148,22 +110,17 @@ public class StoryRoomServiceImpl implements StoryRoomService {
         }
 
         StoryRoomPost post = optionalPost.get();
-        //작성자 본인인지 확인
-        if (!post.getAuthor() .getId().equals(memberId)) {
+        if (!post.getAuthor().getId().equals(memberId)) {
             return ApiResponse.onFailure(
                     ErrorStatus.STORYROOMPOST_NOT_OWNER.getCode(),
                     ErrorStatus.STORYROOMPOST_NOT_OWNER.getMessage(),
                     null
             );
         }
-        // 게시글에 연결된 이미지 리스트 조회
+
         List<StoryRoomImg> images = storyRoomImageRepository.findByStoryRoomPost(post);
-
         if (images != null && !images.isEmpty()) {
-            //S3에서 이미지 삭제
             images.forEach(image -> utilService.deleteS3Img(image.getImageUrl()));
-
-            //DB에서 이미지 삭제
             storyRoomImageRepository.deleteAll(images);
         }
 
@@ -173,8 +130,7 @@ public class StoryRoomServiceImpl implements StoryRoomService {
         return ApiResponse.onSuccess("게시글과 채팅방이 삭제되었습니다.");
     }
 
-
-    //비로그인한 사용자 용 게시글 상세 조회
+    // 비로그인한 사용자 용 게시글 상세 조회
     @Override
     public StoryRoomPostResponseDTO getStoryRoomPostDetail(Long postId) {
         StoryRoomPost post = storyRoomPostRepository.findById(postId)
@@ -184,7 +140,7 @@ public class StoryRoomServiceImpl implements StoryRoomService {
                 .map(StoryRoomImg::getImageUrl)
                 .collect(Collectors.toList());
 
-        StoryRoom room = (StoryRoom) storyRoomRepository.findByPost(post)
+        StoryRoom room = storyRoomRepository.findByPost(post)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글과 연결된 이야기방이 없습니다."));
 
         int participantCount = storyRoomParticipantRepository.countByStoryRoomId(room.getId());
@@ -192,190 +148,50 @@ public class StoryRoomServiceImpl implements StoryRoomService {
         return new StoryRoomPostResponseDTO(post, imageUrls, participantCount);
     }
 
-    //로그인한 사용자용 게시글 상세 조회
+    // 로그인한 사용자용 게시글 상세 조회 (통합 차단 체크 포함)
     @Override
     public StoryRoomPostResponseDTO getStoryRoomPostDetail(Long postId, Long memberId) {
-        // 로그인된 사용자 확인
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("로그인된 사용자를 찾을 수 없습니다."));
 
-        // 게시글 조회
         StoryRoomPost post = storyRoomPostRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글을 찾을 수 없습니다."));
 
-        if (memberId != null && blockedStoryRoomPostRepository.existsByMemberIdAndStoryRoomPostId(memberId, postId)) {
+        // ✅ 통합 차단(신고) 체크
+        if (blockedService.isBlocked(memberId, TargetType.STORY_POST, postId)) {
             throw new IllegalStateException("신고한 게시글입니다.");
         }
 
-        // 이미지 리스트 조회
         List<String> imageUrls = storyRoomImageRepository.findByStoryRoomPost(post).stream()
                 .map(StoryRoomImg::getImageUrl)
                 .collect(Collectors.toList());
 
-        // 이야기방 조회 및 참여 인원 수 확인
         StoryRoom room = (StoryRoom) storyRoomRepository.findByPost(post)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글과 연결된 이야기방이 없습니다."));
-
         int participantCount = storyRoomParticipantRepository.countByStoryRoomId(room.getId());
-//        boolean isScrapped = scrapedStoryRoomRepository.existsByMemberIdAndStoryRoomPostId(memberId, postId);
-        // ✅ 통합 scrap 테이블로 스크랩 여부 확인
-        boolean isScrapped = scrapRepository.existsByMemberIdAndTargetTypeAndTargetId(
-                memberId, ScrapTargetType.STORY_POST, postId);
-        System.out.println("Member ID: " + memberId + ", Post ID: " + postId + ", Is Scrapped: " + isScrapped);
 
-        // 응답 DTO 생성
+        boolean isScrapped = scrapRepository.existsByMemberIdAndTargetTypeAndTargetId(
+                memberId, TargetType.STORY_POST, postId);
+
         return new StoryRoomPostResponseDTO(post, imageUrls, participantCount, isScrapped);
     }
 
-
-//    //이야기 방 상세조회
-//    @Override
-//    public StoryRoomDetailResponseDTO getStoryRoomDetail(Long id) {
-//        StoryRoom room = storyRoomRepository.findById(id)
-//                .orElseThrow(() -> new IllegalArgumentException("이야기방을 찾을 수 없습니다."));
-//        return new StoryRoomDetailResponseDTO(room);
-//    }
-
-//    //이야기방 목록 조회
-//    @Override
-//    public List<StoryRoomListResponseDTO> getAllStoryRooms() {
-//        return storyRoomRepository.findAll().stream()
-//                .map(StoryRoomListResponseDTO::new)
-//                .collect(Collectors.toList());
-//    }
-
-//    //게시글 스크랩
-//    @Override
-//    public void scrap(Long memberId, Long postId) {
-//        if (scrapedStoryRoomRepository.existsByMemberIdAndStoryRoomPostId(memberId, postId)) {
-//            return; // 이미 스크랩된 경우 중복 저장 방지
-//        }
-//
-//        Member member = memberRepository.findById(memberId)
-//                .orElseThrow(() -> new EntityNotFoundException("해당 사용자를 찾을 수 없습니다."));
-//        StoryRoomPost post = storyRoomPostRepository.findById(postId)
-//                .orElseThrow(() -> new EntityNotFoundException("해당 게시글을 찾을 수 없습니다."));
-//
-//        ScrapedStoryRoomPost scrap = new ScrapedStoryRoomPost();
-//        scrap.setMember(member);
-//        scrap.setStoryRoomPost(post);
-//        scrap.setCreatedAt(LocalDateTime.now());
-//
-//        scrapedStoryRoomRepository.save(scrap);
-//    }
-//
-//    //게시글 스크랩 해제
-//    @Override
-//    public void unscrap(Long memberId, Long postId) {
-//        // 게시글 존재 여부 확인
-//        if (!storyRoomPostRepository.existsById(postId)) {
-//            throw new EntityNotFoundException("해당 게시글을 찾을 수 없습니다.");
-//        }
-//
-//        // 스크랩 정보 조회 및 삭제
-//        ScrapedStoryRoomPost scrap = scrapedStoryRoomRepository.findByMemberIdAndStoryRoomPostId(memberId, postId)
-//                .orElseThrow(() -> new EntityNotFoundException("해당 스크랩 정보를 찾을 수 없습니다."));
-//
-//        scrapedStoryRoomRepository.delete(scrap);
-//    }
-//
-//
-//    //특정 사용자가 특정 게시글을 스크랩했는지?
-//    @Override
-//    public boolean isScrapped(Long memberId, Long postId) {
-//        if (!memberRepository.existsById(memberId)) {
-//            throw new EntityNotFoundException("해당 사용자를 찾을 수 없습니다.");
-//        }
-//        if (!storyRoomPostRepository.existsById(postId)) {
-//            throw new EntityNotFoundException("해당 게시글을 찾을 수 없습니다.");
-//        }
-//        return scrapedStoryRoomRepository.existsByMemberIdAndStoryRoomPostId(memberId, postId);
-//    }
-//
-//    //스크랩된 게시글 목록 확인
-//    @Override
-//    public List<StoryRoomPostResponseDTO> getScrappedPosts(Long memberId) {
-//        List<ScrapedStoryRoomPost> scraps = scrapedStoryRoomRepository.findAllByMemberId(memberId);
-//
-//        return scraps.stream()
-//                .map(scrap -> {
-//                    StoryRoomPost post = scrap.getStoryRoomPost();
-//                    return StoryRoomPostResponseDTO.builder()
-//                            .id(post.getId())
-//                            .title(post.getTitle())
-//                            .content(post.getContent())
-//                            .createdAt(post.getCreatedAt())
-//                            .isScrapped(true)
-//                            .participantCount(post.getParticipants().size())
-//                            .build();
-//                })
-//                .collect(Collectors.toList());
-//
-//    }
-//
-//    // 필터 게시글 목록 반환 (로그인 사용자 기반 스크랩 포함)
-//    public List<StoryRoomPostResponseDTO> getFilteredStoryRoomPosts(StoryRoomStatus status, StoryRoomPostSortType sortType, Topic topic, Long memberId) {
-//
-//        //List<StoryRoomPost> posts = storyRoomPostRepository.findAll();
-//        List<Long> blockedIds = blockedStoryRoomPostRepository.findBlockedPostIdsByMemberId(memberId); // 차단된 게시글 조회
-//
-//        // 모든 게시글을 가져옵니다.
-//        List<StoryRoomPost> posts = storyRoomPostRepository.findAll();
-//
-//        // 차단된 게시글을 제외합니다.
-//        if (!blockedIds.isEmpty()) {
-//            posts = posts.stream()
-//                    .filter(post -> !blockedIds.contains(post.getId())) // 차단된 게시글 제외
-//                    .collect(Collectors.toList());
-//        }
-//
-//        if (status != null) {
-//            posts = posts.stream()
-//                    .filter(post -> post.getStatus() == status)
-//                    .collect(Collectors.toList());
-//        }
-//
-//        if (topic != null) {
-//            posts = posts.stream()
-//                    .filter(post -> post.getTopic() == topic)
-//                    .collect(Collectors.toList());
-//        }
-//
-//        if (sortType != null) {
-//            if (sortType == StoryRoomPostSortType.LATEST) {
-//                posts.sort(Comparator.comparing(StoryRoomPost::getCreatedAt).reversed());
-//            } else if (sortType == StoryRoomPostSortType.SCRAP) {
-//                posts = posts.stream()
-//                        .filter(post -> scrapedStoryRoomRepository.existsByMemberIdAndStoryRoomPostId(memberId, post.getId()))
-//                        .collect(Collectors.toList());
-//            }
-//        }
-//
-//        return posts.stream()
-//                .map(post -> {
-//                    boolean isScrapped = scrapedStoryRoomRepository.existsByMemberIdAndStoryRoomPostId(memberId, post.getId());
-//                    int participantCount = post.getParticipants().size();
-//                    return new StoryRoomPostResponseDTO(post, null, participantCount, isScrapped);
-//                })
-//                .collect(Collectors.toList());
-//    }
-
+    // 게시글 스크랩
     @Override
     @Transactional
     public void scrap(Long memberId, Long postId) {
         if (!storyRoomPostRepository.existsById(postId)) {
             throw new EntityNotFoundException("해당 게시글을 찾을 수 없습니다.");
         }
-        // 이미 있으면 멱등 처리
-        if (scrapRepository.existsByMemberIdAndTargetTypeAndTargetId(memberId, ScrapTargetType.STORY_POST, postId)) {
-            return;
+        if (scrapRepository.existsByMemberIdAndTargetTypeAndTargetId(memberId, TargetType.STORY_POST, postId)) {
+            return; // 멱등
         }
         scrapRepository.save(com.example.tikicktaka.domain.mapping.scrap.Scrap.of(
-                memberId, ScrapTargetType.STORY_POST, postId
+                memberId, TargetType.STORY_POST, postId
         ));
     }
 
-    //게시글 스크랩 해제 (통합 scrap)
+    // 게시글 스크랩 해제 (통합 scrap)
     @Override
     @Transactional
     public void unscrap(Long memberId, Long postId) {
@@ -383,11 +199,11 @@ public class StoryRoomServiceImpl implements StoryRoomService {
             throw new EntityNotFoundException("해당 게시글을 찾을 수 없습니다.");
         }
         scrapRepository.deleteByMemberIdAndTargetTypeAndTargetId(
-                memberId, ScrapTargetType.STORY_POST, postId
+                memberId, TargetType.STORY_POST, postId
         );
     }
 
-    //특정 사용자가 특정 게시글을 스크랩했는지? (통합 scrap)
+    // 특정 사용자가 특정 게시글을 스크랩했는지? (통합 scrap)
     @Override
     public boolean isScrapped(Long memberId, Long postId) {
         if (!memberRepository.existsById(memberId)) {
@@ -397,23 +213,22 @@ public class StoryRoomServiceImpl implements StoryRoomService {
             throw new EntityNotFoundException("해당 게시글을 찾을 수 없습니다.");
         }
         return scrapRepository.existsByMemberIdAndTargetTypeAndTargetId(
-                memberId, ScrapTargetType.STORY_POST, postId
+                memberId, TargetType.STORY_POST, postId
         );
     }
 
-    //스크랩된 게시글 목록 확인 (통합 scrap)
+    // 스크랩된 게시글 목록 확인 (통합 scrap)
     @Override
     @Transactional
     public List<StoryRoomPostResponseDTO> getScrappedPosts(Long memberId) {
-        // 1) 통합 scrap에서 내가 스크랩한 STORY_POST id들을 최신순으로
         List<Long> ids = scrapRepository
-                .findByMemberIdAndTargetTypeOrderByCreatedAtDesc(memberId, ScrapTargetType.STORY_POST)
-                .stream().map(com.example.tikicktaka.domain.mapping.scrap.Scrap::getTargetId)
+                .findByMemberIdAndTargetTypeOrderByCreatedAtDesc(memberId, TargetType.STORY_POST)
+                .stream()
+                .map(com.example.tikicktaka.domain.mapping.scrap.Scrap::getTargetId)
                 .toList();
 
         if (ids.isEmpty()) return List.of();
 
-        // 2) 게시글 일괄 로드 후 원래 순서대로 DTO 매핑
         Map<Long, StoryRoomPost> map = storyRoomPostRepository.findAllById(ids).stream()
                 .collect(Collectors.toMap(StoryRoomPost::getId, it -> it));
 
@@ -431,10 +246,16 @@ public class StoryRoomServiceImpl implements StoryRoomService {
                 .collect(Collectors.toList());
     }
 
-    // 필터 게시글 목록 반환 (로그인 사용자 기반 스크랩 포함) — 통합 scrap 반영
-    public List<StoryRoomPostResponseDTO> getFilteredStoryRoomPosts(StoryRoomStatus status, StoryRoomPostSortType sortType, Topic topic, Long memberId) {
+    // 필터 게시글 목록 반환 (로그인 사용자 기반 스크랩 포함) — 통합 차단 반영
+    public List<StoryRoomPostResponseDTO> getFilteredStoryRoomPosts(StoryRoomStatus status,
+                                                                    StoryRoomPostSortType sortType,
+                                                                    Topic topic,
+                                                                    Long memberId) {
 
-        List<Long> blockedIds = blockedStoryRoomPostRepository.findBlockedPostIdsByMemberId(memberId); // 차단된 게시글 조회
+        // ✅ 통합 차단 id
+        List<Long> blockedIds = (memberId == null)
+                ? List.of()
+                : blockedService.blockedIds(memberId, TargetType.STORY_POST);
 
         // 모든 게시글
         List<StoryRoomPost> posts = storyRoomPostRepository.findAll();
@@ -462,11 +283,10 @@ public class StoryRoomServiceImpl implements StoryRoomService {
             if (sortType == StoryRoomPostSortType.LATEST) {
                 posts.sort(Comparator.comparing(StoryRoomPost::getCreatedAt).reversed());
             } else if (sortType == StoryRoomPostSortType.SCRAP) {
-                // ✅ 통합 scrap 기준으로 내가 스크랩한 글만 필터
                 posts = posts.stream()
                         .filter(post -> memberId != null &&
                                 scrapRepository.existsByMemberIdAndTargetTypeAndTargetId(
-                                        memberId, ScrapTargetType.STORY_POST, post.getId()))
+                                        memberId, TargetType.STORY_POST, post.getId()))
                         .collect(Collectors.toList());
             }
         }
@@ -475,20 +295,18 @@ public class StoryRoomServiceImpl implements StoryRoomService {
                 .map(post -> {
                     boolean isScrapped = memberId != null &&
                             scrapRepository.existsByMemberIdAndTargetTypeAndTargetId(
-                                    memberId, ScrapTargetType.STORY_POST, post.getId());
+                                    memberId, TargetType.STORY_POST, post.getId());
                     int participantCount = post.getParticipants().size();
                     return new StoryRoomPostResponseDTO(post, null, participantCount, isScrapped);
                 })
                 .collect(Collectors.toList());
     }
 
-
-    //게시글 신고하기(=차단)
+    // 게시글 신고하기(=차단)
     @Override
     @Transactional
     public ApiResponse<String> blockStoryRoomPost(Long memberId, Long postId) {
-        Optional<Member> optionalMember = memberRepository.findById(memberId);
-        if (optionalMember.isEmpty()) {
+        if (memberRepository.findById(memberId).isEmpty()) {
             return ApiResponse.onFailure(
                     ErrorStatus.MEMBER_NOT_FOUND.getCode(),
                     ErrorStatus.MEMBER_NOT_FOUND.getMessage(),
@@ -496,8 +314,7 @@ public class StoryRoomServiceImpl implements StoryRoomService {
             );
         }
 
-        Optional<StoryRoomPost> optionalPost = storyRoomPostRepository.findById(postId);
-        if (optionalPost.isEmpty()) {
+        if (storyRoomPostRepository.findById(postId).isEmpty()) {
             return ApiResponse.onFailure(
                     ErrorStatus.STORYROOMPOST_NOT_FOUND.getCode(),
                     ErrorStatus.STORYROOMPOST_NOT_FOUND.getMessage(),
@@ -505,8 +322,7 @@ public class StoryRoomServiceImpl implements StoryRoomService {
             );
         }
 
-        boolean alreadyBlocked = blockedStoryRoomPostRepository.existsByMemberIdAndStoryRoomPostId(memberId, postId);
-        if (alreadyBlocked) {
+        if (blockedService.isBlocked(memberId, TargetType.STORY_POST, postId)) {
             return ApiResponse.onFailure(
                     ErrorStatus.STORYROOMPOST_ALREADY_BLOCKED.getCode(),
                     ErrorStatus.STORYROOMPOST_ALREADY_BLOCKED.getMessage(),
@@ -514,13 +330,7 @@ public class StoryRoomServiceImpl implements StoryRoomService {
             );
         }
 
-        BlockedStoryRoomPost blocked = new BlockedStoryRoomPost(optionalMember.get(), optionalPost.get());
-        blockedStoryRoomPostRepository.save(blocked);
-
+        blockedService.ensureOn(memberId, TargetType.STORY_POST, postId);
         return ApiResponse.onSuccess("게시글이 신고되었습니다.");
     }
-
-
-
-
 }

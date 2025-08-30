@@ -1,6 +1,6 @@
 package com.example.tikicktaka.service.scrap;
 
-import com.example.tikicktaka.domain.enums.ScrapTargetType;
+import com.example.tikicktaka.domain.enums.TargetType;
 import com.example.tikicktaka.domain.mapping.scrap.Scrap;
 import com.example.tikicktaka.repository.scrap.ScrapRepository;
 
@@ -28,7 +28,7 @@ public class ScrapCommandService {
 
     /** 내가 이 타깃을 스크랩했는지 여부 */
     @Transactional(readOnly = true)
-    public boolean hasScrap(Long memberId, ScrapTargetType type, Long targetId) {
+    public boolean hasScrap(Long memberId, TargetType type, Long targetId) {
         return scrapRepository.existsByMemberIdAndTargetTypeAndTargetId(memberId, type, targetId);
     }
 
@@ -37,7 +37,7 @@ public class ScrapCommandService {
      * 컨트롤러에서 결과에 따라 메시지 분기할 때 사용.
      */
     @Transactional
-    public boolean removeIfOwned(Long memberId, ScrapTargetType type, Long targetId) {
+    public boolean removeIfOwned(Long memberId, TargetType type, Long targetId) {
         if (!hasScrap(memberId, type, targetId)) return false;
         scrapRepository.deleteByMemberIdAndTargetTypeAndTargetId(memberId, type, targetId);
         return true;
@@ -46,60 +46,60 @@ public class ScrapCommandService {
     /* ===== 동행찾기 ===== */
     @Transactional
     public boolean toggleCompanionPost(Long memberId, Long postId) {
-        ensureExists(ScrapTargetType.COMPANION_POST, postId);
-        return toggle(memberId, ScrapTargetType.COMPANION_POST, postId);
+        ensureExists(TargetType.COMPANION_POST, postId);
+        return toggle(memberId, TargetType.COMPANION_POST, postId);
     }
 
     @Transactional
     public void addCompanionPost(Long memberId, Long postId) {
-        ensureExists(ScrapTargetType.COMPANION_POST, postId);
-        add(memberId, ScrapTargetType.COMPANION_POST, postId);
+        ensureExists(TargetType.COMPANION_POST, postId);
+        add(memberId, TargetType.COMPANION_POST, postId);
     }
 
     @Transactional
     public void removeCompanionPost(Long memberId, Long postId) {
-        guardedRemove(memberId, ScrapTargetType.COMPANION_POST, postId);
+        guardedRemove(memberId, TargetType.COMPANION_POST, postId);
     }
 
     /* ===== 이야기방 ===== */
     @Transactional
     public boolean toggleStoryPost(Long memberId, Long storyPostId) {
-        ensureExists(ScrapTargetType.STORY_POST, storyPostId);
-        return toggle(memberId, ScrapTargetType.STORY_POST, storyPostId);
+        ensureExists(TargetType.STORY_POST, storyPostId);
+        return toggle(memberId, TargetType.STORY_POST, storyPostId);
     }
 
     @Transactional
     public void addStoryPost(Long memberId, Long storyPostId) {
-        ensureExists(ScrapTargetType.STORY_POST, storyPostId);
-        add(memberId, ScrapTargetType.STORY_POST, storyPostId);
+        ensureExists(TargetType.STORY_POST, storyPostId);
+        add(memberId, TargetType.STORY_POST, storyPostId);
     }
 
     @Transactional
     public void removeStoryPost(Long memberId, Long storyPostId) {
-        guardedRemove(memberId, ScrapTargetType.STORY_POST, storyPostId);
+        guardedRemove(memberId, TargetType.STORY_POST, storyPostId);
     }
 
     /* ===== 장소 추천 ===== */
     @Transactional
     public boolean toggleTravelRegion(Long memberId, Long regionId) {
-        ensureExists(ScrapTargetType.TRAVEL_REGION, regionId);
-        return toggle(memberId, ScrapTargetType.TRAVEL_REGION, regionId);
+        ensureExists(TargetType.TRAVEL_REGION, regionId);
+        return toggle(memberId, TargetType.TRAVEL_REGION, regionId);
     }
 
     @Transactional
     public void addTravelRegion(Long memberId, Long regionId) {
-        ensureExists(ScrapTargetType.TRAVEL_REGION, regionId);
-        add(memberId, ScrapTargetType.TRAVEL_REGION, regionId);
+        ensureExists(TargetType.TRAVEL_REGION, regionId);
+        add(memberId, TargetType.TRAVEL_REGION, regionId);
     }
 
     @Transactional
     public void removeTravelRegion(Long memberId, Long regionId) {
-        guardedRemove(memberId, ScrapTargetType.TRAVEL_REGION, regionId);
+        guardedRemove(memberId, TargetType.TRAVEL_REGION, regionId);
     }
 
     /* ===== 내부 공통 ===== */
 
-    private boolean toggle(Long memberId, ScrapTargetType type, Long targetId) {
+    private boolean toggle(Long memberId, TargetType type, Long targetId) {
         if (scrapRepository.existsByMemberIdAndTargetTypeAndTargetId(memberId, type, targetId)) {
             scrapRepository.deleteByMemberIdAndTargetTypeAndTargetId(memberId, type, targetId);
             return false; // 해제됨
@@ -108,7 +108,7 @@ public class ScrapCommandService {
         return true; // 스크랩됨
     }
 
-    private void add(Long memberId, ScrapTargetType type, Long targetId) {
+    private void add(Long memberId, TargetType type, Long targetId) {
         if (scrapRepository.existsByMemberIdAndTargetTypeAndTargetId(memberId, type, targetId)) return; // 멱등
         try {
             scrapRepository.save(Scrap.of(memberId, type, targetId));
@@ -117,14 +117,14 @@ public class ScrapCommandService {
         }
     }
 
-    private void guardedRemove(Long memberId, ScrapTargetType type, Long targetId) {
+    private void guardedRemove(Long memberId, TargetType type, Long targetId) {
         if (!scrapRepository.existsByMemberIdAndTargetTypeAndTargetId(memberId, type, targetId)) {
             throw new IllegalStateException("해당 콘텐츠를 스크랩한 이력이 없습니다.");
         }
         scrapRepository.deleteByMemberIdAndTargetTypeAndTargetId(memberId, type, targetId);
     }
 
-    private void ensureExists(ScrapTargetType type, Long targetId) {
+    private void ensureExists(TargetType type, Long targetId) {
         boolean ok = switch (type) {
             case COMPANION_POST -> companionPostRepository.existsById(targetId);
             case STORY_POST     -> storyRoomPostRepository.existsById(targetId);

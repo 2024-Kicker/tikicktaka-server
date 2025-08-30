@@ -1,12 +1,11 @@
 package com.example.tikicktaka.service.CompanionPostService;
 
-import com.example.tikicktaka.domain.companionPost.BlockedPost;
 import com.example.tikicktaka.domain.companionPost.CompanionPost;
-import com.example.tikicktaka.domain.enums.ScrapTargetType;
+import com.example.tikicktaka.domain.enums.TargetType;
 import com.example.tikicktaka.domain.images.CompanionPostImg;
 import com.example.tikicktaka.domain.member.Member;
-import com.example.tikicktaka.repository.companionPost.BlockedPostRepository;
 import com.example.tikicktaka.repository.companionPost.CompanionPostRepository;
+import com.example.tikicktaka.service.blocked.BlockedService;
 import com.example.tikicktaka.repository.companionPost.CompanionPostImageRepository;
 import com.example.tikicktaka.repository.member.MemberRepository;
 import com.example.tikicktaka.repository.scrap.ScrapRepository;
@@ -55,9 +54,8 @@ public class CompanionPostServiceImpl implements CompanionPostService {
     private InviteCodeGeneratorService InviteCodeGenerator;
 
     @Autowired
-    private BlockedPostRepository blockedPostRepository;
+    private BlockedService blockedService;
 
-    // ✅ 통합 scrap 사용
     @Autowired
     private ScrapRepository scrapRepository;
 
@@ -152,7 +150,7 @@ public class CompanionPostServiceImpl implements CompanionPostService {
         CompanionPost post = companionPostRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글을 찾을 수 없습니다."));
 
-        if (memberId != null && blockedPostRepository.existsByMemberIdAndPostId(memberId, postId)) {
+        if (memberId != null && blockedService.isBlocked(memberId, TargetType.COMPANION_POST, postId)) {
             throw new IllegalStateException("차단된 게시글입니다.");
         }
 
@@ -167,7 +165,7 @@ public class CompanionPostServiceImpl implements CompanionPostService {
     @Override
     @Transactional(readOnly = true)
     public Page<CompanionPostListResponseDTO> getPostList(Long memberId, Pageable pageable) {
-        List<Long> blockedPostIds = blockedPostRepository.findPostIdsByMemberId(memberId);
+        List<Long> blockedPostIds = blockedService.blockedIds(memberId, TargetType.COMPANION_POST);
 
         Page<CompanionPost> posts;
         if (blockedPostIds.isEmpty()) {
@@ -182,7 +180,7 @@ public class CompanionPostServiceImpl implements CompanionPostService {
                 .toList();
 
         Set<Long> scrapedIdSet = scrapRepository
-                .findByMemberIdAndTargetTypeOrderByCreatedAtDesc(memberId, ScrapTargetType.COMPANION_POST)
+                .findByMemberIdAndTargetTypeOrderByCreatedAtDesc(memberId, TargetType.COMPANION_POST)
                 .stream()
                 .map(scrap -> scrap.getTargetId())
                 .filter(pagePostIds::contains) // 현재 페이지 것만 남김
@@ -197,7 +195,7 @@ public class CompanionPostServiceImpl implements CompanionPostService {
     @Override
     @Transactional(readOnly = true)
     public List<CompanionPostListResponseDTO> getBlockedPostList(Long memberId) {
-        List<Long> blockedPostIds = blockedPostRepository.findPostIdsByMemberId(memberId);
+        List<Long> blockedPostIds = blockedService.blockedIds(memberId, TargetType.COMPANION_POST);
         if (blockedPostIds.isEmpty()) {
             return new ArrayList<>();
         }
@@ -206,7 +204,7 @@ public class CompanionPostServiceImpl implements CompanionPostService {
 
         // 차단 목록의 게시글들에 대해 스크랩 여부 set 생성
         Set<Long> scrapedIdSet = scrapRepository
-                .findByMemberIdAndTargetTypeOrderByCreatedAtDesc(memberId, ScrapTargetType.COMPANION_POST)
+                .findByMemberIdAndTargetTypeOrderByCreatedAtDesc(memberId, TargetType.COMPANION_POST)
                 .stream()
                 .map(scrap -> scrap.getTargetId())
                 .collect(Collectors.toSet());
@@ -228,35 +226,32 @@ public class CompanionPostServiceImpl implements CompanionPostService {
     @Override
     @Transactional
     public void blockPost(Long memberId, Long postId) {
-        Member member = memberRepository.findById(memberId)
+        // 존재 검증(선택)
+        memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
-        CompanionPost post = companionPostRepository.findById(postId)
+        companionPostRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
 
-        if (blockedPostRepository.existsByMemberAndBlockedPost(member, post)) {
+        if (blockedService.isBlocked(memberId, TargetType.COMPANION_POST, postId)) {
             throw new IllegalStateException("이미 차단한 게시글입니다.");
         }
-
-        BlockedPost blockedPost = BlockedPost.builder()
-                .member(member)
-                .blockedPost(post)
-                .build();
-        blockedPostRepository.save(blockedPost);
+        blockedService.ensureOn(memberId, TargetType.COMPANION_POST, postId);
     }
 
     //게시글 차단 해제
     @Override
     @Transactional
     public void unblockPost(Long memberId, Long postId) {
-        Member member = memberRepository.findById(memberId)
+        // 존재 검증(선택)
+        memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
-        CompanionPost post = companionPostRepository.findById(postId)
+        companionPostRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
 
-        BlockedPost blockedPost = blockedPostRepository.findByMemberAndBlockedPost(member, post)
-                .orElseThrow(() -> new IllegalStateException("차단된 게시글이 아닙니다."));
-
-        blockedPostRepository.delete(blockedPost);
+        if (!blockedService.isBlocked(memberId, TargetType.COMPANION_POST, postId)) {
+            throw new IllegalStateException("차단된 게시글이 아닙니다.");
+        }
+        blockedService.ensureOff(memberId, TargetType.COMPANION_POST, postId);
     }
 
     @Override
