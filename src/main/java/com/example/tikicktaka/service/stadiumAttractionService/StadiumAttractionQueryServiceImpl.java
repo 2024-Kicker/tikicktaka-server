@@ -49,10 +49,14 @@ public class StadiumAttractionQueryServiceImpl implements StadiumAttractionQuery
 
         // 2) 정렬 옵션
         Sort s = switch (sort) {
-            case "rating" -> Sort.by(Sort.Direction.DESC, "contentTypeId"); // 임시: 평점 필드 생기면 교체
+            case "rating" -> Sort.by(Sort.Direction.DESC, "contentTypeId"); // 임시
             default -> Sort.by(Sort.Direction.DESC, "id");
         };
-        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), s);
+
+        final int DEFAULT_PAGE_SIZE = 200; // 필요에 맞게 조절
+        Pageable sortedPageable = (pageable == null || pageable.isUnpaged())
+                ? PageRequest.of(0, DEFAULT_PAGE_SIZE, s)
+                : PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), s);
 
         // 3) 조회 분기
         Page<TravelRegion> entityPage;
