@@ -33,8 +33,6 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     private final RedisService redisService;  // RedisService 객체
 
 
-
-
     @Autowired
     public ChatRoomServiceImpl(CompanionPostChatRoomRepository companionPostChatRoomRepository, CompanionPostChatParticipantRepository companionPostChatParticipantRepository,
                                MemberRepository memberRepository, CompanionPostRepository companionPostRepository, CompanionPostChatMessageRepository companionPostChatMessageRepository, InviteCodeGeneratorService inviteCodeGeneratorService, RedisService redisService) {
@@ -49,6 +47,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
     //단체방 초대 및 생성
     @Override
+    @Transactional
     public ChatRoomDTO createChatRoom(ChatRoomDTO chatRoomDTO) {
         Member owner = memberRepository.findById(chatRoomDTO.getOwnerId())
                 .orElseThrow(() -> new RuntimeException("소유자 정보를 찾을 수 없습니다."));
@@ -57,29 +56,34 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                 .orElseThrow(() -> new RuntimeException("게시글 정보를 찾을 수 없습니다."));
 
 
-        // 기존 채팅방이 있는지 확인
-        Optional<ChatRoom> existingChatRoom = companionPostChatRoomRepository.findByCompanionPost_IdAndParticipant_Id(chatRoomDTO.getPostId(), chatRoomDTO.getOwnerId());
-        if (existingChatRoom.isPresent()) {
-            // 이미 존재하면 해당 채팅방 반환
-            return new ChatRoomDTO(existingChatRoom.get());
+        // ✅ 단체방 존재 여부 정확히 검사
+        boolean existsGroup = companionPostChatRoomRepository
+                .existsByCompanionPost_IdAndIsGroupTrue(chatRoomDTO.getPostId());
+        if (existsGroup) {
+            // 이미 있으면 그 방을 리턴해도 되고, 409로 막아도 OK
+            // 여기선 기존 방 DTO 반환 패턴 유지가 맞다면 이렇게:
+            ChatRoom room = companionPostChatRoomRepository.findAllByCompanionPost_Id(chatRoomDTO.getPostId())
+                    .stream().filter(ChatRoom::getIsGroup).findFirst()
+                    .orElseThrow(); // 논리상 존재
+            return new ChatRoomDTO(room);
         }
 
-        // 초대 코드 생성
-        String inviteCode = inviteCodeGeneratorService.generateInviteCode(); // 초대 코드 생성
+        // 초대 코드 & roomId 생성
+        String inviteCode = inviteCodeGeneratorService.generateInviteCode();
+        String roomId = java.util.UUID.randomUUID().toString();
 
-        // 채팅방 생성
-        // ChatRoomDTO를 ChatRoom 엔티티로 변환
+        // 엔티티 생성 (participant 없음, isGroup=true)
         ChatRoom chatRoom = chatRoomDTO.toEntity(owner, companionPost);
         chatRoom.setIsGroup(true);
-        chatRoom.setInviteCode(inviteCode);  // 생성된 초대 코드 설정
+        chatRoom.setInviteCode(inviteCode);
+        chatRoom.setRoomId(roomId); // ✅ roomId 확정 세팅
 
-        // 채팅방 저장
         companionPostChatRoomRepository.save(chatRoom);
 
-        // Redis에 초대 코드 저장 (10분 만료)
-        redisService.storeInviteCode(inviteCode, 10 * 60); // Redis에 초대 코드와 만료 시간 저장
+        // Redis에 초대 코드 저장 (10분 TTL)
+        redisService.storeInviteCode(inviteCode, 10 * 60);
 
-        return new ChatRoomDTO(chatRoom); // 생성된 채팅방 반환
+        return new ChatRoomDTO(chatRoom); // roomId, inviteCode 포함되어야 함
     }
 
     @Override
@@ -91,8 +95,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     // roomId로 채팅방 조회
     @Override
     public Optional<ChatRoomDTO> getChatRoomById(String roomId) {
-        Optional<ChatRoom> chatRoom = companionPostChatRoomRepository.findByRoomId(roomId);
-        return chatRoom.map(ChatRoomDTO::new);
+        return companionPostChatRoomRepository.findByRoomId(roomId).map(ChatRoomDTO::new);
     }
 
     // 초대 코드 검증 예시 메서드
@@ -104,10 +107,10 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     // 초대 코드로 채팅방 참가자 추가 메서드
     @Override
     public String joinRoomByInviteCode(String inviteCode, Long userId) {
-        // Redis에서 초대 코드 만료 여부 확인
-        if (!redisService.isInviteCodeValid(inviteCode)) {
-            throw new IllegalArgumentException("초대 코드가 만료되었습니다.");
-        }
+//        // Redis에서 초대 코드 만료 여부 확인
+//        if (!redisService.isInviteCodeValid(inviteCode)) {
+//            throw new IllegalArgumentException("초대 코드가 만료되었습니다.");
+//        }
 
         // MySQL에서 초대 코드로 채팅방 조회
         ChatRoom chatRoom = companionPostChatRoomRepository.findByInviteCode(inviteCode)
@@ -171,9 +174,11 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
         // 새 채팅방 생성
         ChatRoom chatRoom = ChatRoom.builder()
+                .roomId(java.util.UUID.randomUUID().toString())
                 .owner(owner)  // 게시글 작성자 (owner)
                 .participant(participant)  // 요청한 사용자 (participant)
                 .isGroup(false)  // 1:1 채팅은 그룹이 아님
+                .inviteCode(inviteCodeGeneratorService.generateInviteCode())
                 .companionPost(companionPost)  // 게시글과 연결
                 .build();
 
@@ -228,6 +233,11 @@ public class ChatRoomServiceImpl implements ChatRoomService {
             companionPostChatRoomRepository.delete(chatRoom);                   // 그 후 채팅방 삭제
             logger.info("게시글 {}에 연결된 채팅방 {} 삭제 완료", postId, chatRoom.getRoomId());
         }
+    }
+
+    @Override
+    public boolean existsGroupRoomForPost(Long postId) {
+        return companionPostChatRoomRepository.existsByCompanionPost_IdAndIsGroupTrue(postId);
     }
 
 

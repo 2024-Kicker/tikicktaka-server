@@ -209,17 +209,15 @@ public class ChatEventListener {
             logger.info("Message saved successfully: roomId={}, senderId={}, message={}", roomId, senderId, message);
 
             // 해당 채팅방에 연결된 모든 클라이언트에게 메시지 전송 -> 이러면 자기 자신이 보낸 메시지도 자기한테 한번 더 옴
-            client.getNamespace().getRoomOperations(roomId).sendEvent("receiveMessage", data);
+//            client.getNamespace().getRoomOperations(roomId).sendEvent("receiveMessage", data);
 
             // 해당 채팅방에 연결된 모든 클라이언트에게 메시지 전송 (자기 자신 제외)
             logger.info("Clients in room {}: {}", roomId, server.getRoomOperations(roomId).getClients());
-//            for (SocketIOClient roomClient : server.getRoomOperations(roomId).getClients()) {
-//                // 현재 클라이언트와 다른 클라이언트에게 메시지 전송
-//                if (!roomClient.getSessionId().equals(client.getSessionId())) {
-//                    roomClient.sendEvent("receiveMessage", data);
-//                    logger.info("Message sent to: {}", roomClient.getSessionId());
-//                }
-//            }
+            for (SocketIOClient roomClient : server.getRoomOperations(roomId).getClients()) {
+                if (!roomClient.getSessionId().equals(client.getSessionId())) {
+                    roomClient.sendEvent("receiveMessage", data);
+                }
+            }
             logger.info("Message broadcasted to room {}", roomId);
 
         } catch (Exception e) {
