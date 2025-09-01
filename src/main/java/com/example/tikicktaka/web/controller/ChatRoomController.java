@@ -61,7 +61,7 @@ public class ChatRoomController {
         }
 
         // 이미 해당 게시글에 채팅방이 존재하는지 확인
-        if (chatRoomService.existsByCompanionPost_Id(request.getPostId())) {
+        if (chatRoomService.existsGroupRoomForPost(request.getPostId())) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 해당 게시글에 대한 단체 채팅방이 존재합니다.");
         }
 

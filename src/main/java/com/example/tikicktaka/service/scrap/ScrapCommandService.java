@@ -129,6 +129,7 @@ public class ScrapCommandService {
             case COMPANION_POST -> companionPostRepository.existsById(targetId);
             case STORY_POST     -> storyRoomPostRepository.existsById(targetId);
             case TRAVEL_REGION  -> travelRegionRepository.existsById(targetId);
+            case MEMBER         -> throw new UnsupportedOperationException("Scrap does not support MEMBER target type");
         };
         if (!ok) throw new IllegalArgumentException("Target not found. type=" + type + " id=" + targetId);
     }

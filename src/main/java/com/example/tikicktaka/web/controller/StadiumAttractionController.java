@@ -120,62 +120,6 @@ public class StadiumAttractionController {
     private final StadiumAttractionQueryService stadiumAttractionQueryService;
     private final BlockedService blockedService;
 
-    /**
-     * 기본: 팀 기준(내 선호팀 or teamId)으로 필터 없이 조회
-     * 옵션: myScrapOnly=true / categoryCodes=A01,A05 / useDefaultCategory=true(마이페이지 저장 키워드 사용, 최대 2개)
-     */
-//    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-//    public ApiResponse<Page<StadiumAttractionResponseDTO.Item>> getStadiumAttractions(
-//            Authentication authentication,
-//            @RequestParam(required = false) Long teamId,
-//            @RequestParam(required = false) String categoryCodes,                 // 예: "A01,A05"
-//            @RequestParam(defaultValue = "false") boolean useDefaultCategory,    // 기본: 필터 미적용
-//            @RequestParam(defaultValue = "false") boolean myScrapOnly,           // 기본: 필터 미적용
-//            @RequestParam(defaultValue = "popularity") String sort,              // popularity | rating | distance(미구현)
-//            @PageableDefault(page = 0, size = 20) @ParameterObject Pageable pageable
-//    ) {
-//        if (authentication == null || authentication.getName() == null) {
-//            return ApiResponse.onFailure(ErrorStatus._UNAUTHORIZED.getCode(),
-//                    ErrorStatus._UNAUTHORIZED.getMessage(), null);
-//        }
-//        Long memberId = Long.valueOf(authentication.getName());
-//
-//        // 1) 팀 결정: 쿼리 > 내 선호팀
-//        Long effectiveTeamId = teamId;
-//        if (effectiveTeamId == null) {
-//            Member member = memberQueryService.findMemberById(memberId)
-//                    .orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
-//
-//            Optional<MemberTeam> memberTeamOpt = memberTeamRepository.findByMember(member);
-//            if (memberTeamOpt.isPresent() && memberTeamOpt.get().getTeam() != null) {
-//                effectiveTeamId = memberTeamOpt.get().getTeam().getId();
-//            } else {
-//                return ApiResponse.onFailure(ErrorStatus._BAD_REQUEST.getCode(),
-//                        "선호 팀이 설정되어 있지 않습니다. teamId를 전달하거나 마이페이지에서 선호 팀을 설정하세요.", null);
-//            }
-//        }
-//
-//        // 1) 팀 결정: 쿼리 > 내 선호팀
-//        List<String> categoryList = StadiumAttractionQueryService.parseCategoryCsv(categoryCodes);
-//
-//        // ✅ 차단 목록 ID 가져오기 (TargetType은 프로젝트 enum에 맞춰 조정: TRAVEL_LOCATION 또는 TRAVEL_REGION)
-//        List<Long> blockedIds = blockedService.blockedIds(memberId, TargetType.TRAVEL_LOCATION);
-//
-//        Page<StadiumAttractionResponseDTO.Item> page = stadiumAttractionQueryService.findItems(
-//                memberId,
-//                effectiveTeamId,
-//                categoryList,
-//                useDefaultCategory,
-//                myScrapOnly,
-//                sort,
-//                pageable,
-//                blockedIds
-//        );
-//
-//        return ApiResponse.onSuccess(page);
-//    }
-    // src/main/java/com/example/tikicktaka/web/controller/StadiumAttractionController.java
-    // StadiumAttractionController.java (일부)
     @GetMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "구장별 관광지 목록 조회(리스트, 차단 제외)")
     public ApiResponse<List<StadiumAttractionResponseDTO.Item>> getStadiumAttractionsAsList(

@@ -19,5 +19,5 @@ public interface CompanionPostChatRoomRepository extends JpaRepository<ChatRoom,
 
     List<ChatRoom> findAllByCompanionPost_Id(Long postId);
 
-
+    boolean existsByCompanionPost_IdAndIsGroupTrue(Long postId);
 }

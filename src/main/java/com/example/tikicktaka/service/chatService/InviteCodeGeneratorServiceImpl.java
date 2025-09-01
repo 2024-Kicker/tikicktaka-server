@@ -1,4 +1,5 @@
 package com.example.tikicktaka.service.chatService;
+import com.example.tikicktaka.repository.companionPostChat.CompanionPostChatRoomRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -11,6 +12,8 @@ public class InviteCodeGeneratorServiceImpl implements InviteCodeGeneratorServic
 
     @Autowired
     private RedisTemplate<String, String> redisTemplate;
+    CompanionPostChatRoomRepository companionPostChatRoomRepository;
+
 
     private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"; // 랜덤 코드로 사용할 문자 집합
     private static final int CODE_LENGTH = 8; // 코드 길이
@@ -26,8 +29,8 @@ public class InviteCodeGeneratorServiceImpl implements InviteCodeGeneratorServic
             inviteCode.append(CHARACTERS.charAt(randomIndex));
         }
 
-        String redisKey = "inviteCode:" + inviteCode.toString();
-        redisTemplate.opsForValue().set(redisKey, inviteCode.toString(), 10, TimeUnit.MINUTES);
+        //String redisKey = "inviteCode:" + inviteCode.toString();
+        //redisTemplate.opsForValue().set(redisKey, inviteCode.toString(), 10, TimeUnit.MINUTES);
 
         // 3. 초대 코드 반환
         return inviteCode.toString();
@@ -35,7 +38,9 @@ public class InviteCodeGeneratorServiceImpl implements InviteCodeGeneratorServic
 
     @Override
     public boolean isInviteCodeValid(String inviteCode) {
-        String redisKey = "inviteCode:" + inviteCode;
-        return redisTemplate.hasKey(redisKey);  // Redis에 초대 코드가 존재하는지 확인
+        //String redisKey = "inviteCode:" + inviteCode;
+        //return redisTemplate.hasKey(redisKey);  // Redis에 초대 코드가 존재하는지 확인
+        return companionPostChatRoomRepository.findByInviteCode(inviteCode).isPresent();
+
     }
 }
