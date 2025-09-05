@@ -3,6 +3,9 @@ package com.example.tikicktaka.web.controller;
 import com.example.tikicktaka.apiPayload.ApiResponse;
 import com.example.tikicktaka.apiPayload.code.status.ErrorStatus;
 import com.example.tikicktaka.domain.enums.*;
+import com.example.tikicktaka.domain.storyRoom.StoryRoom;
+import com.example.tikicktaka.domain.storyRoom.StoryRoomPost;
+import com.example.tikicktaka.repository.storyRoom.StoryRoomRepository;
 import com.example.tikicktaka.service.scrap.ScrapCommandService;
 import com.example.tikicktaka.service.storyRoom.StoryRoomService;
 import com.example.tikicktaka.web.dto.storyRoom.StoryRoomDetailResponseDTO;
@@ -19,6 +22,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -29,24 +33,8 @@ public class StoryRoomController {
 
     private final StoryRoomService storyRoomService;
     private final ScrapCommandService scrapCommandService;
+    private final StoryRoomRepository storyRoomRepository;
 
-
-
-
-//    @GetMapping("/list")
-//    @Operation(summary = "이야기방 게시글 목록 조회", description = "이야기방 게시판의 글 목록을 페이징하여 조회합니다.")
-//    public ApiResponse<Page<StoryRoomListResponseDTO>> getStoryRoomList(
-//            @PageableDefault(size = 10) Pageable pageable) {
-//        Page<StoryRoomListResponseDTO> storyRooms = storyRoomService.getStoryRoomList(pageable);
-//        return ApiResponse.onSuccess(storyRooms);
-//    }
-
-//    @GetMapping("/{storyRoomId}")
-//    @Operation(summary = "이야기방 상세 조회", description = "특정 이야기방의 상세 내용을 조회합니다.")
-//    public ApiResponse<StoryRoomDetailResponseDTO> getStoryRoomDetail(@PathVariable Long storyRoomId) {
-//        StoryRoom storyRoom = storyRoomService.getStoryRoomDetail(storyRoomId);
-//        return ApiResponse.onSuccess(new StoryRoomDetailResponseDTO(storyRoom));
-//    }
 
     // 이야기방 게시글 작성 API
     @PostMapping(value = "/post/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -223,5 +211,30 @@ public class StoryRoomController {
         }
         return ApiResponse.onSuccess("차단 해제 완료");
     }
+
+    @GetMapping("/rooms/{roomId}/remaining-seconds")
+    public ApiResponse<Long> getRoomRemainingSeconds(@PathVariable String roomId) {
+        StoryRoom room = storyRoomRepository.findByRoomId(roomId)
+                .orElseThrow(() -> new IllegalArgumentException("채팅방을 찾을 수 없습니다."));
+
+        LocalDateTime expiredAt = room.getExpiredAt();
+
+        if (expiredAt == null) {
+            // 백업 정책: 게시글 기준으로 계산 (혹시 과거에 저장 안 된 데이터 대응)
+            StoryRoomPost post = room.getPost();
+            if (post != null && post.getLimitTime() != null && post.getCreatedAt() != null) {
+                expiredAt = post.getCreatedAt().plusMinutes(post.getLimitTime().getMinutes());
+            }
+        }
+
+        Long remaining = null; // null = 무제한(프론트 협의)
+        if (expiredAt != null) {
+            long sec = java.time.Duration.between(LocalDateTime.now(), expiredAt).getSeconds();
+            remaining = Math.max(0, sec); // 0 이하일 경우 0으로 고정
+        }
+
+        return ApiResponse.onSuccess(remaining);
+    }
+
 }
 
