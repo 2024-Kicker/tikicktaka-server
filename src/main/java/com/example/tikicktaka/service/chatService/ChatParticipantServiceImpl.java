@@ -113,4 +113,26 @@ public class ChatParticipantServiceImpl implements ChatParticipantService {
         return exists;
     }
 
+
+    @Override
+    @Transactional
+    public void leave(String roomId, Long meId) {
+        ChatRoom room = companionPostChatRoomRepository.findByRoomId(roomId)
+                .orElseThrow(() -> new IllegalArgumentException("채팅방을 찾을 수 없습니다."));
+        Member me = memberRepository.findById(meId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        ChatParticipant myPart = companionPostChatParticipantRepository.findByChatRoomAndMember(room, me);
+        if (myPart != null) {
+            companionPostChatParticipantRepository.delete(myPart);
+        }
+
+        // 1명 이하만 남으면 방 상태 플래그 변경/삭제
+        int remain = companionPostChatParticipantRepository.countByChatRoom(room);
+        if (remain <= 1) {
+            // room.setStatus(RoomStatus.CLOSED);
+            companionPostChatRoomRepository.save(room);
+        }
+    }
+
 }

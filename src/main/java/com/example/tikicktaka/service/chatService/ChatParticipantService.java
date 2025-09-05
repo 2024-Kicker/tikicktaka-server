@@ -18,5 +18,8 @@ public interface ChatParticipantService {
     int getParticipantCount(String roomId);
 
     boolean isUserInRoom(String roomId, Long userId);
+
+    void leave(String roomId, Long userId);
+
 }
 
