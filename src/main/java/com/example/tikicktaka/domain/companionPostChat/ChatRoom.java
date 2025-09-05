@@ -3,6 +3,7 @@ package com.example.tikicktaka.domain.companionPostChat;
 import com.example.tikicktaka.domain.companionPost.CompanionPost;
 import com.example.tikicktaka.domain.member.Member;
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 import lombok.*;
 
 import java.util.List;
@@ -55,12 +56,25 @@ public class ChatRoom {
     public void setRoomId(String s) {
     }
 
+    @Setter
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
     public void setOwner(Member owner) {
         this.owner = owner;  // owner 필드에 Member 객체 설정
     }
 
     public void setCompanionPost(CompanionPost companionPost) {
         this.companionPost = companionPost;  // companionPost 필드에 CompanionPost 객체 설정
+    }
+
+    // 메시지 저장 시 최근 활동 시간 갱신에 사용
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 
 }

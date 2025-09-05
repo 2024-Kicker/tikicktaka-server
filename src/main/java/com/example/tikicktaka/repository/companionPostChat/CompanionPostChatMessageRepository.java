@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface CompanionPostChatMessageRepository extends JpaRepository<ChatMessage, Long> {
     List<ChatMessage> findByChatRoom(ChatRoom chatRoom);
@@ -18,5 +19,9 @@ public interface CompanionPostChatMessageRepository extends JpaRepository<ChatMe
 
     // 다음 페이지: id > cursor 오름차 N개
     List<ChatMessage> findByChatRoomRoomIdAndIdGreaterThanOrderByIdAsc(String roomId, Long cursor, Pageable pageable);
+
+    // 마지막 메시지 1건
+    Optional<ChatMessage> findTop1ByChatRoom_RoomIdOrderByIdDesc(String roomId);
+
 
 }

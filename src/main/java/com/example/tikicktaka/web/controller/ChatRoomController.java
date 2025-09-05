@@ -15,7 +15,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("api/chatRoom")
+@RequestMapping("/api/chatRoom")
 @RequiredArgsConstructor
 public class ChatRoomController {
 

@@ -60,6 +60,11 @@ public class StoryRoomServiceImpl implements StoryRoomService {
 
         // 2. 이야기방 생성
         StoryRoom room = new StoryRoom(post, author);
+        if (post.getLimitTime() != null && post.getCreatedAt() != null) {
+            int minutes = post.getLimitTime().getMinutes(); // 30/60/120...
+            LocalDateTime deadline = post.getCreatedAt().plusMinutes(minutes);
+            room.setExpiredAt(deadline);
+        }
         storyRoomRepository.save(room);
 
         // 3. 참가자 등록(방장)
@@ -94,7 +99,9 @@ public class StoryRoomServiceImpl implements StoryRoomService {
             }
         }
 
-        return new StoryRoomPostResponseDTO(post, imageUrls, 1);
+        StoryRoomPostResponseDTO dto = new StoryRoomPostResponseDTO(post, imageUrls, 1);
+        dto.setRoomId(room.getRoomId());
+        return dto;
     }
 
     // 채팅방 게시글 삭제
@@ -173,7 +180,11 @@ public class StoryRoomServiceImpl implements StoryRoomService {
         boolean isScrapped = scrapRepository.existsByMemberIdAndTargetTypeAndTargetId(
                 memberId, TargetType.STORY_POST, postId);
 
-        return new StoryRoomPostResponseDTO(post, imageUrls, participantCount, isScrapped);
+        StoryRoomPostResponseDTO dto =
+                new StoryRoomPostResponseDTO(post, imageUrls, participantCount, isScrapped);
+
+        dto.setRoomId(room.getRoomId());
+        return dto;
     }
 
     // 게시글 스크랩
