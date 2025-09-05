@@ -20,4 +20,7 @@ public interface CompanionPostChatRoomRepository extends JpaRepository<ChatRoom,
     List<ChatRoom> findAllByCompanionPost_Id(Long postId);
 
     boolean existsByCompanionPost_IdAndIsGroupTrue(Long postId);
+
+    // 해당 게시글의 단체방 (1개만 존재 가정)
+    Optional<ChatRoom> findFirstByCompanionPost_IdAndIsGroupTrue(Long companionPostId);
 }

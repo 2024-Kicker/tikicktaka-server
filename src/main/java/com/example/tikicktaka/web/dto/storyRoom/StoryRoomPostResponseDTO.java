@@ -32,6 +32,10 @@ public class StoryRoomPostResponseDTO {
     private List<String> imageUrls;
     private int participantCount;
     private boolean isScrapped;
+    private String roomId;
+
+
+    public void setRoomId(String roomId) { this.roomId = roomId; }
 
 
     public StoryRoomPostResponseDTO(StoryRoomPost post, List<String> imageUrls, int participantCount) {

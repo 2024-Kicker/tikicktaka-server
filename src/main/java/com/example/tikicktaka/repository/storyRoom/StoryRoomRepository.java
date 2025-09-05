@@ -19,4 +19,8 @@ public interface StoryRoomRepository extends JpaRepository<StoryRoom, Long> {
 
     // 존재 여부 체크가 필요할 때
     boolean existsByPostId(Long postId);
+
+    Optional<StoryRoom> findByRoomId(String roomId);
+    //Optional<StoryRoom> findByPost_Id(Long postId);
+
 }
