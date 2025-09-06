@@ -56,7 +56,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                 .orElseThrow(() -> new RuntimeException("게시글 정보를 찾을 수 없습니다."));
 
 
-        // ✅ 단체방 존재 여부 정확히 검사
+        // 단체방 존재 여부 정확히 검사
         boolean existsGroup = companionPostChatRoomRepository
                 .existsByCompanionPost_IdAndIsGroupTrue(chatRoomDTO.getPostId());
         if (existsGroup) {
@@ -76,12 +76,19 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         ChatRoom chatRoom = chatRoomDTO.toEntity(owner, companionPost);
         chatRoom.setIsGroup(true);
         chatRoom.setInviteCode(inviteCode);
-        chatRoom.setRoomId(roomId); // ✅ roomId 확정 세팅
+        chatRoom.setRoomId(roomId); // roomId 확정 세팅
 
         companionPostChatRoomRepository.save(chatRoom);
 
+        //방장 자동 참가자 등록
+        boolean ownerAlreadyIn = companionPostChatParticipantRepository
+                .existsByChatRoomAndMemberId(chatRoom, owner.getId());
+        if (!ownerAlreadyIn) {
+            companionPostChatParticipantRepository.save(ChatParticipant.create(chatRoom, owner));
+        }
+
         // Redis에 초대 코드 저장 (10분 TTL)
-        redisService.storeInviteCode(inviteCode, 10 * 60);
+//        redisService.storeInviteCode(inviteCode, 10 * 60);
 
         return new ChatRoomDTO(chatRoom); // roomId, inviteCode 포함되어야 함
     }
