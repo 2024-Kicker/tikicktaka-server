@@ -35,6 +35,11 @@ public class StoryRoomController {
     private final ScrapCommandService scrapCommandService;
     private final StoryRoomRepository storyRoomRepository;
 
+    private String stripSrPrefix(String id) {
+        if (id == null) return null;
+        return id.startsWith("SR-") ? id.substring(3) : id;
+    }
+
 
     // 이야기방 게시글 작성 API
     @PostMapping(value = "/post/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -213,8 +218,9 @@ public class StoryRoomController {
     }
 
     @GetMapping("/rooms/{roomId}/remaining-seconds")
+    @Operation(summary = "이야기방 남은 시간(초) 반환 api", description = "이야기방 입장 남은 시간(초)을 반환합니다.")
     public ApiResponse<Long> getRoomRemainingSeconds(@PathVariable String roomId) {
-        StoryRoom room = storyRoomRepository.findByRoomId(roomId)
+        StoryRoom room = storyRoomRepository.findByRoomId(stripSrPrefix(roomId))
                 .orElseThrow(() -> new IllegalArgumentException("채팅방을 찾을 수 없습니다."));
 
         LocalDateTime expiredAt = room.getExpiredAt();
