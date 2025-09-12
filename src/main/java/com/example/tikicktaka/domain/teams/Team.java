@@ -33,8 +33,8 @@ public class Team extends BaseDateTimeEntity {
     @Column(columnDefinition = "TEXT")
     private String location;
 
-    @OneToOne(mappedBy = "team")
-    private MemberTeam memberTeam;
+    //@OneToOne(mappedBy = "team")
+    //private MemberTeam memberTeam;
 
     @OneToOne(mappedBy = "team")
     private TeamImg teamImg;
