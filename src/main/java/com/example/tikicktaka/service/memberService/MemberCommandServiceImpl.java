@@ -256,18 +256,22 @@ public class MemberCommandServiceImpl implements MemberCommandService{
     @Transactional
     public MemberTeam setPreferTeam(Member member, Long teamId) {
 
-        Optional<MemberTeam> beforeMemberTeam = memberTeamRepository.findByMember(member);
-        if(beforeMemberTeam.isPresent()){
-            MemberTeam deleteMemberTeam = beforeMemberTeam.orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_TEAM_NOT_FOUND));
-            memberTeamRepository.delete(deleteMemberTeam);
-            memberTeamRepository.flush();
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new TeamHandler(ErrorStatus.TEAM_NOT_FOUND));
+
+        MemberTeam mt = memberTeamRepository.findByMember(member)
+                .orElseGet(() -> MemberTeam.builder()
+                        .member(member)
+                        .team(team)
+                        .build());
+
+        // 이미 같은 팀이면 멱등 반환
+        if (mt.getTeam() != null && Objects.equals(mt.getTeam().getId(), teamId)) {
+            return mt;
         }
 
-        Team team = teamRepository.findById(teamId).orElseThrow(() -> new TeamHandler(ErrorStatus.TEAM_NOT_FOUND));//error 처리 추가하기
-
-        MemberTeam memberTeam = MemberConverter.toPreferTeam(member,team);
-
-        return memberTeamRepository.save(memberTeam);//Member Team repository 생성
+        mt.setTeam(team);
+        return memberTeamRepository.save(mt);
     }
 
 

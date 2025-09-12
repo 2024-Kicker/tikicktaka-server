@@ -50,7 +50,7 @@ public class MyScrapQueryService {
                 .map(p -> ScrapCompanionPostDTO.builder()
                         .id(p.getId())
                         .title(p.getTitle())
-                        .authorName(resolveCompanionAuthorName(p))  // ✅ 안전하게 닉네임 추출
+                        .authorName(resolveCompanionAuthorName(p))  // 안전하게 닉네임 추출
                         .status(p.getStatus().name())
                         .createdAt(p.getCreatedAt())
                         .scrapped(true)

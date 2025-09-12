@@ -34,8 +34,13 @@ public class StoryRoomServiceImpl implements StoryRoomService {
     private final StoryRoomImageRepository storyRoomImageRepository;
     private final ScrapRepository scrapRepository;
 
-    /** ✅ 통합 차단 서비스 */
+    //통합 차단 서비스
     private final BlockedService blockedService;
+
+    private String ensureSrPrefix(String id) {
+        if (id == null) return null;
+        return id.startsWith("SR-") ? id : "SR-" + id;
+    }
 
     // 이야기방 게시글 생성 및 이야기방 + 참가자 생성
     @Override
@@ -100,7 +105,7 @@ public class StoryRoomServiceImpl implements StoryRoomService {
         }
 
         StoryRoomPostResponseDTO dto = new StoryRoomPostResponseDTO(post, imageUrls, 1);
-        dto.setRoomId(room.getRoomId());
+        dto.setRoomId(ensureSrPrefix(room.getRoomId()));
         return dto;
     }
 
@@ -183,7 +188,7 @@ public class StoryRoomServiceImpl implements StoryRoomService {
         StoryRoomPostResponseDTO dto =
                 new StoryRoomPostResponseDTO(post, imageUrls, participantCount, isScrapped);
 
-        dto.setRoomId(room.getRoomId());
+        dto.setRoomId(ensureSrPrefix(room.getRoomId()));
         return dto;
     }
 

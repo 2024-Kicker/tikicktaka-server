@@ -5,5 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface StoryRoomParticipantRepository extends JpaRepository<StoryRoomParticipant, Long> {
     int countByStoryRoomId(Long id);
+    void deleteByStoryRoomIdAndMemberId(Long storyRoomId, Long memberId);
+    boolean existsByStoryRoomIdAndMemberId(Long id, Long memberId);
 }
 
