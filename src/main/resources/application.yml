@@ -50,10 +50,6 @@ spring:
 jwt:
   token:
     secret: ${JWT_TOKEN_SECRET}
-    access-token-validity-seconds: ${JWT_ACCESS_TTL}
-    refresh-token-validity-seconds: ${JWT_REFRESH_TTL}
-
-
 
 oauth:
   kakao:

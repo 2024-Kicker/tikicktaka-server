@@ -61,8 +61,13 @@ public class Member extends BaseDateTimeEntity {
 
     private String introduceMessage;
 
-    @Column(name = "token_version", nullable = false)
-    private int tokenVersion = 0;
+//    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+//    private Boolean isVerified; //전화번호 본인인증 여부 저장
+//
+//    private LocalDateTime verifiedAt; //본인인증 완료 시간
+
+//    @Column(columnDefinition = "VARCHAR(13)")
+//    private String phone;
 
     @Enumerated(EnumType.STRING)
     @Column(columnDefinition = "VARCHAR(10)")
@@ -121,9 +126,6 @@ public class Member extends BaseDateTimeEntity {
     public void setSocialType(SocialType socialType) { this.socialType = socialType; }
 
     public void setMemberRole(MemberRole memberRole) { this.memberRole = memberRole; }
-
-    public void increaseTokenVersion() { this.tokenVersion++; }
-    public int getTokenVersion() { return tokenVersion; }
 
     public Member(String email, String nickname, String name, Gender gender, List<MemberTerm> memberTermList) {
     }

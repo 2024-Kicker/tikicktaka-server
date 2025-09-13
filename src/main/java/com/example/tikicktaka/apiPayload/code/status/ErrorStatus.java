@@ -32,8 +32,6 @@ public enum ErrorStatus implements BaseErrorCode {
     MEMBER_NOT_SELLER(HttpStatus.BAD_REQUEST, "MEMBER4013", "회원이 판매자가 아닙니다."),
     MEMBER_NOT_ENOUGH_COIN(HttpStatus.BAD_REQUEST, "MEMBER4014", "잔액이 부족합니다."),
     MEMBER_TRAVEL_STYLE_NOT_SET(HttpStatus.BAD_REQUEST, "MEMBER4015", "선호 여행 스타일을 설정해주세요."),
-    MEMBER_INACTIVE(HttpStatus.BAD_REQUEST, "MEMBER4016", "탈퇴한 회원입니다. 재가입이 필요합니다."),
-
 
     BLOCKED_POST_FORBIDDEN(HttpStatus.FORBIDDEN, "POST403", "차단된 게시글입니다."),
 
