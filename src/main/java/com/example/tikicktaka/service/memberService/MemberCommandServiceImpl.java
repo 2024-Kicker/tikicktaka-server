@@ -142,14 +142,20 @@ public class MemberCommandServiceImpl implements MemberCommandService{
     public String login(String email, String password) {
         Member member = memberRepository.findByEmail(email).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_EMAIL_NOT_FOUND));
 
+        if (member.getMemberStatus() != MemberStatus.ACTIVE) {
+            throw new MemberHandler(ErrorStatus.MEMBER_INACTIVE /* 없으면 적절한 에러코드로 */);
+        }
+
         if(!encoder.matches(password, member.getPassword())){
             throw new MemberHandler(ErrorStatus.MEMBER_PASSWORD_NOT_EQUAL);
         }
 
         List<String> roles = new ArrayList<>();
         roles.add("ROLE_USER");
+        int ver = 0; // ★ 추가
+        try { ver = member.getTokenVersion(); } catch (Exception ignore) {}
 
-        return createJwt(member.getId(), member.getName(), expiredMs, key, roles);
+        return createJwt(member.getId(), member.getName(), expiredMs, key, roles, ver);
     }
 
     @Override
@@ -275,7 +281,6 @@ public class MemberCommandServiceImpl implements MemberCommandService{
     }
 
 
-
     //선호 여행스타일 저장
     @Override
     @Transactional
@@ -313,23 +318,6 @@ public class MemberCommandServiceImpl implements MemberCommandService{
         );
     }
 
-
-//    @Transactional
-//    @Override
-//    public Member completeSignup(Long memberId, MemberRequestDTO.CompleteSignupDTO request) {
-//        Member member = memberRepository.findById(memberId)
-//                .orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
-//
-//        // Update member with additional info
-//        member.updateAdditionalInfo(
-//                request.getBirthday(),
-//                request.getPhone()
-//        );
-//
-//
-//        return memberRepository.save(member);
-//    }
-
     @Override
     @Transactional
     public Member profileImageUpload(MultipartFile profile, Member member) {
@@ -360,19 +348,13 @@ public class MemberCommandServiceImpl implements MemberCommandService{
         return update;
     }
 
-//    @Override
-//    @Transactional
-//    public Member findByPhone(String phone) {
-//        return memberRepository.findByPhone(phone)
-//                .orElseThrow(() -> new RuntimeException("User not found"));
-//    }
-
     @Override
     @Transactional
     public void deleteMember(Long memberId) {
 
         Member member = memberRepository.findById(memberId).orElseThrow(()-> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
         member.setMemberStatus(MemberStatus.INACTIVE);
+        member.increaseTokenVersion();                 // 기존 토큰 전부 즉시 무효화
         memberRepository.save(member);
     }
 
