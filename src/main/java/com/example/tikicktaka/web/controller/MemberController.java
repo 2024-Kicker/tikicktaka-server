@@ -70,13 +70,40 @@ public class MemberController {
 
     @PostMapping("/login")
     @Operation(summary = "로그인 API", description = "request 파라미터 : 이메일, 비밀번호, response : jwt token")
-    public ApiResponse<MemberResponseDTO.LoginResultDTO> login(@RequestBody MemberRequestDTO.MemberLoginDTO request){
+    public ApiResponse<MemberResponseDTO.LoginResultDTO> login(@RequestBody MemberRequestDTO.MemberLoginDTO request,
+                                                               HttpServletResponse response) {
         String email = request.getEmail();
         String password = request.getPassword();
+        // 1) 서비스에서 Access Token 발급
+        String accessToken = memberCommandService.login(email, password);
 
-        String jwt = memberCommandService.login(email,password);
+        // 2) 환경값 + 키 세팅
+        String secret = environment.getProperty("jwt.token.secret");
+        int refreshTtlSec = environment.getProperty("jwt.token.refresh-token-validity-seconds", Integer.class); // 필요시 기본값 유지/제거
+        JwtUtil.setSecretKeyString(secret);
 
-        return ApiResponse.onSuccess(MemberConverter.toLoginResultDTO(jwt));
+        // 3) AT에서 식별값 추출
+        Long memberId = JwtUtil.getMemberId(accessToken);
+        String memberName = JwtUtil.getMembername(accessToken);
+        List<String> roles = JwtUtil.getRole(accessToken); // 없으면 null 가능
+
+        // 4) (옵션) 즉시 로그아웃용 ver: 멤버 tokenVersion 있으면 반영, 없으면 0
+        Member m = memberQueryService.findMemberById(memberId)
+                .orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        int ver = m.getTokenVersion();
+
+        // 5) Refresh 토큰 생성 → 헤더로 내려줌(앱 저장용). 실패해도 로그인 자체는 성공.
+        String refreshToken = JwtUtil.createRefreshJwt(
+                memberId, memberName, refreshTtlSec * 1000, secret, roles, ver /* 없으면 오버로드에서 제거 */);
+
+        long refreshExp = 0L;
+        try { refreshExp = JwtUtil.getExpEpochSeconds(refreshToken); } catch (Exception ignore) {}
+
+        // 6) 바디로 모두 반환 (기존 DTO 그대로 사용)
+        MemberResponseDTO.LoginResultDTO body =
+                MemberConverter.toLoginResultDTO(accessToken, refreshToken);
+
+        return ApiResponse.onSuccess(body);
     }
 
     @PostMapping("/email/duplicate")
