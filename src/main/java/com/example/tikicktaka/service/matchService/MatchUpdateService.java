@@ -24,7 +24,7 @@ public class MatchUpdateService {
     private CrawlerService crawlerService;
 
     // 매일 밤 12시 30분에 경기 업데이트
-    @Scheduled(cron = "0 16 17 * * *")
+    //@Scheduled(cron = "0 30 0 * * ?", zone = "Asia/Seoul")
     public void updateMatchesDaily() {
         LocalDate today = LocalDate.now();
 

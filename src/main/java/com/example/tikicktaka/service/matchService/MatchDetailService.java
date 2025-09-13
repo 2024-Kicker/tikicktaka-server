@@ -22,8 +22,7 @@ public class MatchDetailService {
 
     // 15분마다 경기 세부 내용 업데이트
     //@Scheduled(fixedRate = 15 * 60 * 1000) // 15분 간격
-    @Scheduled(cron = "0 56 20 * * *")
-    @Scheduled(fixedRate = 15 * 60 * 1000)
+    @Scheduled(cron = "0 0/15 * * * ?", zone = "Asia/Seoul")
     public void updateMatchDetails() {
         LocalDateTime now = LocalDateTime.now();
 
