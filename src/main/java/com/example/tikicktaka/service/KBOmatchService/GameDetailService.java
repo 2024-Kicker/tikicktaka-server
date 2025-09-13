@@ -32,9 +32,9 @@ public class GameDetailService {
 
 
     // 오전 9시에 시작 -> 수정하기
-    @Scheduled(cron = "0 0 14 * * *")
+    //@Scheduled(cron = "0 0 14 * * *")
     // 10분마다 경기 세부 내용 업데이트
-    @Scheduled(fixedRate = 10 * 60 * 1000)
+    //@Scheduled(fixedRate = 10 * 60 * 1000)
     public void updateGameDetails() {
         LocalDate today = LocalDate.now();
         LocalDateTime now = LocalDateTime.now();
