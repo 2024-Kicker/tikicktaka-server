@@ -4,13 +4,16 @@ package com.example.tikicktaka.web.controller;
 import com.example.tikicktaka.apiPayload.ApiResponse;
 import com.example.tikicktaka.apiPayload.code.status.ErrorStatus;
 import com.example.tikicktaka.apiPayload.exception.handler.MemberHandler;
+import com.example.tikicktaka.config.springSecurity.utils.JwtUtil;
 import com.example.tikicktaka.converter.member.MemberConverter;
 import com.example.tikicktaka.domain.member.Auth;
 import com.example.tikicktaka.domain.member.Member;
 import com.example.tikicktaka.infra.kakao.KakaoLoginParams;
 import com.example.tikicktaka.repository.member.MemberRepository;
-import com.example.tikicktaka.service.OAuthService.OAuthLoginService;
+//import com.example.tikicktaka.service.OAuthService.OAuthLoginService;
 import com.example.tikicktaka.service.memberService.MemberCommandService;
+import com.example.tikicktaka.web.dto.auth.TokenStatusResponseDTO;
+import com.example.tikicktaka.web.dto.auth.TokenResponseDTO;
 import com.example.tikicktaka.service.memberService.MemberQueryService;
 import com.example.tikicktaka.service.smsService.SmsService;
 import com.example.tikicktaka.web.dto.member.MemberRequestDTO;
@@ -21,6 +24,8 @@ import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,9 +35,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.core.env.Environment;
 
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 
 
 @RestController
@@ -47,6 +52,7 @@ public class MemberController {
     private final MemberQueryService memberQueryService;
     private final MemberRepository memberRepository;
     private final SmsService smsService;
+    private final Environment environment;
 
 
     @PostMapping(value ="/join", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
@@ -55,9 +61,8 @@ public class MemberController {
             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                     schema = @Schema(implementation = MemberRequestDTO.JoinDTO.class)))
                                                                  @RequestPart("data") @Valid MemberRequestDTO.JoinDTO request,  // JSON 데이터 받기
-
                                                              @Parameter(description = "프로필 이미지 파일 (선택 사항)", required = false)
-                                                                 @RequestPart(value = "profileImage", required = false) MultipartFile profileImage) {
+                                                             @RequestPart(value = "profileImage", required = false) MultipartFile profileImage) {
         request.setProfileImg(profileImage);
         Member member = memberCommandService.join(request);
 
@@ -70,13 +75,40 @@ public class MemberController {
 
     @PostMapping("/login")
     @Operation(summary = "로그인 API", description = "request 파라미터 : 이메일, 비밀번호, response : jwt token")
-    public ApiResponse<MemberResponseDTO.LoginResultDTO> login(@RequestBody MemberRequestDTO.MemberLoginDTO request){
+    public ApiResponse<MemberResponseDTO.LoginResultDTO> login(@RequestBody MemberRequestDTO.MemberLoginDTO request,
+                                                               HttpServletResponse response) {
         String email = request.getEmail();
         String password = request.getPassword();
+        // 1) 서비스에서 Access Token 발급
+        String accessToken = memberCommandService.login(email, password);
 
-        String jwt = memberCommandService.login(email,password);
+        // 2) 환경값 + 키 세팅
+        String secret = environment.getProperty("jwt.token.secret");
+        int refreshTtlSec = environment.getProperty("jwt.token.refresh-token-validity-seconds", Integer.class); // 필요시 기본값 유지/제거
+        JwtUtil.setSecretKeyString(secret);
 
-        return ApiResponse.onSuccess(MemberConverter.toLoginResultDTO(jwt));
+        // 3) AT에서 식별값 추출
+        Long memberId = JwtUtil.getMemberId(accessToken);
+        String memberName = JwtUtil.getMembername(accessToken);
+        List<String> roles = JwtUtil.getRole(accessToken); // 없으면 null 가능
+
+        // 4) (옵션) 즉시 로그아웃용 ver: 멤버 tokenVersion 있으면 반영, 없으면 0
+        Member m = memberQueryService.findMemberById(memberId)
+                .orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        int ver = m.getTokenVersion();
+
+        // 5) Refresh 토큰 생성 → 헤더로 내려줌(앱 저장용). 실패해도 로그인 자체는 성공.
+        String refreshToken = JwtUtil.createRefreshJwt(
+                memberId, memberName, refreshTtlSec * 1000, secret, roles, ver /* 없으면 오버로드에서 제거 */);
+
+        long refreshExp = 0L;
+        try { refreshExp = JwtUtil.getExpEpochSeconds(refreshToken); } catch (Exception ignore) {}
+
+        // 6) 바디로 모두 반환 (기존 DTO 그대로 사용)
+        MemberResponseDTO.LoginResultDTO body =
+                MemberConverter.toLoginResultDTO(accessToken, refreshToken);
+
+        return ApiResponse.onSuccess(body);
     }
 
     @PostMapping("/email/duplicate")
@@ -136,35 +168,6 @@ public class MemberController {
         return ResponseEntity.ok().body(member.getEmail());
     }
 
-//    private final OAuthLoginService oAuthLoginService;
-//    @PostMapping("/kakao")
-//    @Operation(summary = "카카오 소셜 로그인 API", description = "카카오 소셜 로그인 response : authorization Code") //이거 실행 부분 수정하기
-//    public ResponseEntity<MemberResponseDTO.MemberLoginResponseDTO> loginKakao(@RequestBody KakaoLoginParams params) {
-//        MemberResponseDTO.MemberLoginResponseDTO response = oAuthLoginService.login(params);
-//        return ResponseEntity.ok(response);
-//    }
-
-//    //소셜 로그인 후 회원가입
-//    @PostMapping("/complete-signup/{memberId}")
-//    @Operation(summary = "추가 정보 입력 API", description = "소셜 로그인 후 추가 정보 입력을 처리합니다.")
-//    public ApiResponse<MemberResponseDTO.CompleteSignupResultDTO> completeSignup(@PathVariable Long memberId, @RequestBody @Valid MemberRequestDTO.CompleteSignupDTO request) {
-//        Member member = memberCommandService.completeSignup(memberId, request);
-//        return ApiResponse.onSuccess(MemberConverter.toCompleteSignupResultDTO(member));
-//    }
-
-    // 아이디 찾기
-//    @PostMapping("/find/id")
-//    @Operation(summary = "전화번호로 사용자 찾기", description = "request 파라미터: 전화번호, response: 사용자 정보")
-//    public ApiResponse<MemberResponseDTO.SearchIdDTO> findUserByPhone(@RequestBody @Valid MemberRequestDTO.SearchIdDTO request) {
-//        String phone = request.getPhone();
-//        Optional<Member> member = memberRepository.findByPhone(phone);
-//        if (member.isPresent()) {
-//            Member foundmember = member.get();
-//            return ApiResponse.onSuccess(MemberConverter.toSearchIdResultDTO(foundmember));
-//        } else {
-//            return ApiResponse.onFailure("404", "User not found", null);
-//        }
-//    }
 
     @PostMapping("/find/password")
     @Operation(summary = "비밀번호 찾기 api", description = "request : 이메일, 변경할 비밀번호")
@@ -173,6 +176,172 @@ public class MemberController {
         return ApiResponse.onSuccess(MemberConverter.changePasswordResultDTO(member));
     }
 
+    @GetMapping("/auth/check")
+    @Operation(summary = "엑세스 토큰 유효성 체크", description = "accessToken 쿼리 파라미터 사용")
+    public ApiResponse<TokenStatusResponseDTO> check(
+            @RequestParam(value = "accessToken", required = false) String tokenParam) {
 
+        // 1) 시크릿 세팅
+        String secret = environment.getProperty("jwt.token.secret");
+        JwtUtil.setSecretKeyString(secret);
+
+        // 2) 토큰 추출
+        String token = tokenParam;
+        // 3) 토큰 유무/만료/타입 검사
+        if (token == null || token.isBlank()) {
+            return ApiResponse.onSuccess(TokenStatusResponseDTO.builder()
+                    .isLoggedIn(false).memberId(null).role(null)
+                    .expEpochSeconds(0L).remainingSeconds(0L)
+                    .build());
+        }
+        try {
+            if (JwtUtil.isExpired(token)) {
+                return ApiResponse.onSuccess(TokenStatusResponseDTO.builder()
+                        .isLoggedIn(false).memberId(null).role(null)
+                        .expEpochSeconds(0L).remainingSeconds(0L)
+                        .build());
+            }
+            // typ이 있으면 access만 인정(과거 토큰은 typ 미포함일 수 있음)
+            String typ = null;
+            try { typ = JwtUtil.getTokenType(token); } catch (Exception ignore) {}
+            if (typ != null && !"access".equals(typ)) {
+                return ApiResponse.onSuccess(TokenStatusResponseDTO.builder()
+                        .isLoggedIn(false).memberId(null).role(null)
+                        .expEpochSeconds(0L).remainingSeconds(0L)
+                        .build());
+            }
+
+            Long memberId = JwtUtil.getMemberId(token);
+
+            // ===== ver 비교 (로그아웃 즉시 반영) =====
+            Integer tokenVer = 0;
+            try { Integer v = JwtUtil.getTokenVersion(token); if (v != null) tokenVer = v; } catch (Exception ignore) {}
+            int currentVer = memberQueryService.findMemberById(memberId)
+                    .map(Member::getTokenVersion)
+                    .orElse(0);
+            if (!tokenVer.equals(currentVer)) {
+                return ApiResponse.onSuccess(TokenStatusResponseDTO.builder()
+                        .isLoggedIn(false).memberId(null).role(null)
+                        .expEpochSeconds(0L).remainingSeconds(0L)
+                        .build());
+            }
+            List<String> roles = JwtUtil.getRole(token);
+            String role = (roles == null || roles.isEmpty()) ? null : roles.get(0);
+
+            long exp = 0L, now = System.currentTimeMillis() / 1000;
+            try { exp = JwtUtil.getExpEpochSeconds(token); } catch (Exception ignore) {}
+
+            return ApiResponse.onSuccess(TokenStatusResponseDTO.builder()
+                    .isLoggedIn(true)
+                    .memberId(memberId)
+                    .role(role)
+                    .expEpochSeconds(exp)
+                    .remainingSeconds(Math.max(0, exp - now))
+                    .build());
+
+        } catch (Exception e) {
+            return ApiResponse.onSuccess(TokenStatusResponseDTO.builder()
+                    .isLoggedIn(false).memberId(null).role(null)
+                    .expEpochSeconds(0L).remainingSeconds(0L)
+                    .build());
+        }
+    }
+
+
+    @PostMapping("/auth/refresh")
+    @Operation(
+            summary = "리프레시 토큰으로 액세스 토큰 재발급",
+            description = "리프레시 토큰으로 만료된 액세스 토큰 재발급"
+    )
+    public ApiResponse<TokenResponseDTO> refresh(
+            @RequestParam("refreshToken") String refreshToken) {
+
+        // 1) 설정 로드
+        String secret = environment.getProperty("jwt.token.secret");
+        int accessTtlSec  = environment.getProperty("jwt.token.access-token-validity-seconds", Integer.class, 900);
+        int refreshTtlSec = environment.getProperty("jwt.token.refresh-token-validity-seconds", Integer.class, 1209600);
+        JwtUtil.setSecretKeyString(secret);
+
+        if (refreshToken == null || refreshToken.isBlank()) {
+            return ApiResponse.onFailure("401", "refresh token not provided", null);
+        }
+
+        try {
+            // 2) RT 기본 검증(만료/타입)
+            if (JwtUtil.isExpired(refreshToken)) {
+                return ApiResponse.onFailure("401", "refresh token expired", null);
+            }
+            String typ = null;
+            try { typ = JwtUtil.getTokenType(refreshToken); } catch (Exception ignore) {}
+            if (typ != null && !"refresh".equals(typ)) {
+                return ApiResponse.onFailure("401", "not a refresh token", null);
+            }
+
+            // 3) 토큰 버전 검증: RT에 담긴 ver vs DB의 현재 ver
+            Long memberId = JwtUtil.getMemberId(refreshToken);
+            Member member = memberQueryService.findMemberById(memberId)
+                    .orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
+
+            // DB 기준 최신 ver로 재발급
+            int currentVer = 0; try { currentVer = member.getTokenVersion(); } catch (Exception ignore) {}
+
+            String memberName = JwtUtil.getMembername(refreshToken);
+            List<String> roles = JwtUtil.getRole(refreshToken);
+
+            String newAccess  = JwtUtil.createJwt(memberId, memberName, accessTtlSec * 1000, secret, roles, currentVer);
+            String newRefresh = JwtUtil.createRefreshJwt(memberId, memberName, refreshTtlSec * 1000, secret, roles, currentVer);
+
+            long accessExp = 0L, refreshExp = 0L;
+            try { accessExp = JwtUtil.getExpEpochSeconds(newAccess); } catch (Exception ignore) {}
+            try { refreshExp = JwtUtil.getExpEpochSeconds(newRefresh); } catch (Exception ignore) {}
+
+            TokenResponseDTO body = TokenResponseDTO.builder()
+                    .tokenType("Bearer")
+                    .accessToken(newAccess)
+                    .accessTokenExpiresIn(accessExp)
+                    .refreshToken(newRefresh)
+                    .refreshTokenExpiresIn(refreshExp)
+                    .build();
+
+            return ApiResponse.onSuccess(body);
+        } catch (Exception e) {
+            return ApiResponse.onFailure("401", "invalid refresh token", null);
+        }
+    }
+
+
+    @PostMapping("/auth/logout")
+    @Operation(summary = "로그아웃", description = "로그아웃을 진행합니다.")
+    public ApiResponse<Void> logout(
+            @RequestParam(value = "token", required = false) String tokenParam) {
+
+        String secret = environment.getProperty("jwt.token.secret");
+        JwtUtil.setSecretKeyString(secret);
+
+        String token = null;
+        if (token == null) token = tokenParam;
+
+        if (token == null || token.isBlank()) {
+            return ApiResponse.onSuccess(null); // idempotent
+        }
+
+        try {
+            // (선택) access 토큰인지 확인
+            String typ = null; try { typ = JwtUtil.getTokenType(token); } catch (Exception ignore) {}
+            if (typ != null && !"access".equals(typ)) {
+                return ApiResponse.onSuccess(null);
+            }
+
+            Long memberId = JwtUtil.getMemberId(token);
+            Member m = memberRepository.findById(memberId)
+                    .orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
+            m.increaseTokenVersion();              // ★ 버전 +1
+            memberRepository.save(m);
+        } catch (Exception e) {
+            log.debug("logout error: {}", e.getMessage());
+            // 실패해도 응답은 성공(클라이언트는 토큰 삭제)
+        }
+        return ApiResponse.onSuccess(null);
+    }
 
 }

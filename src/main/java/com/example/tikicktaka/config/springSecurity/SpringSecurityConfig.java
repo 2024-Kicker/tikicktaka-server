@@ -2,6 +2,7 @@ package com.example.tikicktaka.config.springSecurity;
 
 import com.example.tikicktaka.config.springSecurity.utils.JwtTokenFilter;
 import com.example.tikicktaka.service.memberService.MemberCommandService;
+import com.example.tikicktaka.service.memberService.MemberQueryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -18,7 +19,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SpringSecurityConfig {
 
-    private final MemberCommandService memberCommandService;
+    private final MemberQueryService memberQueryService; // ★ 여기로 교체
 
     @Value("${jwt.token.secret}")
     private String secretKey;
@@ -35,8 +36,8 @@ public class SpringSecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                .addFilterBefore(new JwtTokenFilter(memberCommandService, secretKey), UsernamePasswordAuthenticationFilter.class)
-                //UsernamePasswordAuthenticationFilter 앞에 JwtTokenFilter를 둔다. 그 이유는 이미 로그인을 했고 토큰을 발급 받아서 토큰 이용해서 인증하면 된다.
+                .addFilterBefore(new JwtTokenFilter(memberQueryService, secretKey),
+                        UsernamePasswordAuthenticationFilter.class) // ★ 2개 인자                //UsernamePasswordAuthenticationFilter 앞에 JwtTokenFilter를 둔다. 그 이유는 이미 로그인을 했고 토큰을 발급 받아서 토큰 이용해서 인증하면 된다.
                 .build();
     }
 }
