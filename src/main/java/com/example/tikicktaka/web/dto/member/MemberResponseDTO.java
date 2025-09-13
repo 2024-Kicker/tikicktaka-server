@@ -56,6 +56,7 @@ public class MemberResponseDTO {
     @AllArgsConstructor
     public static class LoginResultDTO{
         String jwt;
+        String refreshToken;
     }
 
     @Builder

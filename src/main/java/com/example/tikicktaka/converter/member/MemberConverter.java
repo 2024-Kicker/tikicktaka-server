@@ -55,9 +55,10 @@ public class MemberConverter {
                 .build();
     }
 
-    public static MemberResponseDTO.LoginResultDTO toLoginResultDTO(String jwt){
+    public static MemberResponseDTO.LoginResultDTO toLoginResultDTO(String jwt, String refreshToken){
         return MemberResponseDTO.LoginResultDTO.builder()
                 .jwt(jwt)
+                .refreshToken(refreshToken)
                 .build();
     }
 
