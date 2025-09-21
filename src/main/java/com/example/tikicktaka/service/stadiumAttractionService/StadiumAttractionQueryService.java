@@ -20,7 +20,7 @@ public interface StadiumAttractionQueryService {
     Page<StadiumAttractionResponseDTO.Item> findItems(
             Long memberId,
             Long teamId,
-            List<String> categoryOverride,
+            List<Long> styleIdsOverride,
             boolean useDefaultCategory,
             boolean myScrapOnly,
             String sort,

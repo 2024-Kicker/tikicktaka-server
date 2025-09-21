@@ -16,4 +16,6 @@ public interface TravelRegionRepository extends JpaRepository<TravelRegion, Long
 
     // 팀 + 카테고리(숫자)
     Page<TravelRegion> findByTeam_IdAndContentTypeIdIn(Long teamId, List<Integer> contentTypeIds, Pageable pageable);
+
+    Page<TravelRegion> findByTeam_IdAndCat1In(Long teamId, List<String> cat1Codes, Pageable pageable);
 }
