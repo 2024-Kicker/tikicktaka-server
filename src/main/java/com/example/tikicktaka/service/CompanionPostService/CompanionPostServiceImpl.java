@@ -190,7 +190,7 @@ public class CompanionPostServiceImpl implements CompanionPostService {
                 .collect(Collectors.toSet());
 
         return posts.map(post ->
-                new CompanionPostListResponseDTO(post, scrapedIdSet.contains(post.getId()))
+                new CompanionPostListResponseDTO(post, scrapedIdSet.contains(post.getId()),memberId)
         );
     }
 
@@ -252,7 +252,7 @@ public class CompanionPostServiceImpl implements CompanionPostService {
                 .filter(pagePostIds::contains)
                 .collect(Collectors.toSet());
 
-        return page.map(post -> new CompanionPostListResponseDTO(post, scrapedIdSet.contains(post.getId())));
+        return page.map(post -> new CompanionPostListResponseDTO(post, scrapedIdSet.contains(post.getId()),memberId));
     }
 
 
@@ -276,7 +276,7 @@ public class CompanionPostServiceImpl implements CompanionPostService {
                 .collect(Collectors.toSet());
 
         return blockedPosts.stream()
-                .map(post -> new CompanionPostListResponseDTO(post, scrapedIdSet.contains(post.getId())))
+                .map(post -> new CompanionPostListResponseDTO(post, scrapedIdSet.contains(post.getId()),memberId))
                 .collect(Collectors.toList());
     }
 
