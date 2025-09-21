@@ -11,10 +11,12 @@ import com.example.tikicktaka.repository.scrap.ScrapRepository;
 import com.example.tikicktaka.repository.storyRoom.*;
 import com.example.tikicktaka.service.UtilService;
 import com.example.tikicktaka.service.blocked.BlockedService;
+import com.example.tikicktaka.support.ThumbnailResolver;
 import com.example.tikicktaka.web.dto.storyRoom.StoryRoomPostResponseDTO;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -33,9 +35,11 @@ public class StoryRoomServiceImpl implements StoryRoomService {
     private final UtilService utilService;
     private final StoryRoomImageRepository storyRoomImageRepository;
     private final ScrapRepository scrapRepository;
-
-    //통합 차단 서비스
+    private final ThumbnailResolver thumbnailResolver;
     private final BlockedService blockedService;
+
+    @Value("${companion.default-images.travel}")
+    private String defaultTravelImage;
 
     private String ensureSrPrefix(String id) {
         if (id == null) return null;
@@ -103,8 +107,20 @@ public class StoryRoomServiceImpl implements StoryRoomService {
                 post.setThumbnailUrl(imageUrls.get(0));  // 첫 번째 이미지 썸네일로 설정
             }
         }
+        if (imageUrls.isEmpty()) {
+            // 기본 Travel 이미지 (DB 저장)
+            post.setThumbnailUrl(defaultTravelImage);
+        }
+        // 변경 사항 저장 (트랜잭션이므로 커밋 시 flush되지만, 명시적으로 한 번 더 저장해도 OK)
+        storyRoomPostRepository.save(post);
+
+        String thumbnailUrl = imageUrls.isEmpty()
+                ? thumbnailResolver.resolveForStory(post)
+                : imageUrls.get(0);
+
 
         StoryRoomPostResponseDTO dto = new StoryRoomPostResponseDTO(post, imageUrls, 1);
+        dto.setThumbnailUrl(thumbnailResolver.resolveForStory(post));
         dto.setRoomId(ensureSrPrefix(room.getRoomId()));
         return dto;
     }
@@ -157,8 +173,10 @@ public class StoryRoomServiceImpl implements StoryRoomService {
 
         int participantCount = storyRoomParticipantRepository.countByStoryRoomId(room.getId());
 
-        return new StoryRoomPostResponseDTO(post, imageUrls, participantCount);
-    }
+        StoryRoomPostResponseDTO dto = new StoryRoomPostResponseDTO(post, imageUrls, participantCount);
+        dto.setThumbnailUrl(thumbnailResolver.resolveForStory(post));
+        dto.setRoomId(ensureSrPrefix(room.getRoomId()));
+        return dto;    }
 
     // 로그인한 사용자용 게시글 상세 조회 (통합 차단 체크 포함)
     @Override
@@ -187,7 +205,7 @@ public class StoryRoomServiceImpl implements StoryRoomService {
 
         StoryRoomPostResponseDTO dto =
                 new StoryRoomPostResponseDTO(post, imageUrls, participantCount, isScrapped);
-
+        dto.setThumbnailUrl(thumbnailResolver.resolveForStory(post));
         dto.setRoomId(ensureSrPrefix(room.getRoomId()));
         return dto;
     }
@@ -313,8 +331,9 @@ public class StoryRoomServiceImpl implements StoryRoomService {
                             scrapRepository.existsByMemberIdAndTargetTypeAndTargetId(
                                     memberId, TargetType.STORY_POST, post.getId());
                     int participantCount = post.getParticipants().size();
-                    return new StoryRoomPostResponseDTO(post, null, participantCount, isScrapped);
-                })
+                    StoryRoomPostResponseDTO dto = new StoryRoomPostResponseDTO(post, null, participantCount, isScrapped);
+                    dto.setThumbnailUrl(thumbnailResolver.resolveForStory(post)); // ✨ 기본 이미지 보정
+                    return dto;                })
                 .collect(Collectors.toList());
     }
 
