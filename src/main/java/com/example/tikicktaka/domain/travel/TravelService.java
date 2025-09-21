@@ -23,4 +23,8 @@ public class TravelService extends BaseDateTimeEntity {
     private Long rnum;
 
     private String code;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "travel_style_id", nullable = false)
+    private TravelStyle travelStyle;
 }

@@ -1,12 +1,15 @@
-// src/main/java/com/example/tikicktaka/service/stadiumAttractionService/StadiumAttractionQueryServiceImpl.java
 package com.example.tikicktaka.service.stadiumAttractionService;
 
 import com.example.tikicktaka.domain.enums.TargetType;
 import com.example.tikicktaka.domain.mapping.scrap.Scrap;
 import com.example.tikicktaka.domain.teams.Team;
 import com.example.tikicktaka.domain.travel.TravelRegion;
+import com.example.tikicktaka.repository.member.MemberRepository;
+import com.example.tikicktaka.repository.member.MemberTeamRepository;
+import com.example.tikicktaka.repository.member.MemberTravelStyleRepository;
 import com.example.tikicktaka.repository.scrap.ScrapRepository;
 import com.example.tikicktaka.repository.team.TeamRepository;
+import com.example.tikicktaka.repository.travel.TravelServiceRepository;
 import com.example.tikicktaka.repository.travelRegion.TravelRegionRepository;
 import com.example.tikicktaka.web.dto.stadiumAttraction.StadiumAttractionResponseDTO;
 import lombok.RequiredArgsConstructor;
@@ -22,126 +25,116 @@ public class StadiumAttractionQueryServiceImpl implements StadiumAttractionQuery
 
     private final TeamRepository teamRepository;
     private final TravelRegionRepository travelRegionRepository;
-
-    // ✅ 통합 scrap 테이블 사용
     private final ScrapRepository scrapRepository;
+
+    // 기본값 로딩에 필요
+    private final MemberRepository memberRepository;
+    private final MemberTeamRepository memberTeamRepository;
+    private final MemberTravelStyleRepository memberTravelStyleRepository;
+    private final TravelServiceRepository travelServiceRepository;
 
     @Override
     public Page<StadiumAttractionResponseDTO.Item> findItems(
             Long memberId,
-            Long teamId,
-            List<String> categoryOverride,
-            boolean useDefaultCategory,
+            Long teamId,                    // null 이면 회원 선호팀 사용
+            List<Long> styleIdsOverride,    // 사용자가 보낸 스타일 id들(최대 2). null/빈값이면 회원 선호스타일 사용
+            boolean useDefaultCategory,     // <- 더이상 필요없다면 무시/삭제해도 됨
             boolean myScrapOnly,
-            String sort,
+            String sort,                    // <- 입력 받아도 내부에서 기본 정렬만 적용
             Pageable pageable
     ) {
-        // 0) 팀 존재 검증 (구장 좌표/필터 용)
-        Team team = teamRepository.findById(teamId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 팀입니다."));
+        // 0) 팀 결정: 입력 없으면 회원 선호팀
+        Team team = resolveTeam(memberId, teamId);
 
-        // 1) 카테고리 결정
-        List<String> categoriesToUse = categoryOverride;
-        if ((categoriesToUse == null || categoriesToUse.isEmpty()) && useDefaultCategory) {
-            categoriesToUse = loadDefaultCategoriesForMember(memberId); // TODO: 마이페이지 연동
-        }
-        List<Integer> categoryIds = toIntegerList(categoriesToUse);
+        // 1) 스타일 → cat1 코드로 변환
+        List<String> cat1Codes = resolveCat1Codes(memberId, styleIdsOverride);
 
-        // 2) 정렬 옵션
-        Sort s = switch (sort) {
-            case "rating" -> Sort.by(Sort.Direction.DESC, "contentTypeId"); // 임시
-            default -> Sort.by(Sort.Direction.DESC, "id");
-        };
-
-        final int DEFAULT_PAGE_SIZE = 200; // 필요에 맞게 조절
-        Pageable sortedPageable = (pageable == null || pageable.isUnpaged())
-                ? PageRequest.of(0, DEFAULT_PAGE_SIZE, s)
-                : PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), s);
+        // 2) 정렬은 고정 (최신순)
+        Sort fixedSort = Sort.by(Sort.Direction.DESC, "id");
+        Pageable pageReq = (pageable == null || pageable.isUnpaged())
+                ? PageRequest.of(0, 50, fixedSort)
+                : PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), fixedSort);
 
         // 3) 조회 분기
         Page<TravelRegion> entityPage;
         if (myScrapOnly) {
-            // ✅ 통합 scrap에서 내가 스크랩한 TRAVEL_REGION ID들을 최신순으로 구함
-            List<Long> scrappedIds = scrapRepository
-                    .findByMemberIdAndTargetTypeOrderByCreatedAtDesc(memberId, TargetType.TRAVEL_REGION)
-                    .stream().map(Scrap::getTargetId).toList();
-
-            if (scrappedIds.isEmpty()) {
-                return Page.empty(sortedPageable);
-            }
-
-            // 대상 엔티티 일괄 로드 + 스크랩 순서 보존
-            Map<Long, TravelRegion> idToRegion = new HashMap<>();
-            for (TravelRegion r : travelRegionRepository.findAllById(scrappedIds)) {
-                idToRegion.put(r.getId(), r);
-            }
-            List<TravelRegion> list = scrappedIds.stream()
-                    .map(idToRegion::get)
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
-
-            // 필터링 (팀, 카테고리)
-            boolean hasCategory = !categoryIds.isEmpty();
-            list = list.stream()
-                    .filter(r -> Objects.equals(r.getTeam().getId(), teamId))
-                    .filter(r -> !hasCategory || (r.getContentTypeId() != null && categoryIds.contains(r.getContentTypeId())))
-                    .collect(Collectors.toList());
-
-            // 정렬 (in-memory; 평소 스크랩 수가 많지 않으므로 허용)
-            Comparator<TravelRegion> comparator;
-            if ("rating".equals(sort)) {
-                comparator = Comparator.comparing(
-                        (TravelRegion r) -> Optional.ofNullable(r.getContentTypeId()).orElse(0L) // 임시
-                ).reversed().thenComparing(TravelRegion::getId, Comparator.reverseOrder());
-            } else {
-                comparator = Comparator.comparing(TravelRegion::getId, Comparator.reverseOrder());
-            }
-            list.sort(comparator);
-
-            // 페이지네이션
-            int total = list.size();
-            int start = (int) sortedPageable.getOffset();
-            int end = Math.min(start + sortedPageable.getPageSize(), total);
-            List<TravelRegion> slice = (start >= end) ? List.of() : list.subList(start, end);
-
-            entityPage = new PageImpl<>(slice, sortedPageable, total);
+            entityPage = findMyScrapsFiltered(memberId, team.getId(), cat1Codes, pageReq);
         } else {
-            // 일반 목록: TravelRegionRepository 네이밍 메서드만 사용
-            boolean hasCategory = !categoryIds.isEmpty();
-            if (hasCategory) {
-                entityPage = travelRegionRepository.findByTeam_IdAndContentTypeIdIn(teamId, categoryIds, sortedPageable);
+            if (cat1Codes.isEmpty()) {
+                entityPage = travelRegionRepository.findByTeam_Id(team.getId(), pageReq);
             } else {
-                entityPage = travelRegionRepository.findByTeam_Id(teamId, sortedPageable);
+                entityPage = travelRegionRepository.findByTeam_IdAndCat1In(team.getId(), cat1Codes, pageReq);
             }
         }
 
-        // 4) DTO 변환 (거리/좌표 계산은 추후 연동)
+        // 4) DTO 변환
         return entityPage.map(r -> StadiumAttractionResponseDTO.Item.builder()
                 .id(r.getId())
                 .name(r.getTitle())
                 .imageUrl(r.getFirstImage())
-                .distanceKm(null) // TODO: 팀/구장 좌표 준비 시 r.mapY/mapX로 계산
+                .distanceKm(null)   // TODO: 구장 좌표 연동 시 계산
                 .build());
     }
 
-    private List<String> loadDefaultCategoriesForMember(Long memberId) {
-        return List.of(); // TODO: 마이페이지 저장값 연동
+    private Team resolveTeam(Long memberId, Long teamId) {
+        if (teamId != null) {
+            return teamRepository.findById(teamId)
+                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 팀입니다."));
+        }
+        var member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+        var mt = memberTeamRepository.findByMember(member)
+                .orElseThrow(() -> new IllegalStateException("회원 선호팀이 설정되어 있지 않습니다."));
+        return mt.getTeam();
     }
 
-    /** "12","76" 같은 문자열 목록을 Integer 목록으로 안전 변환(비어있거나 숫자 아님은 무시) */
-    private List<Integer> toIntegerList(List<String> sources) {
-        List<Integer> out = new ArrayList<>();
-        if (sources == null) return out;
-        for (String s : sources) {
-            if (s == null) continue;
-            String t = s.trim();
-            if (t.isEmpty()) continue;
-            try {
-                out.add(Integer.valueOf(t));
-            } catch (NumberFormatException ignore) {
-                // 무시
-            }
-        }
-        return out;
+    private List<String> resolveCat1Codes(Long memberId, List<Long> styleIdsOverride) {
+        List<Long> styleIds = (styleIdsOverride != null && !styleIdsOverride.isEmpty())
+                ? styleIdsOverride
+                : loadMemberStyleIds(memberId);
+
+        if (styleIds.isEmpty()) return List.of();
+
+        return travelServiceRepository.findByTravelStyle_IdIn(styleIds)
+                .stream()
+                .map(TravelServiceRepository.CodeOnly::getCode)
+                .toList();
+    }
+
+
+    private List<Long> loadMemberStyleIds(Long memberId) {
+        var member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+        return memberTravelStyleRepository.findByMember(member)
+                .map(ms -> List.of(ms.getStyleOne().getId(), ms.getStyleTwo().getId()))
+                .orElseGet(List::of);
+    }
+
+    private Page<TravelRegion> findMyScrapsFiltered(
+            Long memberId, Long teamId, List<String> cat1Codes, Pageable pageable) {
+
+        List<Long> scrappedIds = scrapRepository
+                .findByMemberIdAndTargetTypeOrderByCreatedAtDesc(memberId, TargetType.TRAVEL_REGION)
+                .stream().map(Scrap::getTargetId).toList();
+
+        if (scrappedIds.isEmpty()) return Page.empty(pageable);
+
+        Map<Long, TravelRegion> map = new HashMap<>();
+        travelRegionRepository.findAllById(scrappedIds).forEach(tr -> map.put(tr.getId(), tr));
+
+        boolean hasCat1 = !cat1Codes.isEmpty();
+        List<TravelRegion> filtered = scrappedIds.stream()
+                .map(map::get).filter(Objects::nonNull)
+                .filter(r -> Objects.equals(r.getTeam().getId(), teamId))
+                .filter(r -> !hasCat1 || (r.getCat1() != null && cat1Codes.contains(r.getCat1())))
+                .toList();
+
+        // 최신 스크랩 순서 유지(이미 scrappedIds 가 그 순서)
+        int total = filtered.size();
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), total);
+        List<TravelRegion> slice = (start >= end) ? List.of() : filtered.subList(start, end);
+
+        return new PageImpl<>(slice, pageable, total);
     }
 }
