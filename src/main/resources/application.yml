@@ -101,3 +101,9 @@ socketio:
   allow-method: "GET,POST"
   allow-credentials: true
 
+companion:
+  default-images:
+    baseball: https://tikicktaka-bucket.s3.ap-northeast-2.amazonaws.com/logo/Companion_Baseball.png
+    travel: https://tikicktaka-bucket.s3.ap-northeast-2.amazonaws.com/logo/Companion_Travel.png
+
+
