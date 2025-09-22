@@ -23,6 +23,13 @@ public class ChatParticipant {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
+    @Column(name = "last_read_message_id")
+    private Long lastReadMessageId;
+
+    public void markRead(Long lastMessageId) {
+        this.lastReadMessageId = lastMessageId;
+    }
+
     public static ChatParticipant create(ChatRoom chatRoom, Member member) {
         if (member == null) {
             throw new IllegalArgumentException("Member cannot be null");

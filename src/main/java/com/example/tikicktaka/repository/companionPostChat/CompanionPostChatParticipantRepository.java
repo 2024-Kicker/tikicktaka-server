@@ -31,12 +31,11 @@ public interface CompanionPostChatParticipantRepository extends JpaRepository<Ch
 
     void deleteByChatRoom(ChatRoom chatRoom);
 
-    //List<ChatParticipant> findByMemberId(Long memberId, Pageable pageable);
-
     // 특정 방의 참가자 수 (roomId 문자열로 바로 세기)
     int countByChatRoom_RoomId(String roomId);
 
     Optional<ChatParticipant> findFirstByChatRoom_RoomIdAndMember_IdNot(String roomId, Long notMemberId);
 
     List<ChatParticipant> findByMember_Id(Long memberId, Pageable pageable);
+    Optional<ChatParticipant> findByChatRoom_RoomIdAndMember_Id(String roomId, Long memberId);
 }
