@@ -74,4 +74,7 @@ public class StoryRoomPostResponseDTO {
         this.isScrapped = isScrapped;
     }
 
+    public void setThumbnailUrl(String thumbnailUrl) {
+        this.thumbnailUrl = thumbnailUrl;
+    }
 }

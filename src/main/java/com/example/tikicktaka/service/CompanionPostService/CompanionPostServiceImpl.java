@@ -20,9 +20,11 @@ import com.example.tikicktaka.web.dto.companionPost.CompanionPostResponseDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.data.domain.Pageable;
 
@@ -64,6 +66,12 @@ public class CompanionPostServiceImpl implements CompanionPostService {
     @Autowired
     private ScrapCommandService scrapCommandService;
 
+    @Value("${companion.default-images.baseball}")
+    private String defaultBaseballImage;
+
+    @Value("${companion.default-images.travel}")
+    private String defaultTravelImage;
+
     //게시글 작성
     @Override
     @Transactional
@@ -85,12 +93,13 @@ public class CompanionPostServiceImpl implements CompanionPostService {
         companionPostRepository.save(post);
 
         // 이미지 업로드 및 저장
+        List<String> uploaded = new ArrayList<>();
         if (imageFiles != null && !imageFiles.isEmpty()) {
             List<CompanionPostImg> images = new ArrayList<>();
             for (MultipartFile file : imageFiles) {
                 if (!file.isEmpty()) {
                     String imageUrl = utilService.uploadS3Img("companionPost", file);
-
+                    uploaded.add(imageUrl);
                     CompanionPostImg image = CompanionPostImg.builder()
                             .imageUrl(imageUrl)
                             .companionPost(post)
@@ -102,9 +111,21 @@ public class CompanionPostServiceImpl implements CompanionPostService {
             companionPostImageRepository.saveAll(images);
 
             if (!images.isEmpty()) {
-                post.setThumbnailUrl(images.get(0).getImageUrl());
+                //post.setThumbnailUrl(images.get(0).getImageUrl());
+                companionPostImageRepository.saveAll(images);
+                // 업로드가 있으면 1번을 썸네일로
+                post.setThumbnailUrl(uploaded.get(0));
             }
         }
+        // 업로드가 없을 때도 DB에 기본 썸네일 저장 (Travel/Baseball 분기)
+        if (uploaded.isEmpty()) {
+            String fallback = (travelStatus == CompanionPost.TravelStatus.Travel)
+                    ? defaultTravelImage
+                    : defaultBaseballImage;
+            post.setThumbnailUrl(fallback);
+        }
+
+        companionPostRepository.save(post); // 변경 사항 저장
 
         return post;
     }
@@ -138,6 +159,7 @@ public class CompanionPostServiceImpl implements CompanionPostService {
     public CompanionPostResponseDTO getPostDetail(Long postId){
         CompanionPost post = companionPostRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글을 찾을 수 없습니다."));
+        ensureThumbnailOrFallback(post);
         List<String> imageUrls = companionPostImageRepository.findByCompanionPost(post).stream()
                 .map(CompanionPostImg::getImageUrl)
                 .collect(Collectors.toList());
@@ -155,7 +177,7 @@ public class CompanionPostServiceImpl implements CompanionPostService {
         if (memberId != null && blockedService.isBlocked(memberId, TargetType.COMPANION_POST, postId)) {
             throw new IllegalStateException("차단된 게시글입니다.");
         }
-
+        ensureThumbnailOrFallback(post);
         List<String> imageUrls = companionPostImageRepository.findByCompanionPost(post).stream()
                 .map(CompanionPostImg::getImageUrl)
                 .collect(Collectors.toList());
@@ -170,12 +192,15 @@ public class CompanionPostServiceImpl implements CompanionPostService {
     public Page<CompanionPostListResponseDTO> getPostList(Long memberId, Pageable pageable) {
         List<Long> blockedPostIds = blockedService.blockedIds(memberId, TargetType.COMPANION_POST);
 
+
         Page<CompanionPost> posts;
         if (blockedPostIds.isEmpty()) {
             posts = companionPostRepository.findAllByOrderByCreatedAtDesc(pageable);
         } else {
             posts = companionPostRepository.findAllByIdNotInOrderByCreatedAtDesc(blockedPostIds, pageable);
         }
+
+        posts.getContent().forEach(this::ensureThumbnailOrFallback);
 
         // 현재 페이지의 게시글 ID들을 모아놓고, 한 번에 스크랩 여부 set 생성
         List<Long> pagePostIds = posts.getContent().stream()
@@ -236,6 +261,8 @@ public class CompanionPostServiceImpl implements CompanionPostService {
                     ? companionPostRepository.findByStatusInAndIdNotIn(statuses, blockedIds, pageable)
                     : companionPostRepository.findByStatusIn(statuses, pageable);
         }
+
+        page.getContent().forEach(this::ensureThumbnailOrFallback);
 
         // 5) 현재 페이지 게시글 id들
         List<Long> pagePostIds = page.getContent().stream()
@@ -332,6 +359,17 @@ public class CompanionPostServiceImpl implements CompanionPostService {
 
         post.setStatus(status);
         post.preUpdate(); // updatedAt 갱신
+    }
+
+    private void ensureThumbnailOrFallback(CompanionPost post) {
+        if (post == null) return;
+
+        if (!StringUtils.hasText(post.getThumbnailUrl())) {
+            String fallback = (post.getTravelStatus() == CompanionPost.TravelStatus.Travel)
+                    ? defaultTravelImage
+                    : defaultBaseballImage; // 기본값은 Baseball
+            post.setThumbnailUrl(fallback);
+        }
     }
 
     // ===== 통합 scrap 기반 추가/해제 위임 =====
