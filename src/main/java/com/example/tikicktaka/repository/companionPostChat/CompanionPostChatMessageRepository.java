@@ -23,5 +23,7 @@ public interface CompanionPostChatMessageRepository extends JpaRepository<ChatMe
     // 마지막 메시지 1건
     Optional<ChatMessage> findTop1ByChatRoom_RoomIdOrderByIdDesc(String roomId);
 
+    long countByChatRoom_RoomIdAndIdGreaterThan(String roomId, Long id);
+    long countByChatRoom_RoomId(String roomId); // lastRead 없을 때 전체를 미읽음으로
 
 }

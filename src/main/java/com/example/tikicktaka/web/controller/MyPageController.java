@@ -52,17 +52,13 @@ public class MyPageController {
     private final TravelRegionRepository travelRegionRepository;
 
     private Long currentMemberId(Authentication auth) {
-        // 너희 프로젝트 표준 방식으로 유지
         return (Long) auth.getPrincipal();
     }
 
 
 
     @GetMapping("/my/profile")
-    @Operation(summary = "나의 프로필 조회 API", description = "나의 프로필 정보 조회를 위한 API이다.")
-    @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
-    })
+    @Operation(summary = "나의 프로필 조회 API", description = "나의 프로필 정보 조회를 위한 API")
     public ApiResponse<MemberResponseDTO.memberProfileDTO> memberProfile(Authentication authentication){
 
         Member member = memberQueryService.findMemberById(Long.valueOf(authentication.getName().toString())).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
@@ -192,16 +188,19 @@ public class MyPageController {
         var posts = blockedIds.isEmpty() ? List.<CompanionPost>of()
                 : companionPostRepository.findAllByIdIn(blockedIds);
 
-        var dtos = posts.stream().map(p ->
-                new BlockedCompanionPostDTO(
-                        p.getId(),
-                        p.getTitle(),
-                        p.getAuthor() != null ? p.getAuthor().getName() : null,
-                        p.getStatus() != null ? p.getStatus().name() : null,  // 필요 없으면 null 유지
-                        p.getCreatedAt(),
-                        true
-                )
-        ).toList();
+        var dtos = posts.stream().map(p -> {
+
+            return BlockedCompanionPostDTO.builder()
+                    .id(p.getId())
+                    .title(p.getTitle())
+                    .content(p.getContent())
+                    .thumbnailUrl(p.getThumbnailUrl())
+                    .authorName(p.getAuthor() != null ? p.getAuthor().getName() : null)
+                    .status(p.getStatus() != null ? p.getStatus().name() : null)
+                    .createdAt(p.getCreatedAt())
+                    .blocked(true)
+                    .build();
+        }).toList();
 
         return ApiResponse.onSuccess(dtos);
     }

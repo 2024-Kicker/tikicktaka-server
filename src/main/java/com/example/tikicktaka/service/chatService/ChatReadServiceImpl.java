@@ -4,6 +4,7 @@ import com.example.tikicktaka.domain.companionPostChat.ChatMessage;
 import com.example.tikicktaka.domain.enums.TargetType;
 import com.example.tikicktaka.repository.blocked.BlockedRepository;
 import com.example.tikicktaka.repository.companionPostChat.CompanionPostChatMessageRepository;
+import com.example.tikicktaka.repository.companionPostChat.CompanionPostChatParticipantRepository;
 import com.example.tikicktaka.web.dto.chat.ChatMessageItemDTO;
 import com.example.tikicktaka.web.dto.chat.ChatMessagePageDTO;
 import lombok.RequiredArgsConstructor;
@@ -23,9 +24,10 @@ public class ChatReadServiceImpl implements ChatReadService {
     private final CompanionPostChatMessageRepository msgRepo;
     private final MemberDisplayNameService nameService;
     private final BlockedRepository blockedRepo;
+    private final CompanionPostChatParticipantRepository participantRepo;
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public ChatMessagePageDTO readCompanionMessages(Long meId, String roomId,
                                                     String dir, Long cursor, int size) {
         // 권한
@@ -65,7 +67,7 @@ public class ChatReadServiceImpl implements ChatReadService {
                 isGroup = Boolean.TRUE.equals(room.getIsGroup());   // boolean이면 room.isGroup()
                 inviteCode = room.getInviteCode();
                 if (room.getOwner() != null) {
-                    tmpOwnerId = room.getOwner().getId();   // ✅ 여기서 ownerId 세팅
+                    tmpOwnerId = room.getOwner().getId();   //여기서 ownerId 세팅
                 }
             }
         }
@@ -99,6 +101,12 @@ public class ChatReadServiceImpl implements ChatReadService {
 
         Long prev = items.isEmpty() ? null : items.get(0).getId();
         Long next = items.isEmpty() ? null : items.get(items.size() - 1).getId();
+
+        if (!raw.isEmpty()) {
+            Long lastSeenId = raw.get(raw.size() - 1).getId();
+            participantRepo.findByChatRoom_RoomIdAndMember_Id(roomId, meId)
+                    .ifPresent(cp -> cp.markRead(lastSeenId)); // JPA flush는 트랜잭션 종료 시 수행
+        }
 
         return ChatMessagePageDTO.builder()
                 .authorView(authorView)

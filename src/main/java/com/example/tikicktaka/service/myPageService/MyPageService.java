@@ -1,12 +1,15 @@
 package com.example.tikicktaka.service.myPageService;
-// src/main/java/com/example/tikicktaka/service/mypage/MyPageService.java
 
+import com.example.tikicktaka.service.chatService.utils.UnreadUtils;
 import com.example.tikicktaka.domain.companionPost.CompanionPost;
 import com.example.tikicktaka.domain.member.Member;
 import com.example.tikicktaka.domain.storyRoom.StoryRoomPost;
 import com.example.tikicktaka.repository.companionPost.CompanionPostRepository;
 import com.example.tikicktaka.repository.member.MemberRepository;
 import com.example.tikicktaka.repository.storyRoom.StoryRoomPostRepository;
+import com.example.tikicktaka.repository.companionPostChat.CompanionPostChatRoomRepository;
+import com.example.tikicktaka.repository.companionPostChat.CompanionPostChatParticipantRepository;
+import com.example.tikicktaka.repository.companionPostChat.CompanionPostChatMessageRepository;
 import com.example.tikicktaka.web.dto.myPage.MyPostItemDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,6 +27,9 @@ public class MyPageService {
     private final MemberRepository memberRepository;
     private final CompanionPostRepository companionPostRepository;
     private final StoryRoomPostRepository storyRoomPostRepository;
+    private final CompanionPostChatRoomRepository companionPostChatRoomRepository;
+    private final CompanionPostChatParticipantRepository companionPostChatParticipantRepository;
+    private final CompanionPostChatMessageRepository companionPostChatMessageRepository;
 
     @Value("${app.share.baseUrl:https://example.com}")
     private String baseUrl; // application.yml에서 설정(배포 도메인)
@@ -41,9 +47,10 @@ public class MyPageService {
                     return MyPostItemDTO.builder()
                             .postId(p.getId())
                             .title(p.getTitle())
+                            .content(p.getContent())
                             .type("COMPANION")
-                            .linkId(linkId)
                             .shareUrl(shareUrl)
+                            .thumbnailUrl(p.getThumbnailUrl())
                             .build();
                 })
                 .collect(Collectors.toList());
@@ -67,7 +74,6 @@ public class MyPageService {
                             .postId(p.getId())
                             .title(p.getTitle())
                             .type("STORY")
-                            .linkId(linkId)
                             .shareUrl(shareUrl)
                             .build();
                 })
