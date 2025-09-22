@@ -12,6 +12,8 @@ import lombok.*;
 public class BlockedStoryRoomPostDTO {
     private Long id;
     private String title;
+    private String content;
+    private String thumbnailUrl;
     private String authorName;
     private String status;           // 필요 없으면 null
     private LocalDateTime createdAt;

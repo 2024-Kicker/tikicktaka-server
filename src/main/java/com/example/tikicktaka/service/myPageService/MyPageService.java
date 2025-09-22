@@ -62,8 +62,10 @@ public class MyPageService {
                     return MyPostItemDTO.builder()
                             .postId(p.getId())
                             .title(p.getTitle())
+                            .content(p.getContent())
                             .type("STORY")
                             .shareUrl(shareUrl)
+                            .thumbnailUrl(p.getThumbnailUrl())
                             .build();
                 })
                 .collect(Collectors.toList());
