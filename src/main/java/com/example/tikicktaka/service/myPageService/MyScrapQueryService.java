@@ -85,6 +85,7 @@ public class MyScrapQueryService {
                 .map(p -> ScrapStoryRoomPostDTO.builder()
                         .id(p.getId())
                         .title(p.getTitle())
+                        .content(p.getContent())
                         .topic(p.getTopic() != null ? p.getTopic().name() : null)
                         .thumbnailUrl(p.getThumbnailUrl())
                         .createdAt(p.getCreatedAt())

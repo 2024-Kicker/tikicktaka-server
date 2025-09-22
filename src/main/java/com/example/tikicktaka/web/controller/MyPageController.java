@@ -219,8 +219,10 @@ public class MyPageController {
                 new BlockedStoryRoomPostDTO(
                         p.getId(),
                         p.getTitle(),
-                        p.getTopic() != null ? p.getTopic().name() : null,
+                        p.getContent(),
                         p.getThumbnailUrl(),
+                        p.getAuthor() != null ? p.getAuthor().getName() : null,
+                        p.getTopic() != null ? p.getTopic().name() : null,
                         p.getCreatedAt(),
                         true
                 )
