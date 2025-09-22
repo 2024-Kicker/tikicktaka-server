@@ -94,9 +94,9 @@ public class CompanionChatController {
             return ApiResponse.onFailure("FORBIDDEN", "본인이 작성한 게시글만 단체 채팅방을 생성할 수 있습니다.", null);
         }
 
-        if (chatRoomService.existsGroupRoomForPost(request.getPostId())) {
-            return ApiResponse.onFailure("CONFLICT", "이미 해당 게시글에 대한 단체 채팅방이 존재합니다.", null);
-        }
+//        if (chatRoomService.existsGroupRoomForPost(request.getPostId())) {
+//            return ApiResponse.onFailure("CONFLICT", "이미 해당 게시글에 대한 단체 채팅방이 존재합니다.", null);
+//        }
 
         // ChatRoomDTO를 생성하고, request에서 postId와 ownerId를 설정
         ChatRoomDTO chatRoomDTO = new ChatRoomDTO();
