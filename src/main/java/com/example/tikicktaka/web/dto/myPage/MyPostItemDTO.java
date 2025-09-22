@@ -8,8 +8,9 @@ import lombok.*;
 public class MyPostItemDTO {
     private Long postId;     // 내부 ID
     private String title;
+    private String content;
     private String type;     // "COMPANION" | "STORY"
-    private String linkId;   // 기존 로직에 맞춰 postId 문자열 사용
     private String shareUrl; // 예) https://.../api/companionPost/public/12
+    private String thumbnailUrl;
 }
 

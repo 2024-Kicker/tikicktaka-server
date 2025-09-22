@@ -11,6 +11,8 @@ import java.time.LocalDateTime;
 public class ScrapCompanionPostDTO {
     private Long id;                 // post id
     private String title;
+    private String content;
+    private String thumbnailUrl;
     private String authorName;
     private String status;           // 필요 시 enum name
     private LocalDateTime createdAt; // post 생성일

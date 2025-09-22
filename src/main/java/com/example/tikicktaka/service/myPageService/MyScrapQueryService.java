@@ -1,5 +1,6 @@
 package com.example.tikicktaka.service.myPageService;
 
+import com.example.tikicktaka.service.chatService.utils.UnreadUtils;
 import com.example.tikicktaka.domain.enums.TargetType;
 import com.example.tikicktaka.domain.mapping.scrap.Scrap;
 import com.example.tikicktaka.repository.scrap.ScrapRepository;
@@ -16,6 +17,9 @@ import com.example.tikicktaka.repository.travelRegion.TravelRegionRepository;
 import com.example.tikicktaka.web.dto.myPage.ScrapCompanionPostDTO;
 import com.example.tikicktaka.web.dto.myPage.ScrapStoryRoomPostDTO;
 import com.example.tikicktaka.web.dto.myPage.ScrapTravelRegionDTO;
+import com.example.tikicktaka.repository.companionPostChat.CompanionPostChatRoomRepository;
+import com.example.tikicktaka.repository.companionPostChat.CompanionPostChatParticipantRepository;
+import com.example.tikicktaka.repository.companionPostChat.CompanionPostChatMessageRepository;
 
 
 import lombok.RequiredArgsConstructor;
@@ -35,6 +39,11 @@ public class MyScrapQueryService {
     private final CompanionPostRepository companionPostRepository;
     private final StoryRoomPostRepository storyRoomPostRepository;
     private final TravelRegionRepository travelRegionRepository;
+    private final CompanionPostChatRoomRepository companionPostChatRoomRepository;
+    private final CompanionPostChatParticipantRepository companionPostChatParticipantRepository;
+    private final CompanionPostChatMessageRepository companionPostChatMessageRepository;
+
+
 
     public List<ScrapCompanionPostDTO> getCompanionPostScraps(Long memberId) {
         List<Long> ids = scrapRepository
@@ -47,14 +56,18 @@ public class MyScrapQueryService {
                 .collect(Collectors.toMap(CompanionPost::getId, it -> it));
 
         return ids.stream().map(map::get).filter(Objects::nonNull)
-                .map(p -> ScrapCompanionPostDTO.builder()
-                        .id(p.getId())
-                        .title(p.getTitle())
-                        .authorName(resolveCompanionAuthorName(p))  // 안전하게 닉네임 추출
-                        .status(p.getStatus().name())
-                        .createdAt(p.getCreatedAt())
-                        .scrapped(true)
-                        .build())
+                .map(p -> {
+                    return ScrapCompanionPostDTO.builder()
+                            .id(p.getId())
+                            .title(p.getTitle())
+                            .content(p.getContent())
+                            .thumbnailUrl(p.getThumbnailUrl())
+                            .authorName(p.getAuthor()!=null? p.getAuthor().getName(): null)
+                            .status(p.getStatus()!=null? p.getStatus().name(): null)
+                            .createdAt(p.getCreatedAt())
+                            .scrapped(true)
+                            .build();
+                })
                 .toList();
     }
 
@@ -101,14 +114,7 @@ public class MyScrapQueryService {
                 .toList();
     }
 
-    /**
-     * CompanionPost의 작성자 닉네임을 안전하게 추출.
-     * - getMember().getNickname()
-     * - getAuthor().getNickname()
-     * - getWriter().getNickname()
-     * 중 존재하는 것을 리플렉션으로 시도.
-     * 없으면 null 반환.
-     */
+    //CompanionPost의 작성자 닉네임을 안전하게 추출.
     private String resolveCompanionAuthorName(CompanionPost post) {
         if (post == null) return null;
         // 시도할 게터 이름들
