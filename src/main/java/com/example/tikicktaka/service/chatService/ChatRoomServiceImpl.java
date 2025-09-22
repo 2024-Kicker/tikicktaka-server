@@ -44,16 +44,16 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         this.inviteCodeGeneratorService = inviteCodeGeneratorService;
         this.redisService = redisService;
     }
-    private static final String CR_PREFIX = "CR-";
-
-    private String ensureCrPrefix(String id) {
-        if (id == null) return null;
-        return id.startsWith(CR_PREFIX) ? id : CR_PREFIX + id;
-    }
-    private String stripCrPrefix(String id) {
-        if (id == null) return null;
-        return id.startsWith(CR_PREFIX) ? id.substring(CR_PREFIX.length()) : id;
-    }
+//    private static final String CR_PREFIX = "CR-";
+//
+//    private String ensureCrPrefix(String id) {
+//        if (id == null) return null;
+//        return id.startsWith(CR_PREFIX) ? id : CR_PREFIX + id;
+//    }
+//    private String stripCrPrefix(String id) {
+//        if (id == null) return null;
+//        return id.startsWith(CR_PREFIX) ? id.substring(CR_PREFIX.length()) : id;
+//    }
 
 
     //단체방 초대 및 생성
@@ -78,8 +78,9 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                     .orElseThrow(); // 논리상 존재
             ChatRoomDTO dto = new ChatRoomDTO(room);
             // 반환용 roomId에 CR- 접두사 부여
-            dto.setRoomId(ensureCrPrefix(room.getRoomId()));
-            return dto;
+            dto.setRoomId(room.getRoomId());
+
+          return dto;
         }
 
         // 초대 코드 & roomId 생성
@@ -106,7 +107,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
         ChatRoomDTO dto = new ChatRoomDTO(chatRoom);
         // 반환용 roomId에 CR- 접두사 부여
-        dto.setRoomId(ensureCrPrefix(chatRoom.getRoomId()));
+        dto.setRoomId(chatRoom.getRoomId());
         return dto;    }
 
     @Override
@@ -118,13 +119,13 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     // roomId로 채팅방 조회 (동행찾기)
     @Override
     public Optional<ChatRoomDTO> getChatRoomById(String roomId) {
-        String raw = stripCrPrefix(roomId); // 접두사 제거 후 조회
+//        String raw = stripCrPrefix(roomId); // 접두사 제거 후 조회
 
-        return companionPostChatRoomRepository.findByRoomId(raw)
+        return companionPostChatRoomRepository.findByRoomId(roomId)
                 .map(room -> {
                     ChatRoomDTO dto = new ChatRoomDTO(room);
                     // 반환용 roomId에 CR- 접두사 부여
-                    dto.setRoomId(ensureCrPrefix(room.getRoomId()));
+                    dto.setRoomId(room.getRoomId());
                     return dto;
                 });    }
 
@@ -159,7 +160,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
         // 채팅방에 참가자 추가
         addParticipantToChatRoom(chatRoom, userId);
-        return ensureCrPrefix(chatRoom.getRoomId()); // CR- 반환
+        return chatRoom.getRoomId(); // CR- 반환
     }
 
     // 채팅방 참가자 추가 메서드
@@ -199,7 +200,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         Optional<ChatRoom> existingChatRoom = companionPostChatRoomRepository.findByCompanionPostIdAndOwnerIdAndParticipantId(postId, ownerId, participantId);
         if (existingChatRoom.isPresent()) {
             logger.info("Found chatRoom: {}", existingChatRoom.get().getRoomId());
-            return ensureCrPrefix(existingChatRoom.get().getRoomId()); // 재사용도 CR-
+            return (existingChatRoom.get().getRoomId()); // 재사용도 CR-
         }
 
         // 새 채팅방 생성
@@ -219,13 +220,13 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         companionPostChatParticipantRepository.save(ChatParticipant.create(chatRoom, owner)); // 게시글 작성자
         companionPostChatParticipantRepository.save(ChatParticipant.create(chatRoom, participant)); // 요청한 사용자
 
-        return ensureCrPrefix(chatRoom.getRoomId()); // 신규도 CR-
+        return (chatRoom.getRoomId()); // 신규도 CR-
     }
 
     // 채팅방 삭제
     @Override
     public void deleteChatRoom(String roomId) {
-        String raw = stripCrPrefix(roomId);
+//        String raw = stripCrPrefix(roomId);
         Optional<ChatRoom> chatRoomOptional = companionPostChatRoomRepository.findByRoomId(roomId);
 
         if (chatRoomOptional.isEmpty()) {

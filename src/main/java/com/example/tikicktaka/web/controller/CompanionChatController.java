@@ -21,8 +21,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 @RestController
-@RequestMapping("/api/compnaion/chats")
-@Tag(name = "CompnaionChat", description = "동행찾기 채팅방 관련 API")
+@RequestMapping("/api/companion/chats")
+@Tag(name = "CompanionChat", description = "동행찾기 채팅방 관련 API")
 @RequiredArgsConstructor
 public class CompanionChatController {
 
@@ -40,7 +40,6 @@ public class CompanionChatController {
             return ApiResponse.onFailure("UNAUTHORIZED", "로그인이 필요합니다.", null);
         }
 
-        // JWT에서 사용자 ID 가져오기
         Long memberId;
         try {
             memberId = Long.valueOf(authentication.getName());
@@ -48,7 +47,6 @@ public class CompanionChatController {
             return ApiResponse.onFailure("UNAUTHORIZED", "잘못된 인증 정보입니다.", null);
         }
 
-        // 게시글 조회
         CompanionPost post = companionPostService.findById(postId);
         if (post == null) {
             return ApiResponse.onFailure("NOT_FOUND", "게시글을 찾을 수 없습니다.", null);
@@ -57,7 +55,6 @@ public class CompanionChatController {
         // 1:1 채팅방 생성
         Long ownerId = post.getAuthor().getId();
         String roomId = chatRoomService.createOneOnOneChatRoom(ownerId, memberId, postId);
-        //String roomId = chatRoomService.createOneOnOneChatRoom(post.getAuthor().getId(), memberId, postId);
 
         ChatRoomCreateResultDTO dto =
                 ChatConverter.toRoomCreateResultDTO(roomId, postId, TargetType.COMPANION_POST, ownerId, memberId);
@@ -73,12 +70,10 @@ public class CompanionChatController {
             @RequestBody InviteRequestDTO request,
             Authentication authentication
     ) {
-        // JWT 인증 확인 (로그인된 사용자 여부 체크)
         if (authentication == null || authentication.getName() == null) {
             return ApiResponse.onFailure("UNAUTHORIZED", "로그인이 필요합니다.", null);
         }
 
-        //  JWT에서 사용자 ID 가져오기
         final Long memberId;
         try {
             memberId = Long.valueOf(authentication.getName());
@@ -91,7 +86,6 @@ public class CompanionChatController {
             return ApiResponse.onFailure("FORBIDDEN", "권한이 없습니다.", null);
         }
 
-        // 게시글 확인
         CompanionPost post = companionPostService.findById(request.getPostId());
         if (post == null) {
             return ApiResponse.onFailure("NOT_FOUND", "게시글을 찾을 수 없습니다.", null);
@@ -100,10 +94,9 @@ public class CompanionChatController {
             return ApiResponse.onFailure("FORBIDDEN", "본인이 작성한 게시글만 단체 채팅방을 생성할 수 있습니다.", null);
         }
 
-        // 기존 단체방 존재 여부
-        if (chatRoomService.existsGroupRoomForPost(request.getPostId())) {
-            return ApiResponse.onFailure("CONFLICT", "이미 해당 게시글에 대한 단체 채팅방이 존재합니다.", null);
-        }
+//        if (chatRoomService.existsGroupRoomForPost(request.getPostId())) {
+//            return ApiResponse.onFailure("CONFLICT", "이미 해당 게시글에 대한 단체 채팅방이 존재합니다.", null);
+//        }
 
         // ChatRoomDTO를 생성하고, request에서 postId와 ownerId를 설정
         ChatRoomDTO chatRoomDTO = new ChatRoomDTO();

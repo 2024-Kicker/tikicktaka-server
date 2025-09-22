@@ -20,7 +20,7 @@ public interface ChatRoomService {
 
     // 게시글에 해당하는 채팅방 존재 여부 확인
     boolean existsByCompanionPost_Id(Long postId);
-    boolean existsGroupRoomForPost(Long postId);  // ✅ 추가
+    boolean existsGroupRoomForPost(Long postId);
 
     void deleteRoomsByPostId(Long postId);
 }
