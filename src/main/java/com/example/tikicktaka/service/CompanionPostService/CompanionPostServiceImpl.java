@@ -372,6 +372,77 @@ public class CompanionPostServiceImpl implements CompanionPostService {
         }
     }
 
+    @Override
+    @Transactional
+    public CompanionPostResponseDTO updatePostWithImages(
+            Long postId,
+            Long memberId,
+            String title,
+            String content,
+            CompanionPost.PostStatus status,
+            CompanionPost.TravelStatus travelStatus,
+            List<MultipartFile> newImages,
+            boolean replaceAllImages
+    ) {
+        CompanionPost post = companionPostRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
+        if (!post.getAuthor().getId().equals(memberId)) {
+            throw new IllegalStateException("본인이 작성한 게시글만 수정할 수 있습니다.");
+        }
+
+        // 1) 부분 필드 업데이트
+        if (title != null) post.setTitle(title);
+        if (content != null) post.setContent(content);
+        if (status != null) post.setStatus(status);
+        if (travelStatus != null) post.setTravelStatus(travelStatus);
+
+        // 2) 이미지 처리
+        if (replaceAllImages) {
+            // 전면 교체: 기존 이미지 전부 삭제(S3/DB)
+            List<CompanionPostImg> existing = companionPostImageRepository.findByCompanionPost(post);
+            if (!existing.isEmpty()) {
+                existing.forEach(img -> utilService.deleteS3Img(img.getImageUrl()));
+                companionPostImageRepository.deleteAll(existing);
+            }
+            post.setThumbnailUrl(null); // 썸네일 초기화
+        }
+
+        // APPEND 또는 REPLACE 후 새 이미지 업로드
+        List<String> uploaded = new ArrayList<>();
+        if (newImages != null && !newImages.isEmpty()) {
+            List<CompanionPostImg> addList = new ArrayList<>();
+            for (MultipartFile file : newImages) {
+                if (file != null && !file.isEmpty()) {
+                    String url = utilService.uploadS3Img("companionPost", file);
+                    uploaded.add(url);
+                    addList.add(CompanionPostImg.builder()
+                            .imageUrl(url)
+                            .companionPost(post)
+                            .build());
+                }
+            }
+            if (!addList.isEmpty()) {
+                companionPostImageRepository.saveAll(addList);
+                // 썸네일이 비어있다면, 이번 업로드의 첫 이미지를 대표로
+                if (!StringUtils.hasText(post.getThumbnailUrl())) {
+                    post.setThumbnailUrl(uploaded.get(0));
+                }
+            }
+        }
+
+        // 3) 최종 썸네일 보정(이미지 하나도 없으면 fallback)
+        ensureThumbnailOrFallback(post);
+
+        post.preUpdate(); // updatedAt 갱신
+
+        // 4) 응답 DTO
+        List<String> imageUrls = companionPostImageRepository.findByCompanionPost(post).stream()
+                .map(CompanionPostImg::getImageUrl)
+                .collect(Collectors.toList());
+        return new CompanionPostResponseDTO(post, imageUrls);
+    }
+
+
     // ===== 통합 scrap 기반 추가/해제 위임 =====
     @Override
     @Transactional
