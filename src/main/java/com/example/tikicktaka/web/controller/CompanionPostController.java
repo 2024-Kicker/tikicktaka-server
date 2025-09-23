@@ -7,10 +7,8 @@ import com.example.tikicktaka.domain.companionPost.CompanionPost;
 import com.example.tikicktaka.domain.enums.CompanionPostSortType;
 import com.example.tikicktaka.domain.enums.CompanionPostStatus;
 import com.example.tikicktaka.service.CompanionPostService.CompanionPostService;
-import com.example.tikicktaka.service.memberService.MemberCommandService;
 import com.example.tikicktaka.service.scrap.ScrapCommandService;
 import com.example.tikicktaka.domain.images.CompanionPostImg;
-
 import com.example.tikicktaka.service.memberService.MemberQueryService;
 import com.example.tikicktaka.web.dto.companionPost.CompanionPostListResponseDTO;
 import com.example.tikicktaka.repository.companionPost.CompanionPostImageRepository;
@@ -18,24 +16,18 @@ import com.example.tikicktaka.web.dto.companionPost.CompanionPostResponseDTO;
 import com.example.tikicktaka.web.dto.companionPost.UpdatePostStatusRequestDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
 import org.springframework.data.domain.Pageable;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.bouncycastle.asn1.x500.style.RFC4519Style.member;
 
 @RestController
 @RequestMapping("/api/companionPost")
@@ -52,11 +44,10 @@ public class CompanionPostController {
     private CompanionPostImageRepository companionPostImageRepository;
 
     @Autowired
-    private  CompanionPostService companionPostService;
+    private CompanionPostService companionPostService;
 
     @Autowired
     private ScrapCommandService scrapCommandService;
-
 
 
     @PostMapping(value = "/create", consumes = "multipart/form-data")
@@ -116,15 +107,6 @@ public class CompanionPostController {
         return ApiResponse.onSuccess(new CompanionPostResponseDTO(deletedPost, imageUrls));
     }
 
-//    @GetMapping("/list")
-//    @Operation(summary = "게시글 목록 조회", description = "모든 게시글 목록을 조회합니다.")
-//    public ApiResponse<Page<CompanionPostListResponseDTO>> getPostList(
-//            @ParameterObject
-//            @PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-//        Page<CompanionPostListResponseDTO> postList = postService.getPostList(pageable);
-//        return ApiResponse.onSuccess(postList);
-//    }
-
     @GetMapping("/list")
     @Operation(summary = "게시글 목록 조회", description = "로그인한 사용자가 차단한 게시글을 제외한 목록을 조회합니다.")
     public ApiResponse<Page<CompanionPostListResponseDTO>> getPostList(
@@ -145,13 +127,6 @@ public class CompanionPostController {
                 postService.getPostList(memberId, pageable, sortType, statusFilter);
         return ApiResponse.onSuccess(postList);
     }
-
-//    @GetMapping("/{postId}")
-//    @Operation(summary = "동행찾기 게시글 상세 조회 API", description = "게시글 ID를 기반으로 상세 내용을 조회합니다.")
-//    public ApiResponse<CompanionPostResponseDTO> getPostDetail(@PathVariable Long postId) {
-//        CompanionPostResponseDTO responseDTO = postService.getPostDetail(postId);
-//        return ApiResponse.onSuccess(responseDTO);
-//    }
 
     @GetMapping("/{postId}")
     @Operation(summary = "동행찾기 게시글 상세 조회 API", description = "게시글 ID를 기반으로 상세 내용을 조회합니다.")
@@ -226,7 +201,6 @@ public class CompanionPostController {
     }
 
 
-
     @PatchMapping("/{postId}/status")
     @Operation(summary = "게시글 상태 변경", description = "게시글 상태를 변경합니다.(FOUND, FINDING)")
     public ApiResponse<Void> updatePostStatus(@PathVariable Long postId,
@@ -270,5 +244,33 @@ public class CompanionPostController {
         // 통합 scrap 로직 사용
         scrapCommandService.removeCompanionPost(memberId, postId);
         return ApiResponse.onSuccess(null);
+    }
+
+    // 게시글 수정
+    @PutMapping(value = "/{postId}", consumes = "multipart/form-data")
+    @Operation(summary = "동행찾기 게시글 수정", description = "replaceAllImages=true 이미지 모두 교체, false = 추가/유지.")
+    public ApiResponse<CompanionPostResponseDTO> updatePost(
+            @PathVariable Long postId,
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) String content,
+            @RequestParam(required = false) CompanionPost.PostStatus status,
+            @RequestParam(required = false) CompanionPost.TravelStatus travelStatus,
+            @RequestParam(required = false, name = "imageFiles") List<MultipartFile> imageFiles,
+            @RequestParam(required = false, defaultValue = "false") boolean replaceAllImages,
+            Authentication authentication
+    ) {
+        if (authentication == null || authentication.getName() == null) {
+            return ApiResponse.onFailure(ErrorStatus._UNAUTHORIZED.getCode(),
+                    ErrorStatus._UNAUTHORIZED.getMessage(), null);
+        }
+        Long memberId = Long.valueOf(authentication.getName());
+
+        CompanionPostResponseDTO dto = companionPostService.updatePostWithImages(
+                postId, memberId,
+                title, content, status, travelStatus,
+                imageFiles,         // 새로 추가할 이미지(없으면 null/빈 리스트)
+                replaceAllImages    // true=전면 교체, false=추가 또는 유지
+        );
+        return ApiResponse.onSuccess(dto);
     }
 }

@@ -43,9 +43,8 @@ public class CompanionPost {
 
     private LocalDateTime updatedAt;
 
-    private String inviteCode; // 단체방 초대 코드
+    private String inviteCode;
 
-    // Member와 연관관계 설정
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     private Member author;
@@ -69,13 +68,10 @@ public class CompanionPost {
         return author;
     }
 
-    public void setThumbnailUrl(String imageUrl) {
-        this.thumbnailUrl = imageUrl;
-    }
-
-//    public void setChatRoomId(String chatRoomId) {
-//        this.chatRoomId = chatRoomId;
-//    }
+    public void setThumbnailUrl(String imageUrl) {this.thumbnailUrl = imageUrl;}
+    public void setTitle(String title) { this.title = title;}
+    public void setContent(String content) {this.content = content;}
+    public void setTravelStatus(TravelStatus travelStatus) { this.travelStatus = travelStatus;}
 
     public enum PostStatus {
         FINDING, // 동행 구하는 중
