@@ -44,6 +44,9 @@ public class AmazonS3Manager {
             case "companionPost":
                 keyName = generateCompanionPostKeyName(uuid);
                 break;
+            case "storyRoomPost":
+                keyName = generateStoryRoomPostKeyName(uuid);
+                break;
             default:
                 keyName = "./" + uuid.getUuid();
 
@@ -88,5 +91,6 @@ public class AmazonS3Manager {
         return amazonConfig.getStadiumPath() + '/' + uuid.getUuid();
     }
     public String generateCompanionPostKeyName(Uuid uuid){ return amazonConfig.getCompanionPostPath() + '/' + uuid.getUuid();}
+    public String generateStoryRoomPostKeyName(Uuid uuid){ return amazonConfig.getStoryRoomPostPath() + '/' + uuid.getUuid();}
 
 }
