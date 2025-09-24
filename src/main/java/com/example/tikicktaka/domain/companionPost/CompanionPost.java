@@ -28,7 +28,7 @@ public class CompanionPost {
     private String content;
 
     // 이미지 리스트 (1:N 관계)
-    @OneToMany(mappedBy = "companionPost", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)  // ✅ 즉시 로딩
+    @OneToMany(mappedBy = "companionPost", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<CompanionPostImg> images = new ArrayList<>();
 
     private String thumbnailUrl;
@@ -37,7 +37,7 @@ public class CompanionPost {
     private PostStatus status;
 
     @Enumerated(EnumType.STRING)
-    private TravelStatus travelStatus;
+    private PostType postType;
 
     private LocalDateTime createdAt;
 
@@ -71,14 +71,15 @@ public class CompanionPost {
     public void setThumbnailUrl(String imageUrl) {this.thumbnailUrl = imageUrl;}
     public void setTitle(String title) { this.title = title;}
     public void setContent(String content) {this.content = content;}
-    public void setTravelStatus(TravelStatus travelStatus) { this.travelStatus = travelStatus;}
+    public void setPostType(PostType postType) { this.postType = postType;}
+
 
     public enum PostStatus {
         FINDING, // 동행 구하는 중
         FOUND    // 동행 구했음
     }
 
-    public enum TravelStatus {
+    public enum PostType {
         Baseball, // 야구 동행 구하는 중
         Travel    // 여행 동행 구하는 중
     }

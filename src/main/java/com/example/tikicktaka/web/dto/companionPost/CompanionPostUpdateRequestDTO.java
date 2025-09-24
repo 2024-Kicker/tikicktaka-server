@@ -11,7 +11,7 @@ public class CompanionPostUpdateRequestDTO {
     private String title;
     private String content;
     private CompanionPost.PostStatus status;
-    private CompanionPost.TravelStatus travelStatus;
+    private CompanionPost.PostType postType;
 
     private Boolean replaceAllImages = Boolean.FALSE;
 }

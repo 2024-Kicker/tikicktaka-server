@@ -56,7 +56,7 @@ public class CompanionPostController {
                                                             @RequestParam String content,
                                                             @RequestParam(required = false) List<MultipartFile> imageFiles, // 여러 이미지 처리
                                                             @RequestParam CompanionPost.PostStatus status,
-                                                            @RequestParam CompanionPost.TravelStatus travelStatus,
+                                                            @RequestParam CompanionPost.PostType postType,
                                                             Authentication authentication) {
 
         // 인증된 사용자 정보 가져오기
@@ -74,7 +74,7 @@ public class CompanionPostController {
         );
 
         // 게시글 생성
-        CompanionPost post = postService.createPostWithImages(title, content, memberId, imageFiles, status, travelStatus);
+        CompanionPost post = postService.createPostWithImages(title, content, memberId, imageFiles, status, postType);
 
         // 게시글의 이미지 URL 가져오기
         List<String> imageUrls = companionPostImageRepository.findByCompanionPost(post).stream()
@@ -254,7 +254,7 @@ public class CompanionPostController {
             @RequestParam(required = false) String title,
             @RequestParam(required = false) String content,
             @RequestParam(required = false) CompanionPost.PostStatus status,
-            @RequestParam(required = false) CompanionPost.TravelStatus travelStatus,
+            @RequestParam(required = false) CompanionPost.PostType postType,
             @RequestParam(required = false, name = "imageFiles") List<MultipartFile> imageFiles,
             @RequestParam(required = false, defaultValue = "false") boolean replaceAllImages,
             Authentication authentication
@@ -267,7 +267,7 @@ public class CompanionPostController {
 
         CompanionPostResponseDTO dto = companionPostService.updatePostWithImages(
                 postId, memberId,
-                title, content, status, travelStatus,
+                title, content, status, postType,
                 imageFiles,         // 새로 추가할 이미지(없으면 null/빈 리스트)
                 replaceAllImages    // true=전면 교체, false=추가 또는 유지
         );

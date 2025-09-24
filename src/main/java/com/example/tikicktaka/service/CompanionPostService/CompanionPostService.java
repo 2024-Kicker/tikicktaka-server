@@ -14,10 +14,8 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 public interface CompanionPostService {
-
-
     @Transactional
-    CompanionPost createPostWithImages(String title, String content, Long memberId, List<MultipartFile> imageFiles, CompanionPost.PostStatus status, CompanionPost.TravelStatus travelStatus);
+    CompanionPost createPostWithImages(String title, String content, Long memberId, List<MultipartFile> imageFiles, CompanionPost.PostStatus status, CompanionPost.PostType postType);
 
     @Transactional
     CompanionPost deletePost (Long postId, Long memberID); //게시글 삭제 기능
@@ -27,7 +25,7 @@ public interface CompanionPostService {
     CompanionPostResponseDTO getPostDetail(Long postId, Long memberId);
 
     //차단한 게시글 제외하고 게시글 목록 조회 (통합 scrap 기반 isScraped 계산)
-    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    @Transactional
     Page<CompanionPostListResponseDTO> getPostList(Long memberId, Pageable pageable);
 
     @Transactional
@@ -38,14 +36,13 @@ public interface CompanionPostService {
             CompanionPostStatus statusFilter
     );
 
-    // CompanionPostService.java
     CompanionPostResponseDTO updatePostWithImages(
             Long postId,
             Long memberId,
             String title,
             String content,
             CompanionPost.PostStatus status,
-            CompanionPost.TravelStatus travelStatus,
+            CompanionPost.PostType postType,
             List<MultipartFile> newImages,
             boolean replaceAllImages
     );

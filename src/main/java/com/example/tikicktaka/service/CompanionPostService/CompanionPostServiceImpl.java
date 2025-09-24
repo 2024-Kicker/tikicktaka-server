@@ -5,8 +5,10 @@ import com.example.tikicktaka.domain.enums.CompanionPostSortType;
 import com.example.tikicktaka.domain.enums.CompanionPostStatus;
 import com.example.tikicktaka.domain.enums.TargetType;
 import com.example.tikicktaka.domain.images.CompanionPostImg;
+import com.example.tikicktaka.domain.images.ProfileImg;
 import com.example.tikicktaka.domain.member.Member;
 import com.example.tikicktaka.repository.companionPost.CompanionPostRepository;
+import com.example.tikicktaka.repository.member.ProfileImgRepository;
 import com.example.tikicktaka.service.blocked.BlockedService;
 import com.example.tikicktaka.repository.companionPost.CompanionPostImageRepository;
 import com.example.tikicktaka.repository.member.MemberRepository;
@@ -64,6 +66,9 @@ public class CompanionPostServiceImpl implements CompanionPostService {
     private ScrapRepository scrapRepository;
 
     @Autowired
+    private ProfileImgRepository profileImgRepository;
+
+    @Autowired
     private ScrapCommandService scrapCommandService;
 
     @Value("${companion.default-images.baseball}")
@@ -72,10 +77,14 @@ public class CompanionPostServiceImpl implements CompanionPostService {
     @Value("${companion.default-images.travel}")
     private String defaultTravelImage;
 
+    @Value("${member.default-profile:}")
+    private String defaultProfileImage;
+
+
     //게시글 작성
     @Override
     @Transactional
-    public CompanionPost createPostWithImages(String title, String content, Long memberId, List<MultipartFile> imageFiles, CompanionPost.PostStatus status, CompanionPost.TravelStatus travelStatus) {
+    public CompanionPost createPostWithImages(String title, String content, Long memberId, List<MultipartFile> imageFiles, CompanionPost.PostStatus status, CompanionPost.PostType postType) {
         // Member 찾기
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("Member not found with ID: " + memberId));
@@ -85,7 +94,7 @@ public class CompanionPostServiceImpl implements CompanionPostService {
                 .title(title)
                 .content(content)
                 .status(status)
-                .travelStatus(travelStatus)
+                .postType(postType)
                 .author(member)
                 .build();
 
@@ -119,7 +128,7 @@ public class CompanionPostServiceImpl implements CompanionPostService {
         }
         // 업로드가 없을 때도 DB에 기본 썸네일 저장 (Travel/Baseball 분기)
         if (uploaded.isEmpty()) {
-            String fallback = (travelStatus == CompanionPost.TravelStatus.Travel)
+            String fallback = (postType == CompanionPost.PostType.Travel)
                     ? defaultTravelImage
                     : defaultBaseballImage;
             post.setThumbnailUrl(fallback);
@@ -164,7 +173,13 @@ public class CompanionPostServiceImpl implements CompanionPostService {
                 .map(CompanionPostImg::getImageUrl)
                 .collect(Collectors.toList());
 
-        return new CompanionPostResponseDTO(post, imageUrls);
+        String authorProfile = null;
+        if (post.getAuthor() != null) {
+            authorProfile = profileImgRepository.findByMember_Id(post.getAuthor().getId())
+                    .map(ProfileImg::getUrl)
+                    .orElse(defaultProfileImage);
+        }
+        return CompanionPostResponseDTO.of(post, imageUrls, authorProfile, null, null);
     }
 
     //게시글 상세 조회
@@ -182,7 +197,20 @@ public class CompanionPostServiceImpl implements CompanionPostService {
                 .map(CompanionPostImg::getImageUrl)
                 .collect(Collectors.toList());
 
-        return new CompanionPostResponseDTO(post, imageUrls);
+        boolean isScraped = (memberId != null) &&
+                scrapRepository.existsByMemberIdAndTargetTypeAndTargetId(
+                        memberId, TargetType.COMPANION_POST, postId);
+        boolean isMine = (memberId != null) &&
+                post.getAuthor() != null &&
+                memberId.equals(post.getAuthor().getId());
+        String authorProfile = null;
+        if (post.getAuthor() != null) {
+            authorProfile = profileImgRepository.findByMember_Id(post.getAuthor().getId())
+                    .map(ProfileImg::getUrl)
+                    .orElse(defaultProfileImage);
+        }
+
+        return CompanionPostResponseDTO.of(post, imageUrls, authorProfile, isScraped, isMine);
     }
 
 
@@ -365,7 +393,7 @@ public class CompanionPostServiceImpl implements CompanionPostService {
         if (post == null) return;
 
         if (!StringUtils.hasText(post.getThumbnailUrl())) {
-            String fallback = (post.getTravelStatus() == CompanionPost.TravelStatus.Travel)
+            String fallback = (post.getPostType() == CompanionPost.PostType.Travel)
                     ? defaultTravelImage
                     : defaultBaseballImage; // 기본값은 Baseball
             post.setThumbnailUrl(fallback);
@@ -380,7 +408,7 @@ public class CompanionPostServiceImpl implements CompanionPostService {
             String title,
             String content,
             CompanionPost.PostStatus status,
-            CompanionPost.TravelStatus travelStatus,
+            CompanionPost.PostType postType,
             List<MultipartFile> newImages,
             boolean replaceAllImages
     ) {
@@ -394,7 +422,7 @@ public class CompanionPostServiceImpl implements CompanionPostService {
         if (title != null) post.setTitle(title);
         if (content != null) post.setContent(content);
         if (status != null) post.setStatus(status);
-        if (travelStatus != null) post.setTravelStatus(travelStatus);
+        if (postType != null) post.setPostType(postType);
 
         // 2) 이미지 처리
         if (replaceAllImages) {
