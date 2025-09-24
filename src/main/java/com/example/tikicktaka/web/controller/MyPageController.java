@@ -115,6 +115,16 @@ public class MyPageController {
         return ApiResponse.onSuccess(memberCommandService.getMemberTravelStyles(member));
     }
 
+    //선호 구단 조회 api
+    @GetMapping("/teams")
+    @Operation(summary = "선호 구단 조회 API")
+    public ApiResponse<MemberResponseDTO.MemberPreferTeamDTO> getPreferTeam(Authentication authentication){
+        Member member = memberQueryService.findMemberById(Long.valueOf(authentication.getName()))
+                .orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
+
+        return ApiResponse.onSuccess(memberCommandService.getMemberPreferTeam(member));
+    }
+
     // 작성글 모아보기 - 동행
     @GetMapping("/companion-posts")
     @Operation(summary = "사용자가 작성한 동행 찾기 게시글 목록 api ")

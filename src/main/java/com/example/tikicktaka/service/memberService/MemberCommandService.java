@@ -39,6 +39,9 @@ public interface MemberCommandService {
 
     MemberResponseDTO.MemberPreferTravelStyleDTO getMemberTravelStyles(Member member);
 
+    MemberResponseDTO.MemberPreferTeamDTO getMemberPreferTeam(Member member);
+
+
     Member profileImageUpload(MultipartFile profile, Member member);
 
     Member modifyProfile(MemberRequestDTO.UpdateMemberDTO request, Member member);

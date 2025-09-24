@@ -150,7 +150,9 @@ public class MemberResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class MemberPreferTeamDTO{
-        Long memberTeamId;
+        Long memberId;
+        Long teamId;
+        String teamName;
         LocalDateTime createdAt;
     }
 
