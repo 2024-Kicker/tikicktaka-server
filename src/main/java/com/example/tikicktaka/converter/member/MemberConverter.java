@@ -46,10 +46,7 @@ public class MemberConverter {
                 .name(request.getNickname())
                 .password(encoder.encode(request.getPassword()))
                 .email(request.getEmail())
-                //.birthday(request.getBirthday())
                 .gender(request.getGender())
-                //.phone(request.getPhone())
-                .point(0L)
                 .memberRole(MemberRole.MEMBER)
                 .memberTermList(new ArrayList<>())
                 .build();
@@ -148,21 +145,6 @@ public class MemberConverter {
                 .build();
     }
 
-    public static ChargeCoin toChargeCoin(Member member, MemberRequestDTO.ChargeCoinRequestDTO request){
-        return ChargeCoin.builder()
-                .amount(request.getAmount())
-                .title(request.getTitle())
-                .member(member)
-                .leftover(member.getPoint())
-                .build();
-    }
-
-    public static MemberResponseDTO.ChargeCoinResultDTO toChargeCoinResultDTO(Member member){
-        return MemberResponseDTO.ChargeCoinResultDTO.builder()
-                .nickname(member.getName())
-                .point(member.getPoint())
-                .build();
-    }
 
     public static Member toUpdateProfile(Member member, MemberRequestDTO.UpdateMemberDTO request) {
         List<MemberTerm> memberTermList = member.getMemberTermList();
@@ -174,12 +156,10 @@ public class MemberConverter {
         return Member.builder()
                 .id(member.getId())
                 .name(request.getNickname())
-                //.nickname(request.getNickname())
                 .password(member.getPassword())
                 .email(member.getEmail())
-                //.birthday(request.getBirthday())
                 .gender(member.getGender())
-                //.phone(request.getPhone())
+                .introduceMessage(member.getIntroduceMessage())
                 .memberRole(member.getMemberRole())
                 .memberStatus(member.getMemberStatus())
                 .memberTermList(memberTermList)
@@ -212,13 +192,10 @@ public class MemberConverter {
                 .memberId(member.getId())
                 .email(member.getEmail())
                 .nickname(member.getName())
-                //.name(member.getName())
                 .profileImgUrl(profileImgUrl)
                 .teamName(preferTeamName)
-                //.phoneNumber(member.getPhone())
+                .introduceMessage(member.getIntroduceMessage())
                 .gender(member.getGender().name())
-                //.phoneNumber(member.getPhone())
-                .point(member.getPoint())
                 .memberTerm(memberTermList.stream().map(memberTeam -> memberTeam.getMemberAgree()).toList())
                 .build();
     }
@@ -384,21 +361,6 @@ public class MemberConverter {
                 .build();
     }
 
-    public static MemberResponseDTO.ChargeCoinPreviewListDTO chargeCoinPreviewListDTO(Member member, Page<ChargeCoin> chargeCoinList){
-        List<MemberResponseDTO.ChargeCoinPreviewDTO> chargeCoinPreviewDTOList = chargeCoinList.stream()
-                .map(MemberConverter::chargeCoinPreviewDTO).collect(Collectors.toList());
-
-        return MemberResponseDTO.ChargeCoinPreviewListDTO.builder()
-                .amount(member.getPoint())
-                .chargeCoinPreviewDTOList(chargeCoinPreviewDTOList)
-                .isFirst(chargeCoinList.isFirst())
-                .isLast(chargeCoinList.isLast())
-                .listSize(chargeCoinList.getSize())
-                .totalPage(chargeCoinList.getTotalPages())
-                .totalElements(chargeCoinList.getTotalElements())
-                .build();
-    }
-
     public static MemberResponseDTO.SpendCoinPreviewDTO spendCoinPreviewDTO(LanTourPurchase lanTourPurchase){
         List<LanTourResponseDTO.LanTourImageResponseDTO> lanTourImageResponseDTOList = lanTourPurchase.getLanTour().getLanTourImgList().stream()
                 .map(LanTourConverter::toLanTourImgDTO)
@@ -417,7 +379,7 @@ public class MemberConverter {
                 .map(MemberConverter::spendCoinPreviewDTO).collect(Collectors.toList());
 
         return MemberResponseDTO.SpendCoinPreviewListDTO.builder()
-                .amount(member.getPoint())
+                //.amount(member.getPoint())
                 .spendCoinPreviewDTOList(spendCoinPreviewDTOList)
                 .isFirst(lanTourList.isFirst())
                 .isLast(lanTourList.isLast())
