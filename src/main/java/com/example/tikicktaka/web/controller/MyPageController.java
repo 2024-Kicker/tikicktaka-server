@@ -55,8 +55,6 @@ public class MyPageController {
         return (Long) auth.getPrincipal();
     }
 
-
-
     @GetMapping("/my/profile")
     @Operation(summary = "나의 프로필 조회 API", description = "나의 프로필 정보 조회를 위한 API")
     public ApiResponse<MemberResponseDTO.memberProfileDTO> memberProfile(Authentication authentication){
@@ -77,7 +75,7 @@ public class MyPageController {
     }
 
     @PutMapping(value = "/profile/modify")
-    @Operation(summary = "프로필 수정 api", description = "request : 닉네임, 전화번호, 생년월일")
+    @Operation(summary = "프로필 수정 api", description = "request : 닉네임, 성별, 소개메시지")
     public ApiResponse<MemberResponseDTO.UpdateProfileResultDTO> updateProfile(@RequestBody MemberRequestDTO.UpdateMemberDTO request,
                                                                                Authentication authentication){
 

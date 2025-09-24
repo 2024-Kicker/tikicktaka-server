@@ -2,6 +2,7 @@ package com.example.tikicktaka.web.dto.member;
 
 import com.example.tikicktaka.domain.enums.LanTourCategory;
 import com.example.tikicktaka.domain.images.LanTourImg;
+import com.example.tikicktaka.domain.images.ProfileImg;
 import com.example.tikicktaka.web.dto.lanTour.LanTourResponseDTO;
 import lombok.*;
 
@@ -139,7 +140,9 @@ public class MemberResponseDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class ProfileModifyResultDTO {
+        Long memberId;
         String nickname;
+        String profileImgUrl;
     }
 
     @Builder

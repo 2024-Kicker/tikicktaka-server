@@ -133,7 +133,6 @@ public class MemberConverter {
         return new MemberResponseDTO.CompleteSignupResultDTO(
                 member.getId(),
                 member.getName(),
-                //member.getNickname(),
                 member.getEmail()
         );
     }
@@ -144,29 +143,6 @@ public class MemberConverter {
                 .member(member)
                 .build();
     }
-
-
-//    public static Member toUpdateProfile(Member member, MemberRequestDTO.UpdateMemberDTO request) {
-//        List<MemberTerm> memberTermList = member.getMemberTermList();
-//
-//        if (memberTermList == null) {
-//            memberTermList = new ArrayList<>();
-//        }
-//
-//        return Member.builder()
-//                .id(member.getId())
-//                .name(request.getNickname())
-//                .password(member.getPassword())
-//                .email(member.getEmail())
-//                .gender(request.getGender() != null ? request.getGender() : member.getGender())
-//                .introduceMessage(request.getIntroduceMessage() != null ? request.getIntroduceMessage() : member.getIntroduceMessage())
-//                .introduceMessage(member.getIntroduceMessage())
-//                .memberRole(member.getMemberRole())
-//                .memberStatus(member.getMemberStatus())
-//                .memberTermList(memberTermList)
-//                .profileImg(member.getProfileImg())
-//                .build();
-//    }
 
     public static void toUpdateProfile(Member member, MemberRequestDTO.UpdateMemberDTO request) {
         if (request.getNickname() != null) {
@@ -215,9 +191,13 @@ public class MemberConverter {
     }
 
     public static MemberResponseDTO.ProfileModifyResultDTO toProfileModify(Member member) {
+        ProfileImg profileImg = member.getProfileImg();
+        String url = (profileImg != null) ? profileImg.getUrl() : null;
 
         return MemberResponseDTO.ProfileModifyResultDTO.builder()
+                .memberId(member.getId())
                 .nickname(member.getName())
+                .profileImgUrl(url)
                 .build();
 
     }
