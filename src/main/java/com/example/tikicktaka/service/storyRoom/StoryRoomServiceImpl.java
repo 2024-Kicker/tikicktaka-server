@@ -91,7 +91,7 @@ public class StoryRoomServiceImpl implements StoryRoomService {
         if (imageFiles != null && !imageFiles.isEmpty()) {
             for (MultipartFile file : imageFiles) {
                 if (!file.isEmpty()) {
-                    String imageUrl = utilService.uploadS3Img("storyRoom", file);
+                    String imageUrl = utilService.uploadS3Img("storyRoomPost", file);
                     imageUrls.add(imageUrl);
 
                     StoryRoomImg image = StoryRoomImg.builder()

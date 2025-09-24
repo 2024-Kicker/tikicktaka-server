@@ -42,6 +42,9 @@ public class AmazonConfig {
     @Value("companionPost")
     private String companionPostPath;
 
+    @Value("storyRoomPost")
+    private String storyRoomPostPath;
+
     @PostConstruct
     public void init() { this.awsCredentials = new BasicAWSCredentials(accessKey, secretKey); }
 
