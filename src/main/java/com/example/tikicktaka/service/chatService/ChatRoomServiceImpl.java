@@ -71,7 +71,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         boolean existsGroup = companionPostChatRoomRepository
                 .existsByCompanionPost_IdAndIsGroupTrue(chatRoomDTO.getPostId());
         if (existsGroup) {
-            // 이미 있으면 그 방을 리턴해도 되고, 409로 막아도 OK
+            // 이미 있으면 그 방을 리턴
             // 여기선 기존 방 DTO 반환 패턴 유지가 맞다면 이렇게:
             ChatRoom room = companionPostChatRoomRepository.findAllByCompanionPost_Id(chatRoomDTO.getPostId())
                     .stream().filter(ChatRoom::getIsGroup).findFirst()
@@ -79,6 +79,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
             ChatRoomDTO dto = new ChatRoomDTO(room);
             // 반환용 roomId에 CR- 접두사 부여
             dto.setRoomId(room.getRoomId());
+            dto.setInviteCode(room.getInviteCode());
 
           return dto;
         }
