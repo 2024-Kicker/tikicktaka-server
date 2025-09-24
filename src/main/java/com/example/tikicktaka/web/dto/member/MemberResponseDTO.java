@@ -47,6 +47,9 @@ public class MemberResponseDTO {
         Long memberId;
         String nickname;
         String email;
+        String gender;
+        String introduceMessage;
+        String profileImgUrl;
         LocalDateTime updatedAt;
     }
 
