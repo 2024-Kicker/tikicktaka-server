@@ -146,25 +146,39 @@ public class MemberConverter {
     }
 
 
-    public static Member toUpdateProfile(Member member, MemberRequestDTO.UpdateMemberDTO request) {
-        List<MemberTerm> memberTermList = member.getMemberTermList();
+//    public static Member toUpdateProfile(Member member, MemberRequestDTO.UpdateMemberDTO request) {
+//        List<MemberTerm> memberTermList = member.getMemberTermList();
+//
+//        if (memberTermList == null) {
+//            memberTermList = new ArrayList<>();
+//        }
+//
+//        return Member.builder()
+//                .id(member.getId())
+//                .name(request.getNickname())
+//                .password(member.getPassword())
+//                .email(member.getEmail())
+//                .gender(request.getGender() != null ? request.getGender() : member.getGender())
+//                .introduceMessage(request.getIntroduceMessage() != null ? request.getIntroduceMessage() : member.getIntroduceMessage())
+//                .introduceMessage(member.getIntroduceMessage())
+//                .memberRole(member.getMemberRole())
+//                .memberStatus(member.getMemberStatus())
+//                .memberTermList(memberTermList)
+//                .profileImg(member.getProfileImg())
+//                .build();
+//    }
 
-        if (memberTermList == null) {
-            memberTermList = new ArrayList<>();
+    public static void toUpdateProfile(Member member, MemberRequestDTO.UpdateMemberDTO request) {
+        if (request.getNickname() != null) {
+            member.setName(request.getNickname()); // setNickname이 아니라 setName일 가능성 높음
         }
-
-        return Member.builder()
-                .id(member.getId())
-                .name(request.getNickname())
-                .password(member.getPassword())
-                .email(member.getEmail())
-                .gender(member.getGender())
-                .introduceMessage(member.getIntroduceMessage())
-                .memberRole(member.getMemberRole())
-                .memberStatus(member.getMemberStatus())
-                .memberTermList(memberTermList)
-                .profileImg(member.getProfileImg())
-                .build();
+        if (request.getGender() != null) {
+            member.setGender(request.getGender());
+        }
+        if (request.getIntroduceMessage() != null) {
+            member.setIntroduceMessage(request.getIntroduceMessage());
+        }
+        // memberTermList 같은 연관 컬렉션은 여기서 건들 필요 없음 (재생성 금지)
     }
 
     public static MemberResponseDTO.memberProfileDTO memberProfileDTO(Member member){
@@ -209,11 +223,16 @@ public class MemberConverter {
     }
 
     public static MemberResponseDTO.UpdateProfileResultDTO toProfileUpdate(Member member) {
+        ProfileImg profileImg = member.getProfileImg();
+        String profileImgUrl = profileImg != null ? profileImg.getUrl() : null;
 
         return MemberResponseDTO.UpdateProfileResultDTO.builder()
                 .memberId(member.getId())
                 .nickname(member.getName())
                 .email(member.getEmail())
+                .gender(member.getGender() != null ? member.getGender().name() : null)
+                .introduceMessage(member.getIntroduceMessage())
+                .profileImgUrl(profileImgUrl)
                 .updatedAt(member.getUpdatedAt())
                 .build();
 

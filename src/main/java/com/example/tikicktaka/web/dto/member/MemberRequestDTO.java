@@ -52,13 +52,11 @@ public class MemberRequestDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class UpdateMemberDTO{
-        @NotBlank(message = "닉네임을 입력해주세요.")
         private String nickname;
+        private Gender gender;
+        private String introduceMessage;
 
-        @NotBlank(message = "휴대폰 번호를 입력해주세요")
-        private String phone;
 
-        private Date birthday;
     }
 
     @Getter

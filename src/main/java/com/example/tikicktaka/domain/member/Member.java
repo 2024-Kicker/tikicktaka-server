@@ -128,6 +128,15 @@ public class Member extends BaseDateTimeEntity {
         this.introduceMessage = message;
     }
 
-    public void setId(Long ownerId) {
+    public void setName(String newName) {
+        this.name = newName;
+    }
+
+    public void setGender(Gender newGender) {
+        this.gender = newGender;
+    }
+
+    public void setIntroduceMessage(String newIntro) {
+        this.introduceMessage = newIntro;
     }
 }

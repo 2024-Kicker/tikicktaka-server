@@ -331,12 +331,19 @@ public class MemberCommandServiceImpl implements MemberCommandService{
 
     @Override
     @Transactional
-    public Member modifyProfile(MemberRequestDTO.UpdateMemberDTO request, Member member) {
+    public Member modifyProfile(MemberRequestDTO.UpdateMemberDTO request, Member paramMember) {
 
-        Member update = MemberConverter.toUpdateProfile(member, request);
-        memberRepository.save(update);
+        Member member = memberRepository.findById(paramMember.getId())
+                .orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
 
-        return update;
+        if (request.getNickname() != null && !request.getNickname().equals(member.getName())) {
+            memberRepository.findByName(request.getNickname())
+                    .filter(m -> !m.getId().equals(member.getId()))
+                    .ifPresent(m -> { throw new MemberHandler(ErrorStatus.MEMBER_NICKNAME_DUPLICATED); });
+        }
+
+        MemberConverter.toUpdateProfile(member, request);
+        return member;
     }
 
     @Override
