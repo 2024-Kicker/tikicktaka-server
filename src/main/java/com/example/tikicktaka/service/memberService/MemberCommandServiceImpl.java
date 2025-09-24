@@ -130,15 +130,6 @@ public class MemberCommandServiceImpl implements MemberCommandService{
     }
 
     @Override
-    @Transactional
-    public RegisterSeller registerSeller(MemberRequestDTO.RegisterSellerDTO request, Member member) {
-
-        RegisterSeller registerSeller = MemberConverter.toRegisterSeller(request,member);
-        registerSellerRepository.save(registerSeller);
-        return registerSeller;
-    }
-
-    @Override
     public String login(String email, String password) {
         Member member = memberRepository.findByEmail(email).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_EMAIL_NOT_FOUND));
 
@@ -358,50 +349,6 @@ public class MemberCommandServiceImpl implements MemberCommandService{
         memberRepository.save(member);
     }
 
-    @Override
-    @Transactional
-    public Member modifySeller(Long memberId) {
-        Member member = memberRepository.findById(memberId).orElseThrow(()-> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
-        member.setMemberRole(MemberRole.SELLER);
-        memberRepository.save(member);
-        return member;
-    }
-
-    @Override
-    @Transactional
-    public Member chargeCoin(Member member, MemberRequestDTO.ChargeCoinRequestDTO request) {
-        member.updatePoints(request.getAmount());
-        ChargeCoin chargeCoin = MemberConverter.toChargeCoin(member,request);
-        chargeCoinRepository.save(chargeCoin);
-        return member;
-    }
-
-    @Override
-    public LanTourPurchase getPurchaseLanTourDetail(Long lanTourPurchaseId) {
-
-        return lanTourPurchaseRepository.findById(lanTourPurchaseId).orElseThrow(() -> new LanTourHandler(ErrorStatus.LAN_TOUR_PURCHASE_NOT_FOUND));
-    }
-
-    @Override
-    @Transactional
-    public Dibs dibsLanTour(Long lanTourId, Member member) {
-        LanTour lanTour = lanTourRepository.findById(lanTourId).orElseThrow(() -> new LanTourHandler(ErrorStatus.LAN_TOUR_NOT_FOUND));
-        Dibs dibs = LanTourConverter.toDibs(lanTour, member);
-        dibsRepository.save(dibs);
-        lanTour.increaseDibs();
-        return dibs;
-    }
-
-    @Override
-    @Transactional
-    public Dibs deleteDibsLanTour(Long lanTourId, Member member) {
-        LanTour lanTour = lanTourRepository.findById(lanTourId).orElseThrow(() -> new LanTourHandler(ErrorStatus.LAN_TOUR_NOT_FOUND));
-        Dibs dibs = dibsRepository.findByLanTourAndMember(lanTour, member).orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_DIBS_NOT_FOUND));
-        dibsRepository.delete(dibs);
-        dibsRepository.flush();
-        lanTour.decreaseDibs();
-        return dibs;
-    }
 
     @Override
     @Transactional

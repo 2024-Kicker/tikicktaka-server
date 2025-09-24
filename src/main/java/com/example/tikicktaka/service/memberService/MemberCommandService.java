@@ -21,8 +21,6 @@ public interface MemberCommandService {
 
     Member join(MemberRequestDTO.JoinDTO request);
 
-    RegisterSeller registerSeller(MemberRequestDTO.RegisterSellerDTO request, Member member);
-
     String login(String email, String password);
 
     Boolean confirmEmailDuplicate(MemberRequestDTO.EmailDuplicateConfirmDTO request);
@@ -41,27 +39,11 @@ public interface MemberCommandService {
 
     MemberResponseDTO.MemberPreferTravelStyleDTO getMemberTravelStyles(Member member);
 
-
-//    @Transactional
-//    Member completeSignup(Long memberId, MemberRequestDTO.CompleteSignupDTO request);
-
     Member profileImageUpload(MultipartFile profile, Member member);
 
     Member modifyProfile(MemberRequestDTO.UpdateMemberDTO request, Member member);
 
-//    Member findByPhone(String phone);
-
     void deleteMember(Long memberId);
-
-    Member modifySeller(Long memberId);
-
-    Member chargeCoin(Member member, MemberRequestDTO.ChargeCoinRequestDTO request);
-
-    LanTourPurchase getPurchaseLanTourDetail(Long lanTourPurchaseId);
-
-    Dibs dibsLanTour(Long lanTourId, Member member);
-
-    Dibs deleteDibsLanTour(Long lanTourId, Member member);
 
     Member changePassword(MemberRequestDTO.ChangePasswordRequestDTO request);
 

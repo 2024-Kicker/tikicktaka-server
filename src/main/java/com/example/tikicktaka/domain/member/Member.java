@@ -49,11 +49,6 @@ public class Member extends BaseDateTimeEntity {
     @Column(columnDefinition = "TEXT")
     private String password;
 
-    //@Temporal(TemporalType.DATE)
-    //private Date birthday;
-
-    private Long point;
-
     private String tendency;
 
     private String introduceMessage;
@@ -76,12 +71,6 @@ public class Member extends BaseDateTimeEntity {
     @Column(columnDefinition = "VARCHAR(15)")
     @ColumnDefault("'ACTIVE'")
     private MemberStatus memberStatus;
-
-//    @Column(columnDefinition = "TEXT")
-//    private String kakaoAuth;
-//
-//    @Column(columnDefinition = "TEXT")
-//    private String googleAuth;
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<LanTour> lanTourList = new ArrayList<>();
@@ -130,42 +119,15 @@ public class Member extends BaseDateTimeEntity {
     public Member(String email, String nickname, List<MemberTerm> memberTermList) {
 
     }
-    // Method to update additional information after social login
-//    public void updateAdditionalInfo(Date birthday, String phone) {
-//        this.birthday = birthday;
-//        this.phone = phone;
-//        this.memberStatus = MemberStatus.ACTIVE;
-//    }
-
-    public Member updatePoints(Long point){
-        this.point += point;
-        return this;
-    }
 
     public Member updatePassword(String password){
         this.password = password;
         return this;
     }
-
-    public Member spendCoin(Long price){
-        this.point -= price;
-        return this;
-    }
-
     public void updateIntroduceMessage (String message){
         this.introduceMessage = message;
     }
 
     public void setId(Long ownerId) {
     }
-
-
-//    // Method to update additional information after social login
-//    public void updateAdditionalInfo(String name, Date birthday, Gender gender, String phone, List<MemberTerm> memberTermList) {
-//        this.birthday = birthday;
-//        this.gender = gender;
-//        this.phone = phone;
-//        this.memberTermList = memberTermList;
-//        this.memberStatus = MemberStatus.ACTIVE;
-//    }
 }
