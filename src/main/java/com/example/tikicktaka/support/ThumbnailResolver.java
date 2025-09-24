@@ -20,7 +20,7 @@ public class ThumbnailResolver {
     public String resolveForCompanion(CompanionPost post) {
         if (post == null) return defaultBaseballImage;
         if (StringUtils.hasText(post.getThumbnailUrl())) return post.getThumbnailUrl();
-        return (post.getTravelStatus() == CompanionPost.TravelStatus.Travel)
+        return (post.getPostType() == CompanionPost.PostType.Travel)
                 ? defaultTravelImage
                 : defaultBaseballImage;
     }

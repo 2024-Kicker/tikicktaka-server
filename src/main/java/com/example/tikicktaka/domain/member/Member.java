@@ -18,11 +18,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -71,6 +68,7 @@ public class Member extends BaseDateTimeEntity {
     @Enumerated(EnumType.STRING)
     private SocialType socialType;
 
+    @Getter
     @OneToOne(mappedBy = "member")
     private ProfileImg profileImg;
 
