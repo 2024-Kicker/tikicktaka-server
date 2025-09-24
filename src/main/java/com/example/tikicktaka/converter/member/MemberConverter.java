@@ -220,7 +220,9 @@ public class MemberConverter {
 
     public static MemberResponseDTO.MemberPreferTeamDTO toMemberPreferTeamDTO(MemberTeam memberTeam){
         return MemberResponseDTO.MemberPreferTeamDTO.builder()
-                .memberTeamId(memberTeam.getId())
+                .memberId(memberTeam.getMember() != null ? memberTeam.getMember().getId() : null)
+                .teamId(memberTeam.getTeam().getId())
+                .teamName(memberTeam.getTeam() != null ? memberTeam.getTeam().getTeamName() : null)
                 .createdAt(memberTeam.getCreatedAt())
                 .build();
     }

@@ -309,6 +309,22 @@ public class MemberCommandServiceImpl implements MemberCommandService{
         );
     }
 
+    //선호 구단 조회
+    @Override
+    @Transactional(readOnly = true)
+    public MemberResponseDTO.MemberPreferTeamDTO getMemberPreferTeam(Member member) {
+        MemberTeam memberTeam = memberTeamRepository.findByMember(member)
+                .orElseThrow(()-> new MemberHandler(ErrorStatus.MEMBER_TEAM_NOT_FOUND));
+
+        return new MemberResponseDTO.MemberPreferTeamDTO(
+                member.getId(),
+                memberTeam.getTeam().getId(),                                // memberTeamId
+                memberTeam.getTeam() != null ? memberTeam.getTeam().getTeamName() : null,
+                memberTeam.getCreatedAt()
+        );
+    }
+
+
     @Override
     @Transactional
     public Member profileImageUpload(MultipartFile profile, Member member) {
