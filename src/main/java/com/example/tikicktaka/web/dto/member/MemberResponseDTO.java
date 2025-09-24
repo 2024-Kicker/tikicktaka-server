@@ -32,7 +32,7 @@ public class MemberResponseDTO {
         String nickname;
         String teamName;
         Long point;
-        String phoneNumber;
+        String introduceMessage;
         String gender;
         String profileImgUrl;
         List<Boolean> memberTerm;
