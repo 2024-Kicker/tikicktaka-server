@@ -33,6 +33,7 @@ public class CompanionPostResponseDTO {
         this.title = post.getTitle();
         this.content = post.getContent();
         this.authorName = (post.getAuthor() != null) ? post.getAuthor().getName() : "Unknown";
+        this.createdAt = post.getCreatedAt();
         this.status = post.getStatus();
         this.PostType = post.getPostType();
         this.thumbnailUrl = post.getThumbnailUrl();
