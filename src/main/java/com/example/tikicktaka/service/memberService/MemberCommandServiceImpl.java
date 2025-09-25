@@ -266,8 +266,13 @@ public class MemberCommandServiceImpl implements MemberCommandService{
         if (mt.getTeam() != null && Objects.equals(mt.getTeam().getId(), teamId)) {
             return mt;
         }
+        log.info("PreferTeam 저장 전 -> memberId={}, teamId={}", member.getId(), team.getId());
 
         mt.setTeam(team);
+        MemberTeam saved = memberTeamRepository.save(mt);
+        memberTeamRepository.flush();
+        log.info("PreferTeam 저장 후 -> memberTeamId={}, memberId={}, teamId={}",
+                saved.getId(), saved.getMember().getId(), saved.getTeam().getId());
         return memberTeamRepository.save(mt);
     }
 
