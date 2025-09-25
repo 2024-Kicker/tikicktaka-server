@@ -14,7 +14,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-
+import com.example.tikicktaka.web.dto.chat.ChatLinkedPostDTO;
+import com.example.tikicktaka.service.chatService.ChatLinkedPostService;
 import java.util.List;
 
 @RestController
@@ -29,7 +30,7 @@ public class ChatInboxController {
     private final CompanionPostChatParticipantRepository companionPostChatParticipantRepository;
     private final CompanionPostChatRoomRepository companionPostChatRoomRepository;
     private final ChatBlockService chatBlockService;
-
+    private final ChatLinkedPostService chatLinkedPostService;
 
 
 
@@ -107,6 +108,17 @@ public class ChatInboxController {
         return ApiResponse.onSuccess(chatBlockService.list(userId));
     }
 
+    @GetMapping("/api/chats/my-posts")
+    @Operation(
+            summary = "내가 참여 중인 동행찾기 채팅방과 연계된 게시글 목록 반환",
+            description = "채팅방 소속(1:1 + 단체)을 기준으로 연결된 동행찾기 게시글을 모아서 반환합니다. "
+                    + "중복 게시글은 제거되며, 최근 대화 시각 기준으로 정렬됩니다."
+    )
+    public ApiResponse<List<ChatLinkedPostDTO>> myLinkedPosts(Authentication authentication) {
+        Long me = Long.valueOf(authentication.getName());
+        List<ChatLinkedPostDTO> result = chatLinkedPostService.listMyLinkedCompanionPosts(me);
+        return ApiResponse.onSuccess(result);
+    }
 
 
 
