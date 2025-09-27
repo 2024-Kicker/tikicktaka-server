@@ -22,4 +22,8 @@ public interface StoryRoomChatMessageRepository extends JpaRepository<StoryChatM
     Optional<StoryChatMessage> findTop1ByStoryRoom_RoomIdOrderByIdDesc(String roomId);
 
     void deleteByStoryRoom_RoomId(String roomId);
+    void deleteByStoryRoom_Post_Id(Long postId);
+
 }
+
+
