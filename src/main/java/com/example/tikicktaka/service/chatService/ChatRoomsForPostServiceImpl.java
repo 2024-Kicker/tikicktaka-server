@@ -3,6 +3,7 @@ package com.example.tikicktaka.service.chatService;
 import com.example.tikicktaka.domain.companionPostChat.ChatMessage;
 import com.example.tikicktaka.domain.companionPostChat.ChatParticipant;
 import com.example.tikicktaka.domain.companionPostChat.ChatRoom;
+import com.example.tikicktaka.domain.member.Member;
 import com.example.tikicktaka.repository.companionPostChat.CompanionPostChatMessageRepository;
 import com.example.tikicktaka.repository.companionPostChat.CompanionPostChatParticipantRepository;
 import com.example.tikicktaka.repository.companionPostChat.CompanionPostChatRoomRepository;
@@ -64,6 +65,26 @@ public class ChatRoomsForPostServiceImpl implements ChatRoomsForPostService {
                     })
                     .toList();
 
+            String opponentName = null;
+            if (!isGroup) {
+                Long otherId = memberIds.stream()
+                        .filter(id -> !id.equals(meId))
+                        .findFirst()
+                        .orElse(null);
+
+                if (otherId != null) {
+                    var otherMember = (participants == null ? Collections.<ChatParticipant>emptyList() : participants)
+                            .stream()
+                            .map(ChatParticipant::getMember)
+                            .filter(Objects::nonNull)
+                            .filter(m -> otherId.equals(m.getId()))
+                            .findFirst()
+                            .orElse(null);
+
+                    opponentName = resolveDisplayName(otherMember);
+                }
+            }
+
             // 프로필 이미지 배치 조회 → 멤버ID→URL 매핑
             Map<Long, String> urlByMemberId = profileImgRepository.findByMember_IdIn(memberIds)
                     .stream()
@@ -105,6 +126,7 @@ public class ChatRoomsForPostServiceImpl implements ChatRoomsForPostService {
                     .postId(postId)
                     .participants(participantCount)
                     .participantProfileImages(profileImages)
+                    .opponentName(opponentName)
                     .lastMessage(lastMsg)
                     .lastAt(lastAt)
                     .unreadCount(unread)
@@ -120,4 +142,20 @@ public class ChatRoomsForPostServiceImpl implements ChatRoomsForPostService {
         return new PostChatRoomListResponseDTO(items);
     }
 
+    private String resolveDisplayName(Member m) {
+        if (m == null) return null;
+        try {
+            if (m.getName() != null && !m.getName().isBlank()) return m.getName();
+        } catch (NoSuchMethodError | Exception ignored) {
+        }
+        try {
+            if (m.getEmail() != null && !m.getEmail().isBlank()) {
+                String email = m.getEmail();
+                int at = email.indexOf('@');
+                return (at > 0) ? email.substring(0, at) : email;
+            }
+        } catch (NoSuchMethodError | Exception ignored) {
+        }
+        return "알 수 없음";
+    }
 }
