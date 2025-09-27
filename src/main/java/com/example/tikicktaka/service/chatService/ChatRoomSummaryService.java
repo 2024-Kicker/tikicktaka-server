@@ -1,8 +1,11 @@
 package com.example.tikicktaka.service.chatService;
 
 import com.example.tikicktaka.web.dto.chat.ChatRoomSummaryDTO;
+import com.example.tikicktaka.web.dto.chat.PostSummaryDTO;
 
 public interface ChatRoomSummaryService {
-    ChatRoomSummaryDTO getSummary(Long meId, String roomId);
+    ChatRoomSummaryDTO getRoomSummary(Long meId, String roomId);
+    PostSummaryDTO getPostHeader(Long meId, Long postId);
+
 }
 

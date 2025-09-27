@@ -6,9 +6,7 @@ import com.example.tikicktaka.repository.companionPostChat.CompanionPostChatPart
 import com.example.tikicktaka.repository.companionPostChat.CompanionPostChatRoomRepository;
 import com.example.tikicktaka.service.CompanionPostService.CompanionPostService;
 import com.example.tikicktaka.service.chatService.*;
-import com.example.tikicktaka.web.dto.chat.ChatRoomListResponseDTO;
-import com.example.tikicktaka.web.dto.chat.ChatRoomSummaryDTO;
-import com.example.tikicktaka.web.dto.chat.PostChatRoomListResponseDTO;
+import com.example.tikicktaka.web.dto.chat.*;
 import com.example.tikicktaka.service.chatService.ChatReadService;
 import com.example.tikicktaka.web.dto.companionPost.CompanionPostListResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,7 +14,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import com.example.tikicktaka.web.dto.chat.ChatLinkedPostDTO;
 import com.example.tikicktaka.repository.companionPostChat.CompanionPostChatMessageRepository;
 import com.example.tikicktaka.domain.companionPostChat.ChatMessage;
 
@@ -41,8 +38,7 @@ public class ChatInboxController {
     private final ChatRoomsForPostService chatRoomsForPostService;
     private final ChatReadService chatReadService;
     private final CompanionPostService companionPostService;
-
-
+    private final ChatRoomSummaryService chatRoomSummaryService;
 
 
     @GetMapping("/rooms") //안읽은 메시지 수 구현되어있지 않음
@@ -63,8 +59,18 @@ public class ChatInboxController {
 //            Authentication authentication
 //    ) {
 //        Long meId = Long.valueOf(authentication.getName());
-//        return ApiResponse.onSuccess(summaryService.getSummary(meId, roomId));
+//        return ApiResponse.onSuccess(summaryService.getRoomSummary(meId, roomId));
 //    }
+    @GetMapping("/companion/{postId}/header")
+    @Operation(summary = "동행찾기 게시글 헤더 조회(작성자면 단체방 초대코드 포함)")
+    public ApiResponse<PostSummaryDTO> getPostHeader(
+            @PathVariable Long postId,
+            Authentication authentication
+    ) {
+        Long meId = Long.valueOf(authentication.getName());
+        PostSummaryDTO dto = chatRoomSummaryService.getPostHeader(meId, postId);
+        return ApiResponse.onSuccess(dto);
+    }
 
     @PostMapping("/rooms/{roomId}/leave")
     @Operation(summary = "채팅방 나가기 api")
@@ -85,7 +91,6 @@ public class ChatInboxController {
         int cnt = companionPostChatParticipantRepository.countByChatRoom_RoomId(roomId);
         return ApiResponse.onSuccess(cnt);
     }
-// 이야기방 반환시간
 
 
     @PostMapping("/block")
