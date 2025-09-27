@@ -38,4 +38,7 @@ public interface CompanionPostChatParticipantRepository extends JpaRepository<Ch
 
     List<ChatParticipant> findByMember_Id(Long memberId, Pageable pageable);
     Optional<ChatParticipant> findByChatRoom_RoomIdAndMember_Id(String roomId, Long memberId);
+    List<ChatParticipant> findByChatRoom_CompanionPost_IdAndChatRoom_RoomId(Long postId, String roomId);
+    List<ChatParticipant> findByChatRoom_RoomId(String roomId);
+
 }
