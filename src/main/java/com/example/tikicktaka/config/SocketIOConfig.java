@@ -45,21 +45,10 @@ public class SocketIOConfig {
     @Bean
     public SocketIOServer socketIOServer() {
         logger.info("Initializing Socket.IO server...");
-
-
-        // 클라이언트 연결 이벤트 리스너 추가
-        server.addConnectListener(client -> {
-            System.out.println("1: Client Connected: " + client.getSessionId());        });
-
-        // 클라이언트 연결 종료 이벤트 리스너 추가
-        server.addDisconnectListener(client -> {
-            System.out.println("1: Client Disconnected: " + client.getSessionId());
-        });
-
+        server.addConnectListener(client -> System.out.println("1: Client Connected: " + client.getSessionId()));
+        server.addDisconnectListener(client -> System.out.println("1: Client Disconnected: " + client.getSessionId()));
         logger.info("1: Socket.IO 서버 설정 완료: ws://{}:{}", host, port);
-
-
-        return server;  // this.server가 아니라 server를 반환
+        return server;
     }
 
     @EventListener(ApplicationReadyEvent.class)
