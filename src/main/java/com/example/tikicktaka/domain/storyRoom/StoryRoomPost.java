@@ -1,21 +1,23 @@
 package com.example.tikicktaka.domain.storyRoom;
 
+import com.example.tikicktaka.domain.companionPost.CompanionPost;
 import com.example.tikicktaka.domain.member.Member;
 import com.example.tikicktaka.domain.enums.Topic;
 import com.example.tikicktaka.domain.enums.LimitTime;
 import com.example.tikicktaka.domain.enums.StoryRoomStatus;
 import com.example.tikicktaka.domain.images.StoryRoomImg;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import org.hibernate.annotations.DynamicInsert;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Getter
 @Setter
+@Builder
+@DynamicInsert
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -58,6 +60,10 @@ public class StoryRoomPost {
     public void addImage(StoryRoomImg image) {
         images.add(image);
         image.setStoryRoomPost(this);
+    }
+
+    public void setTopic(Topic topic) {
+        this.topic = topic;
     }
 
 }
