@@ -7,6 +7,7 @@ import com.example.tikicktaka.service.chatService.*;
 import com.example.tikicktaka.web.dto.chat.ChatRoomListResponseDTO;
 import com.example.tikicktaka.web.dto.chat.ChatRoomSummaryDTO;
 import com.example.tikicktaka.web.dto.chat.PostChatRoomListResponseDTO;
+import com.example.tikicktaka.service.chatService.ChatReadService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -34,12 +35,12 @@ public class ChatInboxController {
     private final ChatLinkedPostService chatLinkedPostService;
     private final CompanionPostChatMessageRepository companionPostChatMessageRepository;
     private final ChatRoomsForPostService chatRoomsForPostService;
+    private final ChatReadService chatReadService;
 
 
 
 
-
-    @GetMapping("/rooms")
+    @GetMapping("/rooms") //안읽은 메시지 수 구현되어있지 않음
     @Operation(summary = "내가 속한 전체 채팅방(동행찾기) 목록 - 마지막 메시지 포함(커서 기반)")
     public ApiResponse<ChatRoomListResponseDTO> myRooms(
             @RequestParam(required = false) Long cursor,
@@ -138,32 +139,27 @@ public class ChatInboxController {
         return ApiResponse.onSuccess(result);
     }
 
+    @PostMapping("/rooms/{roomId}/read")
+    @Operation(summary = "해당 방에서 내가 마지막으로 읽은 메시지 커서 업데이트")
+    public ApiResponse<Void> markRead(
+            @PathVariable String roomId,
+            @RequestParam Long lastMessageId,
+            Authentication authentication
+    ) {
+        Long meId = Long.valueOf(authentication.getName());
+        chatReadService.markRead(roomId, meId, lastMessageId);
+        return ApiResponse.onSuccess(null);
+    }
 
     @GetMapping("/rooms/{roomId}/unread")
-    @Operation(summary = "특정 채팅방의 (임시) 안읽은 메시지 수 반환")
+    @Operation(summary = "특정 채팅방의 안읽은 메시지 수 반환")
     public ApiResponse<Integer> unread(
             @PathVariable String roomId,
             Authentication authentication
     ) {
         Long meId = Long.valueOf(authentication.getName());
-        int unread = computeUnread(roomId, meId);
+        int unread = chatReadService.countUnread(roomId, meId);
         return ApiResponse.onSuccess(unread);
     }
-
-
-    private int computeUnread(String roomId, Long meId) {
-        // 내가 마지막으로 보낸 메시지 ID (없으면 0L)
-        Long myLastSentId = companionPostChatMessageRepository
-                .findTop1ByChatRoom_RoomIdAndSenderIdOrderByIdDesc(roomId, meId)
-                .map(ChatMessage::getId)
-                .orElse(0L);
-
-        // 그 이후 들어온 '상대' 메시지 수
-        long cnt = companionPostChatMessageRepository
-                .countByChatRoomRoomIdAndIdGreaterThanAndSenderIdNot(roomId, myLastSentId, meId);
-
-        return (int) cnt;
-    }
-
 
 }

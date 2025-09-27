@@ -17,4 +17,5 @@ public class ChatRoomListItemDTO {
     private final String lastMessage;     // 마지막 메시지
     private final LocalDateTime lastAt;   // 마지막 메시지 시각
     private final Long lastMessageId;     // 커서용
+    //private final int unreadCount;        // 읽지않은 메시지 수
 }

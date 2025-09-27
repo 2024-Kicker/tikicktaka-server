@@ -22,19 +22,20 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ChatRoomsForPostServiceImpl implements ChatRoomsForPostService {
 
-    private final CompanionPostChatRoomRepository roomRepo;
-    private final CompanionPostChatParticipantRepository participantRepo;
-    private final CompanionPostChatMessageRepository messageRepo;
+    private final CompanionPostChatRoomRepository companionPostChatRoomRepository;
+    private final CompanionPostChatParticipantRepository companionPostChatParticipantRepository;
+    private final CompanionPostChatMessageRepository companionPostChatMessageRepository;
     private final ProfileImgRepository profileImgRepository;
+    private final ChatReadService chatReadService;
 
     @Override
     @Transactional(readOnly = true)
     public PostChatRoomListResponseDTO myRoomsForPost(Long meId, Long postId) {
-        List<ChatRoom> rooms = roomRepo.findAllByCompanionPost_Id(postId);
+        List<ChatRoom> rooms = companionPostChatRoomRepository.findAllByCompanionPost_Id(postId);
         List<PostChatRoomItemDTO> items = new ArrayList<>();
 
         for (ChatRoom room : rooms) {
-            if (!participantRepo.existsByChatRoomAndMemberId(room, meId)) {
+            if (!companionPostChatParticipantRepository.existsByChatRoomAndMemberId(room, meId)) {
                 continue;
             }
 
@@ -42,11 +43,15 @@ public class ChatRoomsForPostServiceImpl implements ChatRoomsForPostService {
             boolean isGroup = Boolean.TRUE.equals(room.getIsGroup());
 
             List<ChatParticipant> participants =
-                    participantRepo.findByChatRoom_CompanionPost_IdAndChatRoom_RoomId(postId, roomId);
+                    companionPostChatParticipantRepository.findByChatRoom_CompanionPost_IdAndChatRoom_RoomId(postId, roomId);
 
-            int participantCount = (participants != null) ? participants.size() : 0;
+            int participantCount = (int) (participants == null ? 0 :
+                    participants.stream()
+                            .map(p -> p.getMember() != null ? p.getMember().getId() : null)
+                            .filter(Objects::nonNull)
+                            .distinct()
+                            .count());
 
-            //멤버 ID 추출 (원하면 meId 먼저 오도록 정렬)
             List<Long> memberIds = (participants == null ? Collections.<ChatParticipant>emptyList() : participants)
                     .stream()
                     .filter(p -> p.getMember() != null && p.getMember().getId() != null)
@@ -83,21 +88,13 @@ public class ChatRoomsForPostServiceImpl implements ChatRoomsForPostService {
                     .collect(java.util.stream.Collectors.toList());
 
             // 마지막 메시지/시각
-            var lastOpt = messageRepo.findTop1ByChatRoom_RoomIdOrderByIdDesc(roomId);
+            var lastOpt = companionPostChatMessageRepository.findTop1ByChatRoom_RoomIdOrderByIdDesc(roomId);
             String lastMsg = lastOpt.map(ChatMessage::getMessage).orElse(null);
             LocalDateTime lastAt = lastOpt.map(ChatMessage::getTimestamp).orElse(null);
 
-            // (임시) unread: 내 마지막 발신 이후 상대 메시지 수
             int unread = 0;
             try {
-                Long myLastSentId = messageRepo
-                        .findTop1ByChatRoom_RoomIdAndSenderIdOrderByIdDesc(roomId, meId)
-                        .map(ChatMessage::getId)
-                        .orElse(0L);
-
-                unread = (int) messageRepo.countByChatRoomRoomIdAndIdGreaterThanAndSenderIdNot(
-                        roomId, myLastSentId, meId
-                );
+                unread = chatReadService.countUnread(roomId, meId);
             } catch (Exception ignore) {
                 unread = 0;
             }

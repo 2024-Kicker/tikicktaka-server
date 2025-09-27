@@ -1,14 +1,20 @@
 package com.example.tikicktaka.service.chatService;
 
 import com.example.tikicktaka.domain.companionPostChat.ChatMessage;
+import com.example.tikicktaka.domain.companionPostChat.ChatReadCursor;
 import com.example.tikicktaka.domain.enums.TargetType;
+import com.example.tikicktaka.domain.member.Member;
 import com.example.tikicktaka.repository.blocked.BlockedRepository;
+import com.example.tikicktaka.repository.companionPostChat.ChatReadCursorRepository;
 import com.example.tikicktaka.repository.companionPostChat.CompanionPostChatMessageRepository;
 import com.example.tikicktaka.repository.companionPostChat.CompanionPostChatParticipantRepository;
+import com.example.tikicktaka.repository.member.MemberRepository;
 import com.example.tikicktaka.web.dto.chat.ChatMessageItemDTO;
 import com.example.tikicktaka.web.dto.chat.ChatMessagePageDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+
+import java.time.LocalDateTime;
 import java.util.Objects;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,10 +27,13 @@ import java.util.stream.Collectors;
 public class ChatReadServiceImpl implements ChatReadService {
 
     private final ChatAuthFacadeService auth;
-    private final CompanionPostChatMessageRepository msgRepo;
-    private final MemberDisplayNameService nameService;
-    private final BlockedRepository blockedRepo;
-    private final CompanionPostChatParticipantRepository participantRepo;
+    private final CompanionPostChatMessageRepository companionPostChatMessageRepository;
+    private final MemberDisplayNameService memberDisplayNameService;
+    private final BlockedRepository blockedRepository;
+    private final CompanionPostChatParticipantRepository companionPostChatParticipantRepository;
+    private final ChatReadCursorRepository chatReadCursorRepository;
+    private final MemberRepository memberRepository;
+
 
     @Override
     @Transactional
@@ -34,7 +43,7 @@ public class ChatReadServiceImpl implements ChatReadService {
         boolean authorView = auth.resolveCompanion(meId, roomId).authorView();
 
         // 내가 차단한 사용자
-        Set<Long> blocked = blockedRepo.findByMemberIdAndTargetTypeOrderByCreatedAtDesc(meId, TargetType.MEMBER)
+        Set<Long> blocked = blockedRepository.findByMemberIdAndTargetTypeOrderByCreatedAtDesc(meId, TargetType.MEMBER)
                 .stream()
                 .map(b -> b.getTargetId())
                 .collect(Collectors.toSet());
@@ -44,15 +53,15 @@ public class ChatReadServiceImpl implements ChatReadService {
 
         if (cursor == null) {
             // 첫 페이지: 최신부터 n개
-            raw = msgRepo.findByChatRoomRoomIdOrderByIdDesc(roomId, pageable);
+            raw = companionPostChatMessageRepository.findByChatRoomRoomIdOrderByIdDesc(roomId, pageable);
 
         } else if ("prev".equalsIgnoreCase(dir)) {
             // prev = 더 최신으로 이동 (cursor 이후 = id > cursor, 오름차순으로 가져와서 나중에 asc 유지)
-            raw = msgRepo.findByChatRoomRoomIdAndIdGreaterThanOrderByIdAsc(roomId, cursor, pageable);
+            raw = companionPostChatMessageRepository.findByChatRoomRoomIdAndIdGreaterThanOrderByIdAsc(roomId, cursor, pageable);
 
         } else { // dir == "next" (default)
             // next = 더 과거로 이동 (cursor 이전 = id < cursor, 내림차순으로 가져온 뒤 아래에서 asc로 정렬 통일)
-            raw = msgRepo.findByChatRoomRoomIdAndIdLessThanOrderByIdDesc(roomId, cursor, pageable);
+            raw = companionPostChatMessageRepository.findByChatRoomRoomIdAndIdLessThanOrderByIdDesc(roomId, cursor, pageable);
         }
 
 // 응답은 오름차로 통일
@@ -73,7 +82,7 @@ public class ChatReadServiceImpl implements ChatReadService {
         }
         final Long ownerId = tmpOwnerId;
 
-        var names = nameService.namesOf(
+        var names = memberDisplayNameService.namesOf(
                 raw.stream().map(ChatMessage::getSenderId).distinct().toList()
         );
 
@@ -104,7 +113,7 @@ public class ChatReadServiceImpl implements ChatReadService {
 
         if (!raw.isEmpty()) {
             Long lastSeenId = raw.get(raw.size() - 1).getId();
-            participantRepo.findByChatRoom_RoomIdAndMember_Id(roomId, meId)
+            companionPostChatParticipantRepository.findByChatRoom_RoomIdAndMember_Id(roomId, meId)
                     .ifPresent(cp -> cp.markRead(lastSeenId)); // JPA flush는 트랜잭션 종료 시 수행
         }
 
@@ -113,8 +122,36 @@ public class ChatReadServiceImpl implements ChatReadService {
                 .prevCursor(prev)
                 .nextCursor(next)
                 .messages(items)
-                //.inviteCode(inviteCodeForResponse)
                 .build();
+    }
+
+    @Override
+    @Transactional
+    public void markRead(String roomId, Long memberId, Long lastReadMessageId) {
+        ChatReadCursor cursor = chatReadCursorRepository.findByRoomIdAndMember_Id(roomId, memberId)
+                .orElseGet(() -> {
+                    Member meRef = memberRepository.getReferenceById(memberId);
+                    return new ChatReadCursor(roomId, meRef, null, null);
+                });
+        cursor.setLastReadMessageId(lastReadMessageId);
+        cursor.setLastReadAt(LocalDateTime.now());
+        chatReadCursorRepository.save(cursor);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public int countUnread(String roomId, Long memberId) {
+        Long lastReadId = chatReadCursorRepository.findByRoomIdAndMember_Id(roomId, memberId)
+                .map(ChatReadCursor::getLastReadMessageId)
+                .orElse(null);
+
+        if (lastReadId == null || lastReadId == 0L) {
+            // 아직 읽은 기록이 없으면, 내 메시지를 제외한 전체 카운트
+            long c = companionPostChatMessageRepository.countByChatRoom_RoomIdAndSenderIdNot(roomId, memberId);
+            return (int) c;
+        }
+        long c = companionPostChatMessageRepository.countByChatRoomRoomIdAndIdGreaterThanAndSenderIdNot(roomId, lastReadId, memberId);
+        return (int) c;
     }
 }
 
