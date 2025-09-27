@@ -19,17 +19,21 @@ import com.example.tikicktaka.service.chatService.InviteCodeGeneratorService;
 import com.example.tikicktaka.service.scrap.ScrapCommandService;
 import com.example.tikicktaka.web.dto.companionPost.CompanionPostListResponseDTO;
 import com.example.tikicktaka.web.dto.companionPost.CompanionPostResponseDTO;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.data.domain.Pageable;
 
+import javax.swing.text.html.HTMLDocument;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -468,6 +472,58 @@ public class CompanionPostServiceImpl implements CompanionPostService {
                 .map(CompanionPostImg::getImageUrl)
                 .collect(Collectors.toList());
         return new CompanionPostResponseDTO(post, imageUrls);
+    }
+
+    //키워드로 게시글 검색하기
+    @Override
+    @Transactional(readOnly = true)
+    public Page<CompanionPostListResponseDTO> searchByKeyword ( String keyword, Long memberId, Pageable pageable){
+        //키워드 없으면 빈 페이지 반환
+        if (!StringUtils.hasText(keyword)){
+            return Page.empty(pageable);
+        }
+        final String kw = keyword
+                .trim().toLowerCase();
+
+        //사용자가 차단한 게시글 id
+        List<Long> blockedIds = blockedService.blockedIds(memberId, TargetType.COMPANION_POST);
+        boolean hasblocked = blockedIds != null && !blockedIds.isEmpty();
+
+        Specification<CompanionPost> spec = (root, query, cb) -> {
+            String pattern = "%" + kw + "%";
+
+            // title은 VARCHAR일 가능성이 높지만, 방어적으로 as(String.class) 적용해도 무방
+            Expression<String> titleStr   = root.get("title").as(String.class);
+            Expression<String> titleLower = cb.lower(titleStr);
+
+            // content가 CLOB(@Lob)이면 바로 lower()가 불가 → 먼저 String으로 캐스팅
+            Expression<String> contentStr   = root.get("content").as(String.class); // CAST(CLOB → VARCHAR)
+            Expression<String> contentLower = cb.lower(contentStr);
+
+            Predicate titleLike   = cb.like(titleLower, pattern);
+            Predicate contentLike = cb.like(contentLower, pattern);
+            Predicate keywordOr   = cb.or(titleLike, contentLike);
+
+            if (hasblocked) {
+                return cb.and(keywordOr, cb.not(root.get("id").in(blockedIds)));
+            }
+            return keywordOr;
+        };
+
+        Page<CompanionPost> page = companionPostRepository.findAll(spec, pageable);
+        page.getContent().forEach(this::ensureThumbnailOrFallback);
+
+        List<Long> pagePostIds = page.getContent().stream()
+                .map(CompanionPost::getId)
+                .toList();
+        Set<Long> scrapedIdSet = pagePostIds.isEmpty()
+                ?java.util.Collections.emptySet()
+                : scrapRepository.findByMemberIdAndTargetTypeOrderByCreatedAtDesc(memberId, TargetType.COMPANION_POST)
+                .stream()
+                .map(s -> s.getTargetId())
+                .filter(pagePostIds::contains)
+                .collect(Collectors.toSet());
+        return page.map(post -> new CompanionPostListResponseDTO(post, scrapedIdSet.contains(post.getId()), memberId));
     }
 
 

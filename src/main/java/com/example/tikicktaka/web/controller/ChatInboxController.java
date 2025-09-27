@@ -1,13 +1,16 @@
 package com.example.tikicktaka.web.controller;
 
 import com.example.tikicktaka.apiPayload.ApiResponse;
+import com.example.tikicktaka.apiPayload.code.status.ErrorStatus;
 import com.example.tikicktaka.repository.companionPostChat.CompanionPostChatParticipantRepository;
 import com.example.tikicktaka.repository.companionPostChat.CompanionPostChatRoomRepository;
+import com.example.tikicktaka.service.CompanionPostService.CompanionPostService;
 import com.example.tikicktaka.service.chatService.*;
 import com.example.tikicktaka.web.dto.chat.ChatRoomListResponseDTO;
 import com.example.tikicktaka.web.dto.chat.ChatRoomSummaryDTO;
 import com.example.tikicktaka.web.dto.chat.PostChatRoomListResponseDTO;
 import com.example.tikicktaka.service.chatService.ChatReadService;
+import com.example.tikicktaka.web.dto.companionPost.CompanionPostListResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +19,8 @@ import org.springframework.web.bind.annotation.*;
 import com.example.tikicktaka.web.dto.chat.ChatLinkedPostDTO;
 import com.example.tikicktaka.repository.companionPostChat.CompanionPostChatMessageRepository;
 import com.example.tikicktaka.domain.companionPostChat.ChatMessage;
-import java.util.List;
+
+ import java.util.List;
 import java.util.Optional;
 
 
@@ -36,6 +40,7 @@ public class ChatInboxController {
     private final CompanionPostChatMessageRepository companionPostChatMessageRepository;
     private final ChatRoomsForPostService chatRoomsForPostService;
     private final ChatReadService chatReadService;
+    private final CompanionPostService companionPostService;
 
 
 
@@ -51,15 +56,15 @@ public class ChatInboxController {
         return ApiResponse.onSuccess(inboxService.getMyRooms(meId, cursor, size));
     }
 
-    @GetMapping("/rooms/{roomId}/summary")
-    @Operation(summary = "특정 채팅방 게시글 요약 조회(게시글 헤더 + 초대코드)")
-    public ApiResponse<ChatRoomSummaryDTO> summary(
-            @PathVariable String roomId,
-            Authentication authentication
-    ) {
-        Long meId = Long.valueOf(authentication.getName());
-        return ApiResponse.onSuccess(summaryService.getSummary(meId, roomId));
-    }
+//    @GetMapping("/rooms/{roomId}/summary")
+//    @Operation(summary = "특정 채팅방 게시글 요약 조회(게시글 헤더 + 초대코드)")
+//    public ApiResponse<ChatRoomSummaryDTO> summary(
+//            @PathVariable String roomId,
+//            Authentication authentication
+//    ) {
+//        Long meId = Long.valueOf(authentication.getName());
+//        return ApiResponse.onSuccess(summaryService.getSummary(meId, roomId));
+//    }
 
     @PostMapping("/rooms/{roomId}/leave")
     @Operation(summary = "채팅방 나가기 api")

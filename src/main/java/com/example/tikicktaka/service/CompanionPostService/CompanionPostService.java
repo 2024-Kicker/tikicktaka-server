@@ -46,7 +46,7 @@ public interface CompanionPostService {
             List<MultipartFile> newImages,
             boolean replaceAllImages
     );
-
+    Page<CompanionPostListResponseDTO> searchByKeyword(String keyword, Long memberId, Pageable pageable);
 
     CompanionPost findById(Long postId); // 게시글 ID로 조회
 
@@ -57,7 +57,6 @@ public interface CompanionPostService {
     List<CompanionPostListResponseDTO> getBlockedPostList(Long memberId);
 
     void updatePostStatus(Long postId, CompanionPost.PostStatus status, Long memberId);
-
 
     void scrapPost(Long memberId, Long postId);
 

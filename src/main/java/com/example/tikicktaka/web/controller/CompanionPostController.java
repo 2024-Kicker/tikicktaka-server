@@ -19,6 +19,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.Authentication;
@@ -272,5 +273,31 @@ public class CompanionPostController {
                 replaceAllImages    // true=전면 교체, false=추가 또는 유지
         );
         return ApiResponse.onSuccess(dto);
+    }
+
+    @GetMapping("/search")
+    @Operation(summary = "동행찾기 게시글 키워드 검색", description = "제목/내용에 키워드가 포함된 게시글을 목록과 동일 스키마로 반환")
+    public ApiResponse<Page<CompanionPostListResponseDTO>> search(
+            @RequestParam("keyword") String keyword,
+            @ParameterObject
+            @PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Sort.Direction.DESC)
+            Pageable pageable,
+            Authentication authentication
+    ) {
+        if (authentication == null || authentication.getName() == null) {
+            return ApiResponse.onFailure(ErrorStatus._UNAUTHORIZED.getCode(),
+                    ErrorStatus._UNAUTHORIZED.getMessage(), null);
+        }
+        Long memberId = Long.valueOf(authentication.getName());
+
+        // 정렬이 비어 온 경우에만 기본값 보정 (createdAt DESC)
+        Pageable resolved = pageable.getSort().isUnsorted()
+                ? PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
+                Sort.by(Sort.Direction.DESC, "createdAt"))
+                : pageable;
+
+        Page<CompanionPostListResponseDTO> result =
+                companionPostService.searchByKeyword(keyword, memberId, resolved);
+        return ApiResponse.onSuccess(result);
     }
 }
