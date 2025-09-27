@@ -2,6 +2,8 @@ package com.example.tikicktaka.web.dto.myPage;
 // src/main/java/com/example/tikicktaka/web/dto/mypage/MyPostItemDTO.java
 
 import com.example.tikicktaka.domain.companionPost.CompanionPost;
+import com.example.tikicktaka.domain.enums.Topic;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -15,7 +17,11 @@ public class MyPostItemDTO {
     private String type;     // "COMPANION" | "STORY"
     private String shareUrl;
     private String thumbnailUrl;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private CompanionPost.PostStatus status;   // FINDING / FOUND
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Topic topic;
+
     private LocalDateTime createdAt;
 
 }

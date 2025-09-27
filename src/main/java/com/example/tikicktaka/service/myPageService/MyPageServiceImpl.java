@@ -70,6 +70,8 @@ public class MyPageServiceImpl implements MyPageService {
                             .type("STORY")
                             .shareUrl(shareUrl)
                             .thumbnailUrl(p.getThumbnailUrl())
+                            .topic(p.getTopic())
+                            .createdAt(p.getCreatedAt())
                             .build();
                 })
                 .collect(Collectors.toList());
