@@ -9,6 +9,7 @@ import com.example.tikicktaka.domain.storyRoom.*;
 import com.example.tikicktaka.repository.member.MemberRepository;
 import com.example.tikicktaka.repository.scrap.ScrapRepository;
 import com.example.tikicktaka.repository.storyRoom.*;
+import com.example.tikicktaka.repository.storyRoomChat.StoryRoomChatMessageRepository;
 import com.example.tikicktaka.service.UtilService;
 import com.example.tikicktaka.service.blocked.BlockedService;
 import com.example.tikicktaka.support.ThumbnailResolver;
@@ -37,6 +38,7 @@ public class StoryRoomServiceImpl implements StoryRoomService {
     private final ScrapRepository scrapRepository;
     private final ThumbnailResolver thumbnailResolver;
     private final BlockedService blockedService;
+    private final StoryRoomChatMessageRepository storyChatMessageRepository;
 
     @Value("${companion.default-images.travel}")
     private String defaultTravelImage;
@@ -128,16 +130,9 @@ public class StoryRoomServiceImpl implements StoryRoomService {
     // 채팅방 게시글 삭제
     @Transactional
     public ApiResponse<?> deleteStoryRoomPost(Long storyRoomPostId, Long memberId) {
-        Optional<StoryRoomPost> optionalPost = storyRoomPostRepository.findById(storyRoomPostId);
-        if (optionalPost.isEmpty()) {
-            return ApiResponse.onFailure(
-                    ErrorStatus.STORYROOMPOST_NOT_FOUND.getCode(),
-                    ErrorStatus.STORYROOMPOST_NOT_FOUND.getMessage(),
-                    null
-            );
-        }
+        StoryRoomPost post = storyRoomPostRepository.findById(storyRoomPostId)
+                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
 
-        StoryRoomPost post = optionalPost.get();
         if (!post.getAuthor().getId().equals(memberId)) {
             return ApiResponse.onFailure(
                     ErrorStatus.STORYROOMPOST_NOT_OWNER.getCode(),
@@ -146,17 +141,28 @@ public class StoryRoomServiceImpl implements StoryRoomService {
             );
         }
 
+        // 1) S3 이미지 선삭제
         List<StoryRoomImg> images = storyRoomImageRepository.findByStoryRoomPost(post);
         if (images != null && !images.isEmpty()) {
-            images.forEach(image -> utilService.deleteS3Img(image.getImageUrl()));
+            images.forEach(img -> utilService.deleteS3Img(img.getImageUrl()));
             storyRoomImageRepository.deleteAll(images);
         }
 
-        storyRoomRepository.deleteByPost(post);
+        // 2) 채팅방 관련 자식(메시지, 참가자) 선삭제
+        storyChatMessageRepository.deleteByStoryRoom_Post_Id(storyRoomPostId);
+        storyRoomParticipantRepository.deleteByStoryRoom_Post_Id(storyRoomPostId);
+
+        // 3) 채팅방 삭제 (부모)
+        // 파생 deleteByPost를 쓰지 말고, 엔티티 로딩 후 delete()로 지워야 안전
+        List<StoryRoom> rooms = storyRoomRepository.findAllByPost(post);
+        storyRoomRepository.deleteAll(rooms);
+
+        // 4) 게시글 삭제 (최상위 부모)
         storyRoomPostRepository.delete(post);
 
         return ApiResponse.onSuccess("게시글과 채팅방이 삭제되었습니다.");
     }
+
 
     // 비로그인한 사용자 용 게시글 상세 조회
     @Override

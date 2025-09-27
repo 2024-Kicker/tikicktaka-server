@@ -10,6 +10,6 @@ public interface StoryRoomParticipantRepository extends JpaRepository<StoryRoomP
     void deleteByStoryRoomIdAndMemberId(Long storyRoomId, Long memberId);
     boolean existsByStoryRoomIdAndMemberId(Long id, Long memberId);
     Optional<StoryRoomParticipant> findByStoryRoom_IdAndMember_Id(Long storyRoomId, Long memberId);
-
+    void deleteByStoryRoom_Post_Id(Long postId);
 }
 
