@@ -30,17 +30,41 @@ public class StoryChatMessageServiceImpl implements StoryChatMessageService {
         return "storychat:room:" + roomId + ":messages";
     }
 
+//    @Override
+//    @Transactional
+//    public void sendMessage(String roomId, Long senderId, String message) {
+//        // 방 확인
+//        StoryRoom room = storyRoomRepository.findByRoomId(roomId)
+//                .orElseThrow(() -> new IllegalArgumentException("이야기방을 찾을 수 없습니다."));
+//
+//        // DB 저장
+//        StoryChatMessage saved = messageRepository.save(StoryChatMessage.create(room, senderId, message));
+//
+//        // Redis에도 push (최신이 오른쪽)
+//        Map<String, Object> payload = new LinkedHashMap<>();
+//        payload.put("id", saved.getId());
+//        payload.put("senderId", saved.getSenderId());
+//        payload.put("message", saved.getMessage());
+//        payload.put("timestamp", saved.getTimestamp().toString());
+//
+//        try {
+//            stringRedisTemplate.opsForList().rightPush(redisKey(roomId), objectMapper.writeValueAsString(payload));
+//            // 필요 시 trim으로 길이 제한 가능: e.g. 최신 500개만 유지
+//            // stringRedisTemplate.opsForList().trim(redisKey(roomId), -500, -1);
+//        } catch (JsonProcessingException e) {
+//            throw new RuntimeException("메시지 직렬화 오류", e);
+//        }
+//    }
+
     @Override
     @Transactional
     public void sendMessage(String roomId, Long senderId, String message) {
-        // 방 확인
         StoryRoom room = storyRoomRepository.findByRoomId(roomId)
-                .orElseThrow(() -> new IllegalArgumentException("이야기방을 찾을 수 없습니다."));
+                .orElseThrow(() -> new IllegalArgumentException("이야기방을 찾을 수 없습니다. roomId=" + roomId));
 
-        // DB 저장
         StoryChatMessage saved = messageRepository.save(StoryChatMessage.create(room, senderId, message));
 
-        // Redis에도 push (최신이 오른쪽)
+        // (선택) Redis 히스토리 캐시
         Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("id", saved.getId());
         payload.put("senderId", saved.getSenderId());
@@ -49,12 +73,13 @@ public class StoryChatMessageServiceImpl implements StoryChatMessageService {
 
         try {
             stringRedisTemplate.opsForList().rightPush(redisKey(roomId), objectMapper.writeValueAsString(payload));
-            // 필요 시 trim으로 길이 제한 가능: e.g. 최신 500개만 유지
             // stringRedisTemplate.opsForList().trim(redisKey(roomId), -500, -1);
         } catch (JsonProcessingException e) {
             throw new RuntimeException("메시지 직렬화 오류", e);
         }
     }
+
+
 
     @Override
     @Transactional(readOnly = true)

@@ -1,6 +1,5 @@
 package com.example.tikicktaka.service.storyChat;
 
-import com.example.tikicktaka.web.dto.chat.ChatMessageDTO;
 import com.example.tikicktaka.web.dto.chat.ChatMessagePageDTO;
 
 public interface StoryChatMessageService {

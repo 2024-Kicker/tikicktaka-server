@@ -21,7 +21,7 @@ public class ChatGatewayImpl implements ChatGateway {
         var r = roomResolver.resolve(roomId).orElseThrow(() -> new IllegalArgumentException("잘못된 roomId"));
         switch (r.type()) {
             case STORY -> storyChatMessageService.sendMessage(roomId, senderId, message);
-            case COMPANION -> chatMessageService.sendGroupMessage(roomId, senderId, message);
+            case COMPANION -> chatMessageService.sendMessage(roomId, senderId, message);
 
         }
     }
