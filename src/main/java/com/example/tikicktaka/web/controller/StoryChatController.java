@@ -84,14 +84,25 @@ public class StoryChatController {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
 
+        boolean alreadyJoined = participantRepository
+                .existsByStoryRoomIdAndMemberId(room.getId(), member.getId());
+        if (alreadyJoined) {
+            return ApiResponse.onSuccess("이미 입장된 사용자입니다."); // or onFailure(에러코드)로 409 처리
+        }
+
         StoryRoomParticipant p = new StoryRoomParticipant();
         p.setStoryRoom(room);
         p.setMember(member);
         p.setStoryRoomPost(room.getPost());
         p.setRole(StoryRoomParticipant.Role.PARTICIPANT);
 
-        participantRepository.save(p);
-        return ApiResponse.onSuccess("입장 완료");
+        try {
+            participantRepository.save(p);
+            return ApiResponse.onSuccess("입장 완료");
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            // 유니크 제약 충돌 → 이미 입장된 것으로 간주
+            return ApiResponse.onSuccess("이미 입장된 사용자입니다.");
+        }
     }
 
     // 5) POST /rooms/{roomId}/leave -> StoryRoomParticipant 삭제
@@ -123,15 +134,4 @@ public class StoryChatController {
         ChatMessagePageDTO page = storyChatMessageService.readMessages(stripSrPrefix(roomId), meId, size, cursor, direction);
         return ApiResponse.onSuccess(page);
     }
-
-//    // 7) POST /rooms/{roomId}/messages  (본문: message, senderId)
-//    @PostMapping("/rooms/{roomId}/messages")
-//    @Operation(summary = "이야기방 채팅방 나가기 api", description = "이야기 채팅방에서 나가는 api입니다")
-//
-//    public ApiResponse<String> send(@PathVariable String roomId,
-//                                    @RequestParam Long senderId,
-//                                    @RequestParam String message) {
-//        storyChatMessageService.sendMessage(roomId, senderId, message);
-//        return ApiResponse.onSuccess("전송 완료");
-//    }
 }
