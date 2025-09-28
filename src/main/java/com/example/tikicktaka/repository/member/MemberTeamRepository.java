@@ -8,4 +8,7 @@ import java.util.Optional;
 
 public interface MemberTeamRepository extends JpaRepository<MemberTeam, Long> {
     Optional<MemberTeam> findByMember(Member member);
+    Optional<MemberTeam> findByMemberId(Long memberId);
+    Optional<MemberTeam> findTopByMember_IdOrderByCreatedAtDesc(Long memberId);
+
 }

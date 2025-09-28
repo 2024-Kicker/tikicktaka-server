@@ -2,7 +2,6 @@ package com.example.tikicktaka.domain.teams;
 
 import com.example.tikicktaka.domain.common.BaseDateTimeEntity;
 import com.example.tikicktaka.domain.images.ProfileImg;
-import com.example.tikicktaka.domain.images.TeamImg;
 import com.example.tikicktaka.domain.mapping.member.MemberTeam;
 import jakarta.persistence.*;
 import lombok.*;
@@ -33,13 +32,28 @@ public class Team extends BaseDateTimeEntity {
     @Column(columnDefinition = "TEXT")
     private String location;
 
+    @Column(name = "logo_url", length = 512)
+    private String logoUrl; // ← 추가
+
+    private static final String DEFAULT_LOGO_URL =
+            "https://tikicktaka-bucket.s3.ap-northeast-2.amazonaws.com/logo/Companion_Travel.png";
+
+    public void setLogoUrl(String logoUrl) {
+        if (logoUrl == null || logoUrl.isBlank()) {
+            this.logoUrl = DEFAULT_LOGO_URL;
+        } else {
+            this.logoUrl = logoUrl;
+        }
+    }
+
+
     //@OneToOne(mappedBy = "team")
     //private MemberTeam memberTeam;
 
-    @OneToOne(mappedBy = "team")
-    private TeamImg teamImg;
-
-    public void setTeamImg(TeamImg teamImage) {
-        this.teamImg = teamImage;
-    }
+//    @OneToOne(mappedBy = "team")
+//    private TeamImg teamImg;
+//
+//    public void setTeamImg(TeamImg teamImage) {
+//        this.teamImg = teamImage;
+//    }
 }

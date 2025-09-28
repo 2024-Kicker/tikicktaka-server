@@ -1,10 +1,6 @@
 package com.example.tikicktaka.converter.team;
 
-import com.example.tikicktaka.domain.images.ProfileImg;
-import com.example.tikicktaka.domain.images.TeamImg;
-import com.example.tikicktaka.domain.member.Member;
 import com.example.tikicktaka.domain.teams.Team;
-import com.example.tikicktaka.web.dto.member.MemberResponseDTO;
 import com.example.tikicktaka.web.dto.team.TeamResponseDTO;
 
 import java.util.List;
@@ -19,16 +15,12 @@ public class TeamConverter {
                 .teamInfo(team.getTeamInfo())
                 .stadiumName(team.getStadiumName())
                 .location(team.getLocation())
+                .logoUrl(team.getLogoUrl())
                 .build();
     }
 
-    public static TeamImg toTeamImg(String logo, String stadium, Team team){
-        return TeamImg.builder()
-                .logoUrl(logo)
-                .stadiumUrl(stadium)
-                .team(team)
-                .build();
-    }
+    // 팀 이미지 엔티티(TeamImg) 생성 메서드 제거 ✅
+    // public static TeamImg toTeamImg(...) 필요 없음
 
     public static TeamResponseDTO.TeamImgUploadResultDTO teamImgUploadResultDTO(Team team) {
         return TeamResponseDTO.TeamImgUploadResultDTO.builder()
@@ -43,16 +35,15 @@ public class TeamConverter {
                 .teamName(team.getTeamName())
                 .location(team.getLocation())
                 .stadiumName(team.getStadiumName())
-                .logoUrl(team.getTeamImg().getLogoUrl())
-                .stadiumUrl(team.getTeamImg().getStadiumUrl())
+                .logoUrl(team.getLogoUrl())
                 .createdAt(team.getCreatedAt())
                 .build();
     }
 
     public static TeamResponseDTO.TeamPreviewListDTO teamPreviewListDTO(List<Team> teamList){
-
         List<TeamResponseDTO.TeamPreviewDTO> teamPreviewDTOList = teamList.stream()
-                .map(TeamConverter::teamPreviewDTO).collect(Collectors.toList());
+                .map(TeamConverter::teamPreviewDTO)
+                .collect(Collectors.toList());
 
         return TeamResponseDTO.TeamPreviewListDTO.builder()
                 .teamPreviewDTOList(teamPreviewDTOList)
