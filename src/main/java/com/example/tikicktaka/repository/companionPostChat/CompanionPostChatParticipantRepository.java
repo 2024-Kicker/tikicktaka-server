@@ -3,15 +3,18 @@ package com.example.tikicktaka.repository.companionPostChat;
 import com.example.tikicktaka.domain.companionPostChat.ChatParticipant;
 import com.example.tikicktaka.domain.companionPostChat.ChatRoom;
 import com.example.tikicktaka.domain.member.Member;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import org.springframework.data.domain.Pageable;
+
 import java.util.List;
 import java.util.Optional;
 
 public interface CompanionPostChatParticipantRepository extends JpaRepository<ChatParticipant, Long> {
 
     // 특정 채팅방의 모든 참여자 조회
+    @EntityGraph(attributePaths = { "member", "member.profileImg" })
     List<ChatParticipant> findByChatRoom(ChatRoom chatRoom);
 
     // 특정 채팅방에 참가한 사용자 수를 반환
