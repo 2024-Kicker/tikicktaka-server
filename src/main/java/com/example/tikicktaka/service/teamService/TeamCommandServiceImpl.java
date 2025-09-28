@@ -1,12 +1,6 @@
 package com.example.tikicktaka.service.teamService;
 
-import com.example.tikicktaka.converter.member.MemberConverter;
-import com.example.tikicktaka.converter.team.TeamConverter;
-import com.example.tikicktaka.domain.images.ProfileImg;
-import com.example.tikicktaka.domain.images.TeamImg;
-import com.example.tikicktaka.domain.member.Member;
 import com.example.tikicktaka.domain.teams.Team;
-import com.example.tikicktaka.repository.team.TeamImgRepository;
 import com.example.tikicktaka.repository.team.TeamRepository;
 import com.example.tikicktaka.service.UtilService;
 import lombok.RequiredArgsConstructor;
@@ -15,36 +9,25 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
-import java.util.Optional;
-
 @Service
 @Slf4j
 @RequiredArgsConstructor
 @Transactional
-public class TeamCommandServiceImpl implements TeamCommandService{
+public class TeamCommandServiceImpl implements TeamCommandService {
 
-    private final TeamImgRepository teamImgRepository;
+    private final TeamRepository teamRepository;
     private final UtilService utilService;
 
     @Override
     @Transactional
     public Team teamImageUpload(MultipartFile logo, MultipartFile stadium, Team team) {
+        String logoUrl = (logo != null && !logo.isEmpty())
+                ? utilService.uploadS3Img("logo", logo)
+                : team.getLogoUrl(); // 새 업로드 없으면 기존 유지
 
-        Optional<TeamImg> older = teamImgRepository.findByTeam_Id(team.getId());
-        if(older.isPresent()){
-            TeamImg old = older.get();
-            teamImgRepository.delete(old);
-            teamImgRepository.flush();
-        }
 
-        String logoUrl = utilService.uploadS3Img("logo", logo);
-        String stadiumUrl = utilService.uploadS3Img("stadium", stadium);
+        team.setLogoUrl(logoUrl);
 
-        TeamImg teamImg = TeamConverter.toTeamImg(logoUrl, stadiumUrl, team);
-        team.setTeamImg(teamImg);
-        teamImgRepository.save(teamImg);
-
-        return team;
+        return teamRepository.save(team);
     }
 }

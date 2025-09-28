@@ -19,6 +19,7 @@ import com.example.tikicktaka.service.memberService.MemberQueryService;
 import com.example.tikicktaka.domain.enums.TargetType;
 import com.example.tikicktaka.service.myPageService.MyPageService;
 import com.example.tikicktaka.service.myPageService.MyScrapQueryService;
+import com.example.tikicktaka.service.myPageService.MyTravelInningService;
 import com.example.tikicktaka.web.dto.member.MemberRequestDTO;
 import com.example.tikicktaka.web.dto.member.MemberResponseDTO;
 import com.example.tikicktaka.web.dto.myPage.*;
@@ -27,6 +28,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -50,6 +52,8 @@ public class MyPageController {
     private final CompanionPostRepository companionPostRepository;
     private final StoryRoomPostRepository storyRoomPostRepository;
     private final TravelRegionRepository travelRegionRepository;
+    private final MyTravelInningService myTravelInningService;
+
 
     private Long currentMemberId(Authentication auth) {
         return (Long) auth.getPrincipal();
@@ -261,4 +265,17 @@ public class MyPageController {
 
         return ApiResponse.onSuccess(dtos);
     }
+
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "나의 트래블이닝 저장 API")
+    public ApiResponse<MyTravelInningResponseDTO.Detail> create(
+            Authentication authentication,
+            @RequestPart("request") MyTravelInningRequestDTO.Create request,
+            @RequestPart(value = "image", required = false) MultipartFile image
+    ) {
+        Long memberId = Long.valueOf(authentication.getName());
+        return ApiResponse.onSuccess(myTravelInningService.create(memberId, request, image));
+    }
+
+
 }
