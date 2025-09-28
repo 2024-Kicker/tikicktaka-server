@@ -20,6 +20,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class MyTravelInningServiceImpl implements MyTravelInningService {
@@ -55,6 +57,16 @@ public class MyTravelInningServiceImpl implements MyTravelInningService {
 
         return MyTravelInningConverter.toDetailDTO(entity);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<MyTravelInningResponseDTO.ListItem> findByMemberId(Long memberId) {
+        List<MyTravelInning> list = repository.findByMember_IdOrderByDateDesc(memberId);
+        return list.stream()
+                .map(MyTravelInningConverter::toListItemDTO)
+                .toList();
+    }
+
 
 
 }

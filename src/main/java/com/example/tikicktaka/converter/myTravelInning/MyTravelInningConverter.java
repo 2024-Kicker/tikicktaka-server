@@ -44,4 +44,14 @@ public class MyTravelInningConverter {
                 : url;
     }
 
+    public static MyTravelInningResponseDTO.ListItem toListItemDTO(MyTravelInning entity) {
+        return MyTravelInningResponseDTO.ListItem.builder()
+                .opponentTeamId(entity.getOpponentTeam().getId())
+                .opponentTeamImageUrl(entity.getOpponentTeam().getLogoUrl())
+                .imageUrl(entity.getImageUrl()) // 저장 시점에 기본값이 이미 들어갔으니 그냥 반환
+                .date(entity.getDate())
+                .build();
+    }
+
+
 }
