@@ -39,6 +39,8 @@ public class ChatInboxController {
     private final ChatReadService chatReadService;
     private final CompanionPostService companionPostService;
     private final ChatRoomSummaryService chatRoomSummaryService;
+    private final RoomOthersService roomOthersService;
+
 
 
     @GetMapping("/rooms") //안읽은 메시지 수 구현되어있지 않음
@@ -171,5 +173,35 @@ public class ChatInboxController {
         int unread = chatReadService.countUnread(roomId, meId);
         return ApiResponse.onSuccess(unread);
     }
+
+    @GetMapping("/rooms/{roomId}/participants/others")
+    @Operation(
+            summary = "단체채팅방 참가자(본인 제외) 닉네임/프로필 이미지 조회",
+            description = "type=COMPANION|STORY 와 roomId를 함께 전달. 닉네임 없으면 user#<id>, 프로필 없으면 기본 이미지로 반환"
+    )
+    public ApiResponse<RoomParticipantsResponseDTO> getOthersParticipants(
+            @PathVariable String roomId,
+            @RequestParam RoomOthersService.RoomType type,
+            Authentication authentication
+    ) {
+        Long meId = Long.valueOf(authentication.getName());
+        var result = roomOthersService.getOthers(type, roomId, meId);
+        return ApiResponse.onSuccess(result.dto());
+    }
+
+//    // (옵션) type 없이 roomId만으로 자동 판별하고 싶을 때
+//    @GetMapping("/rooms/{roomId}/participants/others:auto")
+//    @Operation(
+//            summary = "단체채팅방 참가자(본인 제외) 조회 - roomId만으로 자동 판별",
+//            description = "CR-/SR- 접두사 또는 RoomResolver를 통해 동행/이야기방을 자동 구분"
+//    )
+//    public ApiResponse<RoomParticipantsResponseDTO> getOthersParticipantsAuto(
+//            @PathVariable String roomId,
+//            Authentication authentication
+//    ) {
+//        Long meId = Long.valueOf(authentication.getName());
+//        var result = roomOthersService.getOthersAuto(roomId, meId);
+//        return ApiResponse.onSuccess(result.dto());
+//    }
 
 }

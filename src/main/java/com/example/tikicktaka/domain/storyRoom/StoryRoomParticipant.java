@@ -1,3 +1,4 @@
+
 package com.example.tikicktaka.domain.storyRoom;
 
 import com.example.tikicktaka.domain.member.Member;
