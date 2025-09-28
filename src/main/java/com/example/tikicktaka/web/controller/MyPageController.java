@@ -277,5 +277,15 @@ public class MyPageController {
         return ApiResponse.onSuccess(myTravelInningService.create(memberId, request, image));
     }
 
+    @GetMapping
+    @Operation(summary = "내가 쓴 트래블이닝 리스트 조회")
+    public ApiResponse<List<MyTravelInningResponseDTO.ListItem>> getMyTravelInnings(
+            Authentication authentication
+    ) {
+        Long memberId = Long.valueOf(authentication.getName());
+        return ApiResponse.onSuccess(myTravelInningService.findByMemberId(memberId));
+    }
+
+
 
 }

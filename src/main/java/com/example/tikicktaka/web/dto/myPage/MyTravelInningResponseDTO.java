@@ -1,9 +1,7 @@
 package com.example.tikicktaka.web.dto.myPage;
 
 import com.fasterxml.jackson.core.JsonToken;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDate;
 
@@ -22,5 +20,16 @@ public class MyTravelInningResponseDTO {
         private String opponentTeamImageUrl;
         private String content;
 
+    }
+
+    @Getter @Setter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ListItem {
+        private Long opponentTeamId;
+        private String opponentTeamImageUrl;
+        private String imageUrl;
+        private LocalDate date;
     }
 }
