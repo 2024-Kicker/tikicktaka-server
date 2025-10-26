@@ -8,9 +8,7 @@
 ---
 
 ## 🚀 주요 기능
-<img width="512" height="1054" alt="Image" src="https://github.com/user-attachments/assets/590a209a-1f5e-4ec0-8693-18811db9fa5e" />
-<img width="512" height="576" alt="Image" src="https://github.com/user-attachments/assets/e0260225-47f6-4a53-bd2f-d1e8953ab05e" />
-<img width="512" height="550" alt="Image" src="https://github.com/user-attachments/assets/4436649b-cfa4-46c3-b054-399209efa291" />
+<img width="512" height="1054" alt="Image" src="https://github.com/user-attachments/assets/590a209a-1f5e-4ec0-8693-18811db9fa5e" /> <img width="512" height="576" alt="Image" src="https://github.com/user-attachments/assets/e0260225-47f6-4a53-bd2f-d1e8953ab05e" /> <img width="512" height="550" alt="Image" src="https://github.com/user-attachments/assets/4436649b-cfa4-46c3-b054-399209efa291" />
 * **동행 게시판** — 조건 필터링, 차단/차단 해제, 공유 링크
 * **실시간 채팅** — Redis Pub/Sub 구조로 지연·중복 문제 해결
 * **구장 주변 여행지 추천** — 관광/맛집/명소 API
