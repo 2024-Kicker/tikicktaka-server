@@ -62,16 +62,13 @@ MySQL · Redis · AWS S3
 
 ## 🧭 향후 계획
 
-* 초대 알림 기능 추가
-* Travel Recommendation API 고도화
-* ChatRoomRegistry 리팩토링
+* 초대 알림 기능 추가 및 Travel Recommendation API 고도화 등 프로젝트 리팩토링
 
 ---
 
 ## 👩🏻‍💻 개발
 
 **Hyojeong Choi** — Backend Developer
-📎 [GitHub 링크] | [Notion 기획서] | [시연 영상]
 
 ---
 
