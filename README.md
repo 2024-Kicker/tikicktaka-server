@@ -5,7 +5,7 @@
 야구 원정 팬들이 **동행자를 찾고**, **실시간 채팅으로 소통하며**,
 **구장 주변 맛집과 관광지를 탐색할 수 있는** 통합 플랫폼입니다.
 
-<img width="312" height="550" alt="Image" src="https://github.com/user-attachments/assets/f705681e-ee3a-4d2c-9f17-b56ce765487e" /> <img width="312" height="576" alt="Image" src="https://github.com/user-attachments/assets/e0260225-47f6-4a53-bd2f-d1e8953ab05e" /> <img width="312" height="550" alt="Image" src="https://github.com/user-attachments/assets/4436649b-cfa4-46c3-b054-399209efa291" />
+<img width="245" height="550" alt="Image" src="https://github.com/user-attachments/assets/f705681e-ee3a-4d2c-9f17-b56ce765487e" /> <img width="312" height="576" alt="Image" src="https://github.com/user-attachments/assets/e0260225-47f6-4a53-bd2f-d1e8953ab05e" /> <img width="330" height="550" alt="Image" src="https://github.com/user-attachments/assets/4436649b-cfa4-46c3-b054-399209efa291" />
 
 ---
 
