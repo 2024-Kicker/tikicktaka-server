@@ -1,4 +1,3 @@
-# server
 # 🧢 TravelInning — 야구 원정 팬 동행·여행 통합 플랫폼
 
 > **Spring Boot 기반 야구 원정 팬 커뮤니티 & 여행 추천 서비스**
